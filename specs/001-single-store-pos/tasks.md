@@ -507,7 +507,7 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **Independent Test**: ขายมะม่วง 2 ชิ้นจนได้ใบเสร็จ modal และสั่งพิมพ์ได้ ที่ความกว้าง 900px ชั้นวางต้องได้ ≥68% ของจอ
 
-- [X] T103 [US1] แก้ `web/src/app/(protected)/sales/page.tsx` เปลี่ยน `InputText` เป็น `<input class="input">` ของ daisyUI (ช่องสแกนบาร์โค้ด — ต้องคง `autoFocus` และ debounce 250ms เดิม) และส่ง `pageSize` ใหญ่พอโดย**ไม่แสดงตัวแบ่งหน้า** ตาม contracts/products.md — FR-002, FR-037
+- [X] T103 [US1] แก้ `web/src/app/(protected)/sales/page.tsx` เปลี่ยน `InputText` เป็น `<input class="input">` ของ daisyUI (ช่องสแกนบาร์โค้ด — ต้องคง `autoFocus` และ debounce 250ms เดิม) และแสดงสินค้า**ครบทุกรายการโดยไม่มีตัวแบ่งหน้า** ตาม contracts/products.md — ไล่อ่านทีละหน้าจนครบ ไม่ใช่ยิงครั้งเดียวที่ `pageSize` ใหญ่ ๆ (แก้ถ้อยคำเมื่อ 2026-09-10 ตาม finding D1: ของเดิมสั่งให้ทำแบบที่ T127 แก้ทิ้งไปแล้ว) — FR-002, FR-037
 - [X] T104 [US1] แก้ `web/src/components/Cart.tsx` เปลี่ยน `Button`/`InputNumber` เป็น `btn` และ `<input type="number" class="input">` ของ daisyUI — ต้องคงพฤติกรรมปุ่มชำระเงินตอน disabled ที่แก้ไว้แล้ว (มองเห็นได้บนพื้นเข้ม) และ**เปลี่ยนความกว้างแผงจากค่าคงที่ 384px เป็น `clamp` ที่กินไม่เกิน 32% ของจอในช่วง 768–1100px** (research.md ข้อ 12) — FR-032
 - [X] T105 [P] [US1] แก้ `web/src/components/ProductCard.tsx` ใช้ class ของ daisyUI โดยคงขนาดการ์ดที่ย่อไว้แล้ว (`aspect-[4/3]`, ชื่อ `line-clamp-2`) และคงป้าย "สินค้าหมด"/"เหลือ N" — FR-031
 - [X] T106 [US1] แก้ `web/src/components/ReceiptDialog.tsx` เปลี่ยน `Dialog` ของ PrimeReact เป็น `<dialog class="modal">` ของ daisyUI — ต้องคงพฤติกรรมเดิมครบ: หัวข้อ "ขายสำเร็จ", ปุ่ม "ขายรายการต่อไป" + "พิมพ์ใบเสร็จ", และ**ต้องไม่ปิดเมื่อคลิกนอกกล่อง** (ห้ามใส่ `modal-backdrop` ที่กดปิดได้) — FR-030, FR-031
