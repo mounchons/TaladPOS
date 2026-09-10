@@ -5,7 +5,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { Cart, type CartLine } from "@/components/Cart";
 import { MemberFormDialog } from "@/components/MemberFormDialog";
 import { ReceiptDialog } from "@/components/ReceiptDialog";
-import { searchProducts, type Product } from "@/lib/api/products";
+import { searchProductsByNameOrBarcode, type Product } from "@/lib/api/products";
 import { createSale, type Sale } from "@/lib/api/sales";
 import type { Member } from "@/lib/api/members";
 import { ApiError } from "@/lib/api/client";
@@ -23,13 +23,11 @@ export default function SalesPage() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      // FR-002: search by name or barcode - a barcode scanner types the code
-      // then presses Enter, so trying both here covers scan and manual typing.
-      searchProducts({ search: query || undefined, barcode: query || undefined })
-        .then((results) => {
-          const seen = new Map(results.map((p) => [p.id, p]));
-          setProducts(Array.from(seen.values()));
-        })
+      // FR-002: one box answers both the scanner and a typed name. The merge
+      // of the two lives in the api module - the endpoint treats search and
+      // barcode as AND, so they cannot be sent together.
+      searchProductsByNameOrBarcode(query)
+        .then(setProducts)
         .catch(() => setProducts([]));
     }, 250);
     return () => clearTimeout(timeout);
@@ -75,7 +73,7 @@ export default function SalesPage() {
       setReceiptVisible(true);
       setCartLines([]);
       setSelectedMember(null);
-      searchProducts({ search: query || undefined })
+      searchProductsByNameOrBarcode(query)
         .then(setProducts)
         .catch(() => {});
     } catch (err) {

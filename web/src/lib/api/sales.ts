@@ -1,4 +1,4 @@
-import { apiFetch, MAX_PAGE_SIZE, type PagedResult } from "./client";
+import { apiFetch, type PagedResult } from "./client";
 
 export interface SaleLineItemDto {
   productId: string;
@@ -79,18 +79,6 @@ export function searchSalesPaged(params: {
   pageSize: number;
 }): Promise<PagedResult<Sale>> {
   return apiFetch<PagedResult<Sale>>(saleQuery(params));
-}
-
-/** As with searchProducts: pageSize is explicit so "all of them" stays true. */
-export function searchSales(params: {
-  from?: string;
-  to?: string;
-  staffId?: string;
-  memberId?: string;
-}): Promise<Sale[]> {
-  return apiFetch<PagedResult<Sale>>(saleQuery({ ...params, pageSize: MAX_PAGE_SIZE })).then(
-    (page) => page.items,
-  );
 }
 
 // contracts/sales.md - GET /api/v1/sales/{id}/receipt (FR-030)

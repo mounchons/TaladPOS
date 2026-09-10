@@ -25,6 +25,38 @@ export interface PagedResult<T> {
 /** The API rejects anything above this with 400 invalid_pagination. */
 export const MAX_PAGE_SIZE = 100;
 
+/**
+ * Reads every page of a paged endpoint and returns the rows as one list.
+ *
+ * The endpoints page now, so a caller that means "all of them" has to ask for
+ * all of them. Asking once with pageSize=100 looks like it works and then
+ * silently drops row 101 - a shelf that quietly stops showing a product is
+ * worse than a slow one, so this walks to `totalPages` instead.
+ *
+ * `pageSize` is a parameter mainly so a test can force several round trips
+ * against a small dataset; callers should leave it at the ceiling.
+ */
+export async function fetchAllPages<T>(
+  buildPath: (page: number, pageSize: number) => string,
+  pageSize: number = MAX_PAGE_SIZE,
+): Promise<T[]> {
+  const items: T[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const result = await apiFetch<PagedResult<T>>(buildPath(page, pageSize));
+    items.push(...result.items);
+    totalPages = result.totalPages;
+    // An empty page means the server disagrees with its own totalPages;
+    // stop rather than loop forever.
+    if (result.items.length === 0) break;
+    page += 1;
+  } while (page <= totalPages);
+
+  return items;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
