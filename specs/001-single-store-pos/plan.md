@@ -145,3 +145,130 @@ logic
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
 ไม่มี — Constitution Check ทุกข้อผ่านโดยไม่ต้องมี exception ใด ๆ ตารางนี้จึงว่างโดยตั้งใจ
+
+
+---
+
+# รอบที่ 2 — daisyUI + Responsive + Server Paging
+
+> เพิ่มเข้ามาหลังจากฟีเจอร์ 001 ปิดครบทุก task แล้ว (83/83) จึงเขียนต่อในแผนเดิมตามที่
+> `setup-plan.ps1` ชี้มา ไม่ใช่ฟีเจอร์ใหม่แยกโฟลเดอร์ — ตามที่เคยตกลงกันไว้ตอนบันทึกงาน UI หน้า sales เข้า 001
+> **ทางเลือกอื่นที่ไม่ได้เลือก**: แยกเป็น `specs/002-daisyui-responsive/` ซึ่งเป็นรูปแบบมาตรฐานของ speckit
+> สำหรับงานขนาดนี้ (เปลี่ยน UI framework + แก้สัญญา API แบบ breaking) — ถ้าต้องการแยกภายหลังยังทำได้
+
+## Summary (รอบที่ 2)
+
+สี่งานที่ผูกกันเป็นชุดเดียว เรียงตามลำดับที่ต้องทำ:
+
+1. **อัปเกรด Tailwind CSS 3.4.1 → 4.3.3** — เป็นเงื่อนไขของ daisyUI 5 ต้องทำก่อนและพิสูจน์ให้จบก่อนแตะอย่างอื่น
+2. **เปลี่ยน UI library เป็น daisyUI 5** แทน PrimeReact ทั้งหมด (15 ไฟล์)
+3. **เพิ่ม server paging** ที่ `GET /api/v1/products` และ `GET /api/v1/sales` — เป็น breaking change ของ `v1`
+4. **ทำให้ทุกหน้า responsive ตามเกณฑ์ที่วัดได้** และให้ทุก datagrid กรองข้อมูลได้
+
+รายละเอียดการตัดสินใจทั้งหมดอยู่ใน `research.md` ข้อ 8–12
+
+## หมายเหตุสำคัญ — อาการในภาพที่ผู้ใช้ส่งมายังทำซ้ำไม่ได้
+
+ภาพที่ส่งมาแสดงหน้า `/sales` ที่เนื้อหาถูกตัดขาดที่ขอบขวา (แผงแคชเชียร์และชื่อผู้ใช้โดนตัด) แต่การวัดด้วย
+Playwright บน dev server ที่รันอยู่ **ไม่พบ horizontal overflow เลย** ทั้งที่ 375px, 900px และ 1280px ทุกหน้า
+(`scrollWidth - clientWidth = 0`) และหน้า `/stock` ที่ 375px แสดงตารางเป็นการ์ดซ้อนแนวตั้งได้ถูกต้อง
+
+ความเป็นไปได้ที่อธิบายภาพนั้นได้: เป็นภาพจากหน้าเวอร์ชันก่อนการแก้ UI รอบที่แล้ว, เป็นภาพที่จับตอนกำลังลาก
+ย่อหน้าต่าง (Chrome บน Windows จะยืดภาพเฟรมเดิมไว้ระหว่างลาก), หรือเบราว์เซอร์ตั้ง zoom ไว้
+
+**เรื่องนี้ไม่บล็อกแผน** เพราะรอบนี้จะเขียน layout ใหม่ด้วย daisyUI อยู่แล้ว และเกณฑ์ responsive ที่กำหนดไว้
+(research.md ข้อ 12) ครอบอาการแบบในภาพไว้ด้วย — แต่ถ้าอาการยังอยู่หลังทำเสร็จ **รบกวนแจ้งความกว้างหน้าต่าง
+และระดับ zoom** เพื่อให้ทำซ้ำได้
+
+## Technical Context (รอบที่ 2 — เฉพาะส่วนที่เปลี่ยน)
+
+| หัวข้อ | เดิม | รอบนี้ |
+|---|---|---|
+| CSS framework | Tailwind CSS 3.4.1 | **Tailwind CSS 4.3.3** (CSS-first config) |
+| PostCSS plugin | `tailwindcss` | **`@tailwindcss/postcss` 4.3.3** |
+| UI component library | PrimeReact 10.9.9 (unstyled + passthrough) | **daisyUI 5.7.32** (Tailwind plugin) |
+| ที่เก็บธีม | `web/tailwind.config.ts` | `@theme` + `@plugin "daisyui/theme"` ใน `globals.css` (ลบ config ทิ้ง) |
+| Datagrid | `DataTable` ของ PrimeReact | `web/src/components/DataTable.tsx` เขียนเอง (ไม่เพิ่ม dependency) |
+| รูปแบบ response ของ list | array เปล่า | envelope `{items,page,pageSize,totalCount,totalPages}` (2 endpoint) |
+| Next.js | 14.2.35 | คงเดิม — เป็นความเสี่ยงที่ต้องพิสูจน์ ดู research.md ข้อ 8 |
+
+**ไม่เปลี่ยน**: .NET 8, EF Core 8, PostgreSQL 16, โครง DDD ของ `api/`, กลไก auth, และ domain model ทั้งหมด
+
+## Constitution Check (รอบที่ 2)
+
+| หลักการ | ผล | เหตุผล |
+|---|---|---|
+| I. แยก API กับ Frontend | **ผ่าน** | daisyUI เป็น CSS ล้วน ไม่แตะการเรียกข้อมูล paging ทำที่ API แล้วส่งผลผ่าน REST เท่านั้น `web/` ยังไม่มีทางเข้าถึง DB |
+| II. DDD + EF Core + PostgreSQL | **ผ่าน** | logic การแบ่งหน้าอยู่ที่ Application layer (query object) ไม่มี business rule รั่วลงไปที่ controller และไม่มี domain rule ใหม่ |
+| III. Test-First (NON-NEGOTIABLE) | **ผ่าน — เป็น gate ที่เข้มที่สุดของรอบนี้** | การแบ่งหน้าเป็น logic ของ Application layer จึง **ต้องมี unit test ที่รันได้โดยไม่มี PostgreSQL** ครอบ: ค่า default, ค่าเกินเพดาน, `page` เกินจำนวนหน้าจริง, และการนับ `totalCount` ตอนมี filter |
+| IV. Next.js + Tailwind CSS | **ผ่าน** | daisyUI คือ Tailwind plugin ไม่ใช่ CSS framework คู่แข่ง การถอด PrimeReact ทำให้เหลือ styling system เดียว = **ตรงเจตนาของหลักการนี้มากกว่าเดิม** |
+| Repository Structure | **ผ่าน** | ไม่มีการแชร์โค้ดใหม่ระหว่าง `api/` กับ `web/` จุดเชื่อมเดียวยังเป็นสัญญาใน `contracts/` |
+
+**ไม่มีข้อยกเว้นที่ต้องขออนุมัติ** ตาราง Complexity Tracking ข้างบนจึงยังว่างอยู่เหมือนเดิม
+
+## ลำดับงานที่บังคับ (สำคัญกว่ารายละเอียด)
+
+ลำดับนี้ไม่ใช่ความชอบ แต่มาจากการที่งานหลังพังเงียบถ้างานก่อนยังไม่จบ:
+
+```text
+1. Tailwind 4  ──► ต้องรัน `npm run build` ผ่านและเปิดครบทุกหน้าก่อน
+                   (ไม่งั้นแยกไม่ออกว่าที่พังเป็นเพราะ Tailwind 4 หรือ daisyUI)
+        │
+2. API envelope + unit tests + contracts + integration tests
+        │          (ทำก่อน UI ไม่งั้น DataTable ต้องเขียนสองรอบ)
+        │
+3. web/src/lib/api/*.ts อ่าน envelope
+        │
+4. DataTable.tsx + ถอด PrimeReact ทีละหน้า
+        │
+5. Responsive + filter บนหน้าที่เขียนใหม่แล้ว
+        │
+6. วัดผลตามเกณฑ์ research.md ข้อ 12 ที่ 360/768/1024/1440
+```
+
+**ข้อควรระวังจากรอบก่อน**: `npm run build` ทับ `.next/` ของ dev server ที่รันอยู่จนทุก chunk กลายเป็น 404
+ต้องหยุด dev server ก่อน build แล้วค่อยเริ่มใหม่ (บันทึกไว้แล้วใน `web/README.md`)
+
+## Project Structure — ส่วนที่เปลี่ยนใน `web/`
+
+```text
+web/
+├── postcss.config.mjs          # แก้: tailwindcss -> @tailwindcss/postcss
+├── tailwind.config.ts          # ลบทิ้ง — ธีมย้ายไปอยู่ใน globals.css
+├── src/
+│   ├── app/globals.css         # แก้ใหญ่: @import "tailwindcss" + @plugin daisyui + @theme
+│   ├── components/
+│   │   ├── DataTable.tsx       # เพิ่มใหม่ — generic table + server paging + filter slot
+│   │   ├── MemberSearch.tsx    # เขียนใหม่ — autocomplete เองแทน PrimeReact AutoComplete
+│   │   └── *.tsx               # ที่เหลือ: เปลี่ยน PrimeReact -> class ของ daisyUI
+│   ├── lib/api/
+│   │   ├── products.ts         # แก้: อ่าน envelope + ส่ง page/pageSize
+│   │   └── sales.ts            # แก้: อ่าน envelope + ส่ง page/pageSize
+│   └── styles/
+│       └── primereact-passthrough.ts   # ลบทิ้งทั้งไฟล์
+```
+
+## Project Structure — ส่วนที่เปลี่ยนใน `api/`
+
+```text
+api/src/
+├── TaladPOS.Application/
+│   └── Common/PagedResult.cs   # เพิ่มใหม่ — envelope ที่ใช้ร่วมกันทั้งสอง use case
+├── TaladPOS.Api/Controllers/
+│   ├── ProductsController.cs   # แก้: รับ page/pageSize, คืน PagedResult, 400 ถ้านอกช่วง
+│   └── SalesController.cs      # แก้: เหมือนกัน
+api/tests/
+├── TaladPOS.Application.Tests/ # เพิ่ม unit test ของการแบ่งหน้า (Constitution III)
+└── TaladPOS.Api.IntegrationTests/  # แก้ test ที่ deserialize เป็น List<T> + OpenApiDocumentTests
+```
+
+## Phase 1 artifacts ของรอบนี้
+
+| ไฟล์ | สถานะ |
+|---|---|
+| `research.md` ข้อ 8–12 | เขียนแล้ว (ข้อ 7 ถูกทำเครื่องหมายว่าถูกแทนที่) |
+| `contracts/products.md` | แก้แล้ว — envelope + `page`/`pageSize` + 400 |
+| `contracts/sales.md` | แก้แล้ว — envelope + `page`/`pageSize` + 400 |
+| `data-model.md` | **ไม่เปลี่ยน** — ไม่มี entity, field หรือ invariant ใหม่ การแบ่งหน้าเป็นเรื่องของชั้น query ล้วน ๆ |
+| `quickstart.md` หัวข้อ 4–6 + สคริปต์ T080 | **ต้องแก้ให้ส่ง `pageSize` ชัดเจน** — ไม่งั้นการตรวจจะอ่อนลงเงียบ ๆ (ดู 7.6) |
+| `quickstart.md` หัวข้อ 7 | เพิ่มแล้ว — scenario ตรวจ paging, filter และ responsive |

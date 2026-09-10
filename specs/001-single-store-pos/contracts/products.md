@@ -15,23 +15,47 @@
 | `search` | string | ค้นหาจากชื่อสินค้า (contains, case-insensitive) |
 | `barcode` | string | ค้นหาแบบตรงเป๊ะจากบาร์โค้ด (สำหรับสแกน) |
 | `lowStockOnly` | bool | กรองเฉพาะสินค้าที่ `IsLowStock == true` (FR-017) |
+| `page` | int | เลขหน้า เริ่มที่ **1** (default `1`) |
+| `pageSize` | int | จำนวนต่อหน้า (default `20`, **สูงสุด 100**) |
 
 **Response 200 OK**:
 ```json
-[
-  {
-    "id": "guid",
-    "name": "มะม่วง",
-    "imageUrl": "https://...",
-    "price": 45.00,
-    "barcode": "8850000000012",
-    "stockQuantity": 12,
-    "lowStockThreshold": 5,
-    "isLowStock": false,
-    "isOutOfStock": false
-  }
-]
+{
+  "items": [
+    {
+      "id": "guid",
+      "name": "มะม่วง",
+      "imageUrl": "https://...",
+      "price": 45.00,
+      "barcode": "8850000000012",
+      "stockQuantity": 12,
+      "lowStockThreshold": 5,
+      "isLowStock": false,
+      "isOutOfStock": false
+    }
+  ],
+  "page": 1,
+  "pageSize": 20,
+  "totalCount": 137,
+  "totalPages": 7
+}
 ```
+
+> **รูปแบบ response เปลี่ยนแล้ว (รอบที่ 2)** — เดิมคืน array เปล่า ตอนนี้คืน envelope
+> `{items, page, pageSize, totalCount, totalPages}` ดู research.md ข้อ 11 สำหรับเหตุผลและขอบเขต
+> `items` คือ array แบบเดิมทุกประการ ไม่มี field ใดในตัว object เปลี่ยน
+
+**Response 400 Bad Request**: `page < 1`, `pageSize < 1` หรือ `pageSize > 100`
+```json
+{ "error": "invalid_pagination" }
+```
+ค่านอกช่วงตอบ 400 ไม่ปัดเงียบ ๆ ให้เข้าช่วง — ไม่งั้น client ที่ส่งค่าผิดจะเข้าใจว่าได้ข้อมูลครบแล้วทั้งที่ไม่ครบ
+
+`totalCount` นับ **หลังกรอง** ด้วย `search`/`barcode`/`lowStockOnly` แล้ว ไม่ใช่จำนวนสินค้าทั้งร้าน — ไม่งั้น
+ตัวแบ่งหน้าจะแสดงจำนวนหน้าที่กดไปแล้วว่าง
+
+หน้าขายสินค้า (`/sales`) ใช้ endpoint เดียวกันแต่ส่ง `pageSize` ใหญ่และไม่แสดงตัวแบ่งหน้า พฤติกรรมการค้นหา
+และสแกนบาร์โค้ดจึงไม่เปลี่ยน
 
 ## `GET /api/v1/products/{id}`
 

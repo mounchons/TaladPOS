@@ -66,9 +66,42 @@ database transaction
 
 **Auth required**: Manager หรือ Cashier
 
-**Query parameters**: `from`, `to` (ช่วงวันที่), `staffId`, `memberId` — ทั้งหมด optional สำหรับกรองผลลัพธ์
+**Query parameters** (ทั้งหมด optional):
+| Param | Type | ความหมาย |
+|---|---|---|
+| `from` | date | วันเริ่มต้นของช่วง (รวมวันนี้) |
+| `to` | date | วันสิ้นสุดของช่วง (รวมวันนี้) |
+| `staffId` | guid | กรองเฉพาะบิลของพนักงานคนนี้ |
+| `memberId` | guid | กรองเฉพาะบิลของสมาชิกคนนี้ |
+| `page` | int | เลขหน้า เริ่มที่ **1** (default `1`) |
+| `pageSize` | int | จำนวนต่อหน้า (default `20`, **สูงสุด 100**) |
 
-**Response 200 OK**: array ของ SaleDto (รูปแบบเดียวกับ response ของ `POST /api/v1/sales`)
+**Response 200 OK**:
+```json
+{
+  "items": [ ],
+  "page": 1,
+  "pageSize": 20,
+  "totalCount": 412,
+  "totalPages": 21
+}
+```
+`items` คือ array ของ SaleDto (รูปแบบเดียวกับ response ของ `POST /api/v1/sales`)
+
+> **รูปแบบ response เปลี่ยนแล้ว (รอบที่ 2)** — เดิมคืน array เปล่า ตอนนี้คืน envelope
+> `{items, page, pageSize, totalCount, totalPages}` ดู research.md ข้อ 11 สำหรับเหตุผลและขอบเขต
+> `items` คือ array แบบเดิมทุกประการ ไม่มี field ใดในตัว object เปลี่ยน
+
+**Response 400 Bad Request**: `page < 1`, `pageSize < 1` หรือ `pageSize > 100`
+```json
+{ "error": "invalid_pagination" }
+```
+ค่านอกช่วงตอบ 400 ไม่ปัดเงียบ ๆ ให้เข้าช่วง — ไม่งั้น client ที่ส่งค่าผิดจะเข้าใจว่าได้ข้อมูลครบแล้วทั้งที่ไม่ครบ
+
+`totalCount` นับ **หลังกรอง** ด้วย `from`/`to`/`staffId`/`memberId` แล้ว
+
+เรียงจากบิลใหม่สุดไปเก่าสุด (`soldAt` มาก → น้อย) การเรียงต้องคงที่ ไม่งั้นบิลเดียวกันจะโผล่ซ้ำหรือหายไป
+ตอนเปลี่ยนหน้า
 
 ## `GET /api/v1/sales/{id}`
 
