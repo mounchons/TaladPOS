@@ -10,7 +10,7 @@ public sealed record CreatePromotionRequest(
     DateOnly StartDate,
     DateOnly EndDate);
 
-/// <summary>contracts/promotions.md - POST /api/promotions (FR-019-FR-021, Manager only - FR-029)</summary>
+/// <summary>contracts/promotions.md - POST /api/v1/promotions (FR-019-FR-021, Manager only - FR-029)</summary>
 public sealed class CreatePromotionUseCase
 {
     private readonly IPromotionRepository _promotions;

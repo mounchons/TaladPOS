@@ -1,6 +1,6 @@
 namespace TaladPOS.Application.Promotions;
 
-/// <summary>contracts/promotions.md - DELETE /api/promotions/{id} (Manager only - FR-029)</summary>
+/// <summary>contracts/promotions.md - DELETE /api/v1/promotions/{id} (Manager only - FR-029)</summary>
 public sealed class DeletePromotionUseCase
 {
     private readonly IPromotionRepository _promotions;

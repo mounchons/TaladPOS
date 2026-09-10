@@ -7,7 +7,7 @@ using TaladPOS.Domain.Staff;
 namespace TaladPOS.Api.Controllers;
 
 [ApiController]
-[Route("api/products")]
+[Route("api/v1/products")]
 public class ProductsController : ControllerBase
 {
     private readonly IProductRepository _productRepository;
@@ -41,7 +41,7 @@ public class ProductsController : ControllerBase
         bool IsLowStock,
         bool IsOutOfStock);
 
-    /// <summary>contracts/products.md - GET /api/products (FR-001, FR-002, FR-017)</summary>
+    /// <summary>contracts/products.md - GET /api/v1/products (FR-001, FR-002, FR-017)</summary>
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts(
         [FromQuery] string? search,
@@ -53,7 +53,7 @@ public class ProductsController : ControllerBase
         return Ok(products.Select(ToDto).ToList());
     }
 
-    /// <summary>contracts/products.md - GET /api/products/{id}</summary>
+    /// <summary>contracts/products.md - GET /api/v1/products/{id}</summary>
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ProductDto>> GetById(Guid id, CancellationToken ct)
     {
@@ -61,7 +61,7 @@ public class ProductsController : ControllerBase
         return product is null ? NotFound() : Ok(ToDto(product));
     }
 
-    /// <summary>contracts/products.md - POST /api/products (FR-015, FR-029: Manager only)</summary>
+    /// <summary>contracts/products.md - POST /api/v1/products (FR-015, FR-029: Manager only)</summary>
     [HttpPost]
     [Authorize(Roles = nameof(StaffRole.Manager))]
     public async Task<ActionResult<ProductDto>> Create(ProductRequestDto request, CancellationToken ct)
@@ -75,7 +75,7 @@ public class ProductsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = product.Id }, ToDto(product));
     }
 
-    /// <summary>contracts/products.md - PUT /api/products/{id} (FR-015, FR-018, FR-029: Manager only)</summary>
+    /// <summary>contracts/products.md - PUT /api/v1/products/{id} (FR-015, FR-018, FR-029: Manager only)</summary>
     [HttpPut("{id:guid}")]
     [Authorize(Roles = nameof(StaffRole.Manager))]
     public async Task<ActionResult<ProductDto>> Update(Guid id, ProductRequestDto request, CancellationToken ct)
@@ -89,7 +89,7 @@ public class ProductsController : ControllerBase
         return Ok(ToDto(product));
     }
 
-    /// <summary>contracts/products.md - DELETE /api/products/{id} (FR-015, FR-029: Manager only)</summary>
+    /// <summary>contracts/products.md - DELETE /api/v1/products/{id} (FR-015, FR-029: Manager only)</summary>
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = nameof(StaffRole.Manager))]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)

@@ -11,7 +11,7 @@ public sealed record UpdatePromotionRequest(
     DateOnly StartDate,
     DateOnly EndDate);
 
-/// <summary>contracts/promotions.md - PUT /api/promotions/{id} (Manager only - FR-029)</summary>
+/// <summary>contracts/promotions.md - PUT /api/v1/promotions/{id} (Manager only - FR-029)</summary>
 public sealed class UpdatePromotionUseCase
 {
     private readonly IPromotionRepository _promotions;

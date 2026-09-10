@@ -5,7 +5,7 @@ using TaladPOS.Application.Auth;
 namespace TaladPOS.Api.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/v1/auth")]
 public class AuthController : ControllerBase
 {
     private readonly StaffAuthenticator _authenticator;
@@ -23,7 +23,7 @@ public class AuthController : ControllerBase
 
     public record LoginResponse(string Token, DateTime ExpiresAt, StaffSummaryDto Staff);
 
-    /// <summary>contracts/auth.md - POST /api/auth/login (FR-007)</summary>
+    /// <summary>contracts/auth.md - POST /api/v1/auth/login (FR-007)</summary>
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest request, CancellationToken ct)

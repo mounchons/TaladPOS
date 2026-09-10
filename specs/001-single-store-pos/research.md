@@ -9,7 +9,7 @@
 
 ## 1. การยืนยันตัวตนพนักงาน (Authentication) สำหรับ FR-007/FR-009
 
-**Decision**: ใช้ JWT bearer token — พนักงานล็อกอินผ่าน `POST /api/auth/login` ด้วย username/password, API
+**Decision**: ใช้ JWT bearer token — พนักงานล็อกอินผ่าน `POST /api/v1/auth/login` ด้วย username/password, API
 ตรวจสอบรหัสผ่านด้วย `PasswordHasher<Staff>` (จาก `Microsoft.AspNetCore.Identity`) แล้วออก short-lived JWT
 (รวม staff id + role claim) ให้ `web/` เก็บไว้ฝั่ง client และแนบเป็น `Authorization: Bearer` ทุก request
 "ล็อกเอาต์" (FR-009) คือการทิ้ง token ฝั่ง client (ไม่ต้องมี server-side session store)
@@ -68,7 +68,7 @@ discounts ที่ใช้ได้กับ line item/บิลนั้น �
 ## 4. การแจ้งเตือนสินค้าใกล้หมด (Low-stock Notification) สำหรับ FR-017/SC-003
 
 **Decision**: ไม่ต้องมี push/real-time channel (SignalR/WebSocket) — คำนวณสถานะ "ใกล้หมด" เป็น computed flag
-(`stock_quantity <= low_stock_threshold`) ตอนตอบกลับ query สินค้า (`GET /api/products`) และแสดงผลใน `web/` ตอนโหลด/
+(`stock_quantity <= low_stock_threshold`) ตอนตอบกลับ query สินค้า (`GET /api/v1/products`) และแสดงผลใน `web/` ตอนโหลด/
 รีเฟรชหน้าจอสต็อก
 
 **Rationale**: SC-003 กำหนดไว้ชัดว่า "เห็นภายในการใช้งานหน้าจอสต็อกครั้งถัดไป" ไม่ได้ต้องการ real-time push
@@ -80,7 +80,7 @@ discounts ที่ใช้ได้กับ line item/บิลนั้น �
 
 ## 5. รูปแบบใบเสร็จ (Receipt) สำหรับ FR-030
 
-**Decision**: `GET /api/sales/{id}/receipt` คืนข้อมูลใบเสร็จเป็น JSON (รายการสินค้า/ราคา/ส่วนลด/ยอดรวม) ให้
+**Decision**: `GET /api/v1/sales/{id}/receipt` คืนข้อมูลใบเสร็จเป็น JSON (รายการสินค้า/ราคา/ส่วนลด/ยอดรวม) ให้
 `web/` render เป็นหน้าใบเสร็จ HTML แล้วใช้ browser print (`window.print()`) เพื่อพิมพ์ ไม่ผูกกับเครื่องพิมพ์ใบเสร็จ
 เฉพาะทาง (thermal printer) ในเวอร์ชันนี้
 

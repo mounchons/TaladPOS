@@ -6,7 +6,7 @@ public sealed record SalesReportResult(
     string Period, DateOnly RangeStart, DateOnly RangeEnd, decimal TotalSalesAmount, decimal TotalDiscountAmount,
     int BillCount);
 
-/// <summary>contracts/reports.md - GET /api/reports/sales (FR-025)</summary>
+/// <summary>contracts/reports.md - GET /api/v1/reports/sales (FR-025)</summary>
 public sealed class GetDailyOrMonthlySalesReportQuery
 {
     private readonly ISaleRepository _saleRepository;

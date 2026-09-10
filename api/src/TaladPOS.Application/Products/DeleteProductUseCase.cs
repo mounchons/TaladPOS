@@ -1,7 +1,7 @@
 namespace TaladPOS.Application.Products;
 
 /// <summary>
-/// contracts/products.md - DELETE /api/products/{id} (FR-015). Deleting a
+/// contracts/products.md - DELETE /api/v1/products/{id} (FR-015). Deleting a
 /// product never touches past sales: SaleLineItem stores its own
 /// name/price snapshot and only a bare ProductId (no FK), by design.
 /// </summary>

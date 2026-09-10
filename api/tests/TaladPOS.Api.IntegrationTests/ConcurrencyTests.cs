@@ -29,7 +29,7 @@ public sealed class ConcurrencyTests : ApiTestBase
 
     /// <summary>
     /// quickstart.md section 5 (Concurrency) / FR-016: two simultaneous
-    /// POST /api/sales for the last unit in stock.
+    /// POST /api/v1/sales for the last unit in stock.
     ///
     /// The assertions describe the *invariant*, not a particular
     /// interleaving: PostgreSQL serialises the two row updates, so whichever
@@ -53,8 +53,8 @@ public sealed class ConcurrencyTests : ApiTestBase
 
         var body = new { memberId = (Guid?)null, lineItems = new[] { new { productId = mango.Id, quantity = 1 } } };
 
-        var firstRequest = registerOne.PostAsJsonAsync("/api/sales", body);
-        var secondRequest = registerTwo.PostAsJsonAsync("/api/sales", body);
+        var firstRequest = registerOne.PostAsJsonAsync("/api/v1/sales", body);
+        var secondRequest = registerTwo.PostAsJsonAsync("/api/v1/sales", body);
         var responses = await Task.WhenAll(firstRequest, secondRequest);
 
         var created = responses.Where(r => r.StatusCode == HttpStatusCode.Created).ToList();
@@ -73,7 +73,7 @@ public sealed class ConcurrencyTests : ApiTestBase
         afterSale.StockQuantity.Should().Be(0);
 
         // FR-016: the rejected checkout must not have left a Sale behind.
-        var sales = await cashierClient.GetFromJsonAsync<List<SalesController.SaleDto>>("/api/sales");
+        var sales = await cashierClient.GetFromJsonAsync<List<SalesController.SaleDto>>("/api/v1/sales");
         sales.Should().ContainSingle()
             .Which.LineItems.Should().ContainSingle(li => li.ProductId == mango.Id && li.Quantity == 1);
     }
@@ -93,7 +93,7 @@ public sealed class ConcurrencyTests : ApiTestBase
         var mango = await GetProductByNameAsync(cashierClient, "มะม่วง");
         var apple = await GetProductByNameAsync(cashierClient, "แอปเปิ้ล");
 
-        var response = await cashierClient.PostAsJsonAsync("/api/sales", new
+        var response = await cashierClient.PostAsJsonAsync("/api/v1/sales", new
         {
             memberId = (Guid?)null,
             lineItems = new[]
@@ -113,13 +113,13 @@ public sealed class ConcurrencyTests : ApiTestBase
         mangoAfter.StockQuantity.Should().Be(mango.StockQuantity, "the first line's deduction must be rolled back");
         appleAfter.StockQuantity.Should().Be(apple.StockQuantity);
 
-        var sales = await cashierClient.GetFromJsonAsync<List<SalesController.SaleDto>>("/api/sales");
+        var sales = await cashierClient.GetFromJsonAsync<List<SalesController.SaleDto>>("/api/v1/sales");
         sales!.Should().BeEmpty("a rejected checkout is never persisted");
     }
 
     /// <summary>
     /// Drives stock to an exact value straight through the DbContext. Going
-    /// through PUT /api/products would work too, but it couples this test to
+    /// through PUT /api/v1/products would work too, but it couples this test to
     /// the product-update contract; the race being tested is about the row's
     /// value, so setting the row directly keeps the arrangement unambiguous.
     /// </summary>

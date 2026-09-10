@@ -1,11 +1,11 @@
 # Contract: Authentication
 
-**Base path**: `/api/auth`
+**Base path**: `/api/v1/auth`
 **เกี่ยวข้องกับ**: FR-007, FR-009
 
 REST API เท่านั้น — `web/` ต้องเรียกผ่าน endpoint เหล่านี้ ห้ามเข้าถึงตาราง Staff โดยตรง (constitution Principle I)
 
-## `POST /api/auth/login`
+## `POST /api/v1/auth/login`
 
 ล็อกอินด้วย username/password (FR-007)
 

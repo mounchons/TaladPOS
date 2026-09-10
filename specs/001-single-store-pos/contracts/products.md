@@ -1,9 +1,9 @@
 # Contract: Products
 
-**Base path**: `/api/products`
+**Base path**: `/api/v1/products`
 **เกี่ยวข้องกับ**: FR-001–FR-006, FR-015–FR-018, FR-029
 
-## `GET /api/products`
+## `GET /api/v1/products`
 
 ค้นหา/แสดงรายการสินค้า (FR-001, FR-002) — ใช้ทั้งหน้าขายสินค้าและหน้าจัดการสต็อก
 
@@ -33,13 +33,13 @@
 ]
 ```
 
-## `GET /api/products/{id}`
+## `GET /api/v1/products/{id}`
 
 **Auth required**: Manager หรือ Cashier
 **Response 200 OK**: object เดียวตามรูปแบบข้างบน
 **Response 404**: ไม่พบสินค้า
 
-## `POST /api/products`
+## `POST /api/v1/products`
 
 เพิ่มสินค้าใหม่ (FR-015)
 
@@ -61,7 +61,7 @@
 **Response 400**: validation error (เช่น `price <= 0`)
 **Response 409**: `barcode` ซ้ำกับสินค้าอื่นที่มีอยู่แล้ว
 
-## `PUT /api/products/{id}`
+## `PUT /api/v1/products/{id}`
 
 แก้ไขสินค้า (FR-015) — รวมถึงปรับ `stockQuantity`/`lowStockThreshold` (FR-018)
 
@@ -70,7 +70,7 @@
 **Response 200 OK**: ProductDto ที่อัปเดตแล้ว
 **Response 404 / 400 / 409**: เหมือนด้านบน
 
-## `DELETE /api/products/{id}`
+## `DELETE /api/v1/products/{id}`
 
 ลบสินค้า (FR-015) — ไม่กระทบบิลเก่าที่เคยขายสินค้านี้ไปแล้ว เพราะ `SaleLineItem` เก็บ snapshot แยก (ดู data-model.md)
 

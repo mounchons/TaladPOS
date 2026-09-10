@@ -13,7 +13,7 @@ interface MemberSearchProps {
 }
 
 // tasks.md T053 (US4): member search used during checkout - typing a
-// phone number or name suggests matches (contracts/members.md GET /api/members).
+// phone number or name suggests matches (contracts/members.md GET /api/v1/members).
 export function MemberSearch({ selected, onSelect, tone = "light" }: MemberSearchProps) {
   const [query, setQuery] = useState(selected?.name ?? "");
   const [suggestions, setSuggestions] = useState<Member[]>([]);

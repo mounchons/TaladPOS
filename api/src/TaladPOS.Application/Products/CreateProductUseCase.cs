@@ -5,7 +5,7 @@ namespace TaladPOS.Application.Products;
 public sealed record CreateProductRequest(
     string Name, string ImageUrl, decimal Price, string? Barcode, int StockQuantity, int? LowStockThreshold);
 
-/// <summary>contracts/products.md - POST /api/products (FR-015)</summary>
+/// <summary>contracts/products.md - POST /api/v1/products (FR-015)</summary>
 public sealed class CreateProductUseCase
 {
     private readonly IProductRepository _products;

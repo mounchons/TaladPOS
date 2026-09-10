@@ -7,7 +7,7 @@ namespace TaladPOS.Api.Controllers;
 
 /// <summary>contracts/reports.md - every endpoint here is Manager-only (FR-029).</summary>
 [ApiController]
-[Route("api/reports")]
+[Route("api/v1/reports")]
 [Authorize(Roles = nameof(StaffRole.Manager))]
 public class ReportsController : ControllerBase
 {
@@ -28,7 +28,7 @@ public class ReportsController : ControllerBase
         _stockReportQuery = stockReportQuery;
     }
 
-    /// <summary>contracts/reports.md - GET /api/reports/sales (FR-025)</summary>
+    /// <summary>contracts/reports.md - GET /api/v1/reports/sales (FR-025)</summary>
     [HttpGet("sales")]
     public async Task<ActionResult<SalesReportResult>> Sales(
         [FromQuery] string period, [FromQuery] DateOnly date, CancellationToken ct)
@@ -37,7 +37,7 @@ public class ReportsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>contracts/reports.md - GET /api/reports/best-selling-products (FR-026)</summary>
+    /// <summary>contracts/reports.md - GET /api/v1/reports/best-selling-products (FR-026)</summary>
     [HttpGet("best-selling-products")]
     public async Task<ActionResult<IReadOnlyList<BestSellingProductRow>>> BestSellingProducts(
         [FromQuery] DateOnly from, [FromQuery] DateOnly to, [FromQuery] int limit = 10, CancellationToken ct = default)
@@ -46,7 +46,7 @@ public class ReportsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>contracts/reports.md - GET /api/reports/sales-by-staff (FR-027)</summary>
+    /// <summary>contracts/reports.md - GET /api/v1/reports/sales-by-staff (FR-027)</summary>
     [HttpGet("sales-by-staff")]
     public async Task<ActionResult<IReadOnlyList<SalesByStaffRow>>> SalesByStaff(
         [FromQuery] DateOnly from, [FromQuery] DateOnly to, CancellationToken ct)
@@ -55,7 +55,7 @@ public class ReportsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>contracts/reports.md - GET /api/reports/stock (FR-028)</summary>
+    /// <summary>contracts/reports.md - GET /api/v1/reports/stock (FR-028)</summary>
     [HttpGet("stock")]
     public async Task<ActionResult<IReadOnlyList<StockReportRow>>> Stock(CancellationToken ct)
     {

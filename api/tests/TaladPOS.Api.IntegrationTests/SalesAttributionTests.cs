@@ -31,7 +31,7 @@ public sealed class SalesAttributionTests : ApiTestBase
         // staffId-shaped field in the body - the API only ever accepts
         // memberId/lineItems (contracts/sales.md), so this is inert, but it
         // proves the server isn't accidentally binding such a field.
-        var createResponse = await cashierClient.PostAsJsonAsync("/api/sales", new
+        var createResponse = await cashierClient.PostAsJsonAsync("/api/v1/sales", new
         {
             memberId = (Guid?)null,
             staffId = managerLogin.StaffId,
@@ -46,7 +46,7 @@ public sealed class SalesAttributionTests : ApiTestBase
         // Re-fetch through a different logged-in session (the manager) to
         // confirm attribution was actually persisted, not just echoed back.
         var managerClient = await CreateAuthenticatedClientAsync(ManagerUsername, ManagerPassword);
-        var fetched = await managerClient.GetFromJsonAsync<SalesController.SaleDto>($"/api/sales/{created.Id}");
+        var fetched = await managerClient.GetFromJsonAsync<SalesController.SaleDto>($"/api/v1/sales/{created.Id}");
 
         fetched!.Staff!.Id.Should().Be(cashierLogin.StaffId);
     }

@@ -22,7 +22,7 @@ export function searchProducts(params: {
   if (params.barcode) query.set("barcode", params.barcode);
   if (params.lowStockOnly) query.set("lowStockOnly", "true");
   const qs = query.toString();
-  return apiFetch<Product[]>(`/api/products${qs ? `?${qs}` : ""}`);
+  return apiFetch<Product[]>(`/api/v1/products${qs ? `?${qs}` : ""}`);
 }
 
 export interface ProductInput {
@@ -34,15 +34,15 @@ export interface ProductInput {
   lowStockThreshold: number;
 }
 
-// contracts/products.md - POST/PUT/DELETE /api/products (FR-015, FR-018, Manager only - FR-029)
+// contracts/products.md - POST/PUT/DELETE /api/v1/products (FR-015, FR-018, Manager only - FR-029)
 export function createProduct(input: ProductInput): Promise<Product> {
-  return apiFetch<Product>("/api/products", { method: "POST", body: JSON.stringify(input) });
+  return apiFetch<Product>("/api/v1/products", { method: "POST", body: JSON.stringify(input) });
 }
 
 export function updateProduct(id: string, input: ProductInput): Promise<Product> {
-  return apiFetch<Product>(`/api/products/${id}`, { method: "PUT", body: JSON.stringify(input) });
+  return apiFetch<Product>(`/api/v1/products/${id}`, { method: "PUT", body: JSON.stringify(input) });
 }
 
 export function deleteProduct(id: string): Promise<void> {
-  return apiFetch<void>(`/api/products/${id}`, { method: "DELETE" });
+  return apiFetch<void>(`/api/v1/products/${id}`, { method: "DELETE" });
 }

@@ -3,7 +3,7 @@ using TaladPOS.Domain.Sales;
 
 namespace TaladPOS.Application.Reports;
 
-/// <summary>contracts/sales.md - GET /api/sales (FR-024)</summary>
+/// <summary>contracts/sales.md - GET /api/v1/sales (FR-024)</summary>
 public sealed class GetSalesHistoryQuery
 {
     private readonly ISaleRepository _saleRepository;

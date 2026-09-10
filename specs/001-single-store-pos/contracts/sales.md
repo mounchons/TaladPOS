@@ -1,9 +1,9 @@
 # Contract: Sales
 
-**Base path**: `/api/sales`
+**Base path**: `/api/v1/sales`
 **เกี่ยวข้องกับ**: FR-005, FR-006, FR-008, FR-013, FR-014, FR-016, FR-022, FR-023, FR-024, FR-030
 
-## `POST /api/sales`
+## `POST /api/v1/sales`
 
 ปิดบิล/ชำระเงิน (checkout) — จุดที่ตัดสต็อก, คำนวณส่วนลดสูงสุด, บันทึกบิล, และอัปเดตยอดสะสมสมาชิก ทั้งหมดในหนึ่ง
 database transaction
@@ -60,7 +60,7 @@ database transaction
 { "error": "insufficient_stock", "productId": "guid" }
 ```
 
-## `GET /api/sales`
+## `GET /api/v1/sales`
 
 ประวัติบิลขายย้อนหลัง (FR-024)
 
@@ -68,14 +68,14 @@ database transaction
 
 **Query parameters**: `from`, `to` (ช่วงวันที่), `staffId`, `memberId` — ทั้งหมด optional สำหรับกรองผลลัพธ์
 
-**Response 200 OK**: array ของ SaleDto (รูปแบบเดียวกับ response ของ `POST /api/sales`)
+**Response 200 OK**: array ของ SaleDto (รูปแบบเดียวกับ response ของ `POST /api/v1/sales`)
 
-## `GET /api/sales/{id}`
+## `GET /api/v1/sales/{id}`
 
 **Response 200 OK**: SaleDto เดียว
 **Response 404**: ไม่พบบิล
 
-## `GET /api/sales/{id}/receipt`
+## `GET /api/v1/sales/{id}/receipt`
 
 ข้อมูลใบเสร็จอย่างง่ายสำหรับแสดง/พิมพ์ (FR-030, research.md #5) — ไม่มีการคำนวณ VAT
 

@@ -68,12 +68,12 @@ public sealed class OpenApiDocumentTests : ApiTestBase
         var document = GenerateDocument();
 
         document.Paths.Should().ContainKeys(
-            "/api/auth/login",
-            "/api/products",
-            "/api/sales",
-            "/api/members",
-            "/api/promotions",
-            "/api/reports/sales");
+            "/api/v1/auth/login",
+            "/api/v1/products",
+            "/api/v1/sales",
+            "/api/v1/members",
+            "/api/v1/promotions",
+            "/api/v1/reports/sales");
     }
 
     private OpenApiDocument GenerateDocument()

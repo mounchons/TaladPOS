@@ -122,7 +122,7 @@ builder.Services.AddSwaggerGen(options =>
             "REST API สำหรับระบบ POS ร้านค้าเดี่ยว (specs/001-single-store-pos). "
             + "`web/` เรียกใช้ผ่าน endpoint เหล่านี้เท่านั้น ไม่เชื่อมต่อฐานข้อมูลโดยตรง "
             + "(constitution Principle I). ทุก endpoint ต้องล็อกอินก่อน (FR-029) — "
-            + "เรียก POST /api/auth/login เพื่อรับ JWT แล้วกด Authorize ด้านบน "
+            + "เรียก POST /api/v1/auth/login เพื่อรับ JWT แล้วกด Authorize ด้านบน "
             + "ส่วน endpoint ที่สงวนไว้สำหรับผู้จัดการจะตอบ 403 เมื่อเรียกด้วยบัญชี Cashier",
     });
 
@@ -145,7 +145,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "วาง JWT ที่ได้จาก POST /api/auth/login (ไม่ต้องพิมพ์คำว่า \"Bearer\" นำหน้า)",
+        Description = "วาง JWT ที่ได้จาก POST /api/v1/auth/login (ไม่ต้องพิมพ์คำว่า \"Bearer\" นำหน้า)",
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement

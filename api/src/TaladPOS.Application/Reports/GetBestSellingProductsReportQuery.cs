@@ -4,7 +4,7 @@ namespace TaladPOS.Application.Reports;
 
 public sealed record BestSellingProductRow(Guid ProductId, string ProductName, int QuantitySold, decimal TotalSalesAmount);
 
-/// <summary>contracts/reports.md - GET /api/reports/best-selling-products (FR-026), sorted by QuantitySold desc.</summary>
+/// <summary>contracts/reports.md - GET /api/v1/reports/best-selling-products (FR-026), sorted by QuantitySold desc.</summary>
 public sealed class GetBestSellingProductsReportQuery
 {
     private readonly ISaleRepository _saleRepository;

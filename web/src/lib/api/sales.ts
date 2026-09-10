@@ -39,13 +39,13 @@ export function createSale(request: {
   memberId?: string | null;
   lineItems: CreateSaleLineItem[];
 }): Promise<Sale> {
-  return apiFetch<Sale>("/api/sales", {
+  return apiFetch<Sale>("/api/v1/sales", {
     method: "POST",
     body: JSON.stringify({ memberId: request.memberId ?? null, lineItems: request.lineItems }),
   });
 }
 
-// contracts/sales.md - GET /api/sales (FR-024)
+// contracts/sales.md - GET /api/v1/sales (FR-024)
 export function searchSales(params: {
   from?: string;
   to?: string;
@@ -58,10 +58,10 @@ export function searchSales(params: {
   if (params.staffId) query.set("staffId", params.staffId);
   if (params.memberId) query.set("memberId", params.memberId);
   const qs = query.toString();
-  return apiFetch<Sale[]>(`/api/sales${qs ? `?${qs}` : ""}`);
+  return apiFetch<Sale[]>(`/api/v1/sales${qs ? `?${qs}` : ""}`);
 }
 
-// contracts/sales.md - GET /api/sales/{id}/receipt (FR-030)
+// contracts/sales.md - GET /api/v1/sales/{id}/receipt (FR-030)
 export function getReceipt(saleId: string): Promise<Sale> {
-  return apiFetch<Sale>(`/api/sales/${saleId}/receipt`);
+  return apiFetch<Sale>(`/api/v1/sales/${saleId}/receipt`);
 }

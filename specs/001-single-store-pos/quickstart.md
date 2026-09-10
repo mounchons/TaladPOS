@@ -54,44 +54,44 @@ npm run dev
 
 ### US1 — พนักงานทำการขายสินค้า (P1)
 
-1. ล็อกอินด้วยบัญชี Cashier ผ่าน `POST /api/auth/login` (ดู `contracts/auth.md`) → ได้ JWT token
-2. `GET /api/products?search=มะม่วง` → ต้องเจอสินค้า "มะม่วง" (สอดคล้อง Acceptance Scenario #1)
-3. `GET /api/products?barcode=<บาร์โค้ดมะม่วง>` → ต้องเจอสินค้าเดียวกัน (Acceptance Scenario #2)
-4. `POST /api/sales` พร้อม `lineItems: [{ productId: <มะม่วง>, quantity: 2 }]` (ดู `contracts/sales.md`) → ได้ 201
-   พร้อม `totalAmount` ถูกต้อง และ `GET /api/products/<มะม่วง>` ต้องแสดง `stockQuantity` ลดลง 2 (Acceptance Scenario #4)
-5. `POST /api/sales` ด้วย `lineItems: []` → ต้องได้ 400 (Edge Case: ห้ามชำระเงินตะกร้าว่าง)
+1. ล็อกอินด้วยบัญชี Cashier ผ่าน `POST /api/v1/auth/login` (ดู `contracts/auth.md`) → ได้ JWT token
+2. `GET /api/v1/products?search=มะม่วง` → ต้องเจอสินค้า "มะม่วง" (สอดคล้อง Acceptance Scenario #1)
+3. `GET /api/v1/products?barcode=<บาร์โค้ดมะม่วง>` → ต้องเจอสินค้าเดียวกัน (Acceptance Scenario #2)
+4. `POST /api/v1/sales` พร้อม `lineItems: [{ productId: <มะม่วง>, quantity: 2 }]` (ดู `contracts/sales.md`) → ได้ 201
+   พร้อม `totalAmount` ถูกต้อง และ `GET /api/v1/products/<มะม่วง>` ต้องแสดง `stockQuantity` ลดลง 2 (Acceptance Scenario #4)
+5. `POST /api/v1/sales` ด้วย `lineItems: []` → ต้องได้ 400 (Edge Case: ห้ามชำระเงินตะกร้าว่าง)
 6. **ตรวจฝั่ง `web/` (FR-030)**: ที่ `http://localhost:3000/sales` แตะสินค้าแล้วกด "ชำระเงิน" → ใบเสร็จต้องเด้งเป็น
-   modal ทันที (หัวข้อ "ขายสำเร็จ") แสดงรายการ/ส่วนลด/ยอดสุทธิตรงกับ response ของ `POST /api/sales` และมีปุ่ม
+   modal ทันที (หัวข้อ "ขายสำเร็จ") แสดงรายการ/ส่วนลด/ยอดสุทธิตรงกับ response ของ `POST /api/v1/sales` และมีปุ่ม
    "พิมพ์ใบเสร็จ" — สั่งพิมพ์แล้วต้องได้ **เฉพาะตัวใบเสร็จหน้าเดียว** ไม่มีแถบเมนู ตารางสินค้า แผงตะกร้า หรือปุ่มใน
    dialog ติดออกมา (ดู research.md #5.1); กดปิดแล้วลิงก์ "ใบเสร็จบิลล่าสุด" ใต้ปุ่มชำระเงินต้องเปิดใบเสร็จเดิมซ้ำได้
    และการแตะนอก dialog ต้องไม่ปิดใบเสร็จ
 
 ### US2 — พนักงานล็อกอินและถูกบันทึกว่าเป็นผู้ขาย (P2)
 
-1. เรียก `POST /api/sales` โดยไม่แนบ `Authorization` header → ต้องได้ 401
-2. ล็อกอินสำเร็จแล้วทำ Sale ตาม US1 → `GET /api/sales/{id}` ต้องแสดง `staff.name` ตรงกับบัญชีที่ล็อกอิน
+1. เรียก `POST /api/v1/sales` โดยไม่แนบ `Authorization` header → ต้องได้ 401
+2. ล็อกอินสำเร็จแล้วทำ Sale ตาม US1 → `GET /api/v1/sales/{id}` ต้องแสดง `staff.name` ตรงกับบัญชีที่ล็อกอิน
    (Acceptance Scenario #2)
 
 ### US3 — ผู้จัดการดูแลสต็อกสินค้า (P3)
 
-1. ล็อกอินด้วยบัญชี Manager → `POST /api/products` เพิ่มสินค้าใหม่ (ดู `contracts/products.md`) → 201
-2. `GET /api/products` (ไม่ล็อกอินเป็น Cashier ก็ต้องเห็นสินค้านี้ในหน้าขาย) → เจอสินค้าที่เพิ่งเพิ่ม (Acceptance Scenario #1)
-3. `PUT /api/products/{id}` แก้ราคา → `GET /api/products/{id}` ต้องแสดงราคาที่อัปเดตแล้ว (Acceptance Scenario #2)
-4. ตั้ง `stockQuantity` ให้ <= `lowStockThreshold` (เช่นขายจนเหลือน้อย) → `GET /api/products?lowStockOnly=true` ต้องเจอ
+1. ล็อกอินด้วยบัญชี Manager → `POST /api/v1/products` เพิ่มสินค้าใหม่ (ดู `contracts/products.md`) → 201
+2. `GET /api/v1/products` (ไม่ล็อกอินเป็น Cashier ก็ต้องเห็นสินค้านี้ในหน้าขาย) → เจอสินค้าที่เพิ่งเพิ่ม (Acceptance Scenario #1)
+3. `PUT /api/v1/products/{id}` แก้ราคา → `GET /api/v1/products/{id}` ต้องแสดงราคาที่อัปเดตแล้ว (Acceptance Scenario #2)
+4. ตั้ง `stockQuantity` ให้ <= `lowStockThreshold` (เช่นขายจนเหลือน้อย) → `GET /api/v1/products?lowStockOnly=true` ต้องเจอ
    สินค้านี้ (Acceptance Scenario #3 / SC-003)
-5. ลองสั่งซื้อ (`POST /api/products` โดย login เป็น Cashier) → ต้องได้ 403 (FR-029)
+5. ลองสั่งซื้อ (`POST /api/v1/products` โดย login เป็น Cashier) → ต้องได้ 403 (FR-029)
 
 ### US4 — สมัครสมาชิกและรับส่วนลดสมาชิก (P4)
 
-1. `POST /api/members` ด้วยเบอร์โทร/ชื่อใหม่ (ดู `contracts/members.md`) → 201
-2. `POST /api/members` ด้วยเบอร์โทรเดิม → ต้องได้ 409 (FR-011)
-3. `GET /api/members?search=<เบอร์โทร>` → เจอสมาชิกที่เพิ่งสมัคร (Acceptance Scenario #2)
-4. `POST /api/sales` พร้อม `memberId` ของสมาชิกนั้น → หลังสำเร็จ `GET /api/members/{id}` ต้องแสดง
+1. `POST /api/v1/members` ด้วยเบอร์โทร/ชื่อใหม่ (ดู `contracts/members.md`) → 201
+2. `POST /api/v1/members` ด้วยเบอร์โทรเดิม → ต้องได้ 409 (FR-011)
+3. `GET /api/v1/members?search=<เบอร์โทร>` → เจอสมาชิกที่เพิ่งสมัคร (Acceptance Scenario #2)
+4. `POST /api/v1/sales` พร้อม `memberId` ของสมาชิกนั้น → หลังสำเร็จ `GET /api/v1/members/{id}` ต้องแสดง
    `accumulatedPurchaseTotal` เพิ่มขึ้นตาม `totalAmount` ของบิล (Acceptance Scenario #3)
 
 ### US5 — ผู้จัดการตั้งโปรโมชั่นส่วนลด (P5)
 
-1. `POST /api/promotions` สร้างโปรโมชั่นรายสินค้า % ให้ครอบคลุมวันนี้ (ดู `contracts/promotions.md`)
+1. `POST /api/v1/promotions` สร้างโปรโมชั่นรายสินค้า % ให้ครอบคลุมวันนี้ (ดู `contracts/promotions.md`)
 2. ทำ Sale ของสินค้านั้น → `discountAmount` ใน response ต้อง > 0 ตรงกับ % ที่ตั้งไว้ (Acceptance Scenario #1)
 3. สร้างโปรโมชั่นที่ `endDate` เป็นอดีต แล้วทำ Sale สินค้าเดียวกัน → `discountAmount` ต้องเป็น 0 จากโปรโมชั่นนี้
    (Acceptance Scenario #3)
@@ -100,15 +100,15 @@ npm run dev
 
 ### US6 — ดูประวัติการขายและรายงานสรุป (P6)
 
-1. `GET /api/sales?from=<วันนี้>&to=<วันนี้>` → เห็นบิลที่ทำไปใน US1–US5 (Acceptance Scenario #1)
-2. `GET /api/reports/sales?period=daily&date=<วันนี้>` (ดู `contracts/reports.md`) → `totalSalesAmount` ต้องตรงกับ
+1. `GET /api/v1/sales?from=<วันนี้>&to=<วันนี้>` → เห็นบิลที่ทำไปใน US1–US5 (Acceptance Scenario #1)
+2. `GET /api/v1/reports/sales?period=daily&date=<วันนี้>` (ดู `contracts/reports.md`) → `totalSalesAmount` ต้องตรงกับ
    ผลรวมบิลจริงในวันนั้น (Acceptance Scenario #2 / SC-004)
-3. `GET /api/reports/sales-by-staff?from=...&to=...` → ยอดของพนักงานแต่ละคนตรงกับบิลที่คนนั้นขาย (Acceptance Scenario #3)
-4. `GET /api/reports/stock` → จำนวนคงเหลือตรงกับที่เห็นใน `GET /api/products` (Acceptance Scenario #4)
+3. `GET /api/v1/reports/sales-by-staff?from=...&to=...` → ยอดของพนักงานแต่ละคนตรงกับบิลที่คนนั้นขาย (Acceptance Scenario #3)
+4. `GET /api/v1/reports/stock` → จำนวนคงเหลือตรงกับที่เห็นใน `GET /api/v1/products` (Acceptance Scenario #4)
 
 ## 5. ตรวจสอบ Non-Functional จากผลการ Clarify
 
-- **Concurrency**: จำลองสองคำขอ `POST /api/sales` พร้อมกันที่ขอซื้อสินค้าชิ้นสุดท้ายชิ้นเดียวกัน (`stockQuantity == 1`)
+- **Concurrency**: จำลองสองคำขอ `POST /api/v1/sales` พร้อมกันที่ขอซื้อสินค้าชิ้นสุดท้ายชิ้นเดียวกัน (`stockQuantity == 1`)
   → ต้องมีคำขอเดียวที่ได้ 201 อีกคำขอต้องได้ 409 `insufficient_stock` (ไม่ใช่ทั้งคู่สำเร็จหรือสต็อกติดลบ)
 - **Append-only**: ต้องไม่มี endpoint ใดใน `contracts/sales.md` ที่แก้ไข/ลบบิลที่สร้างแล้ว
 - **ไม่มี VAT**: `totalAmount` ทุกบิลต้องเท่ากับ `subtotalAmount - discountAmount` พอดี ไม่มีการบวกภาษีเพิ่ม

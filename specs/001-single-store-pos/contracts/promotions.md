@@ -1,11 +1,11 @@
 # Contract: Promotions
 
-**Base path**: `/api/promotions`
+**Base path**: `/api/v1/promotions`
 **เกี่ยวข้องกับ**: FR-019–FR-022, FR-029
 
 ทุก endpoint ในไฟล์นี้จำกัดสิทธิ์เฉพาะ **Manager** เท่านั้น (FR-029) — Cashier เรียกแล้วได้ 403 Forbidden
 
-## `GET /api/promotions`
+## `GET /api/v1/promotions`
 
 **Query parameters**:
 | Param | Type | ความหมาย |
@@ -28,7 +28,7 @@
 ]
 ```
 
-## `POST /api/promotions`
+## `POST /api/v1/promotions`
 
 สร้างโปรโมชั่นใหม่ (FR-019, FR-020, FR-021)
 
@@ -52,15 +52,15 @@
 **Response 201 Created**: PromotionDto ที่สร้างแล้ว
 **Response 400**: validation error ตามด้านบน
 
-## `PUT /api/promotions/{id}`
+## `PUT /api/v1/promotions/{id}`
 
 แก้ไขโปรโมชั่น — request/validation เหมือน POST
 **Response 200 OK** / **404** / **400**
 
-## `DELETE /api/promotions/{id}`
+## `DELETE /api/v1/promotions/{id}`
 
 **Response 204 No Content**
 **Response 404**: ไม่พบโปรโมชั่น
 
 > หมายเหตุ: ตรรกะ "เลือกส่วนลดสูงสุดเมื่อมีทั้งโปรโมชั่นและส่วนลดสมาชิก" (FR-022) ไม่มี endpoint แยก — ระบบคำนวณ
-> อัตโนมัติฝั่งเซิร์ฟเวอร์ตอนเรียก `POST /api/sales` (ดู `sales.md` และ research.md #3)
+> อัตโนมัติฝั่งเซิร์ฟเวอร์ตอนเรียก `POST /api/v1/sales` (ดู `sales.md` และ research.md #3)

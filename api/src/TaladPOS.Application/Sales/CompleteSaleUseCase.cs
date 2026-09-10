@@ -14,7 +14,7 @@ public record CompleteSaleRequest(
     Guid StaffId, Guid? MemberId, IReadOnlyList<CompleteSaleLineItemRequest> LineItems);
 
 /// <summary>
-/// Checkout (contracts/sales.md - POST /api/sales). Runs stock decrements,
+/// Checkout (contracts/sales.md - POST /api/v1/sales). Runs stock decrements,
 /// the Sale insert, the member accumulation update (US4, FR-014), and
 /// discount resolution (US5, FR-019-FR-022) as one database transaction so
 /// none of them can land without the others (FR-016).

@@ -25,7 +25,7 @@ function toDateOnly(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-// tasks.md T072 (US6): sales history with date/staff/member filters (contracts/sales.md GET /api/sales).
+// tasks.md T072 (US6): sales history with date/staff/member filters (contracts/sales.md GET /api/v1/sales).
 export default function SalesHistoryPage() {
   const { staff } = useAuth();
   const router = useRouter();

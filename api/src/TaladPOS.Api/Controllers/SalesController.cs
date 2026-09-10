@@ -10,7 +10,7 @@ using TaladPOS.Domain.Staff;
 namespace TaladPOS.Api.Controllers;
 
 [ApiController]
-[Route("api/sales")]
+[Route("api/v1/sales")]
 public class SalesController : ControllerBase
 {
     private readonly CompleteSaleUseCase _completeSaleUseCase;
@@ -50,7 +50,7 @@ public class SalesController : ControllerBase
         IReadOnlyList<SaleLineItemDto> LineItems, decimal SubtotalAmount, decimal DiscountAmount,
         decimal TotalAmount);
 
-    /// <summary>contracts/sales.md - POST /api/sales (checkout, FR-005/FR-006/FR-008/FR-016/FR-023)</summary>
+    /// <summary>contracts/sales.md - POST /api/v1/sales (checkout, FR-005/FR-006/FR-008/FR-016/FR-023)</summary>
     [HttpPost]
     public async Task<ActionResult<SaleDto>> Create(CreateSaleRequestDto request, CancellationToken ct)
     {
@@ -70,7 +70,7 @@ public class SalesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = sale.Id }, await ToDtoAsync(sale, ct));
     }
 
-    /// <summary>contracts/sales.md - GET /api/sales (ประวัติการขาย, FR-024)</summary>
+    /// <summary>contracts/sales.md - GET /api/v1/sales (ประวัติการขาย, FR-024)</summary>
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<SaleDto>>> List(
         [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] Guid? staffId, [FromQuery] Guid? memberId,
@@ -80,7 +80,7 @@ public class SalesController : ControllerBase
         return Ok(await ToDtosAsync(sales, ct));
     }
 
-    /// <summary>contracts/sales.md - GET /api/sales/{id}</summary>
+    /// <summary>contracts/sales.md - GET /api/v1/sales/{id}</summary>
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<SaleDto>> GetById(Guid id, CancellationToken ct)
     {
@@ -88,7 +88,7 @@ public class SalesController : ControllerBase
         return sale is null ? NotFound() : Ok(await ToDtoAsync(sale, ct));
     }
 
-    /// <summary>contracts/sales.md - GET /api/sales/{id}/receipt (FR-030, research.md #5)</summary>
+    /// <summary>contracts/sales.md - GET /api/v1/sales/{id}/receipt (FR-030, research.md #5)</summary>
     [HttpGet("{id:guid}/receipt")]
     public async Task<ActionResult<SaleDto>> GetReceipt(Guid id, CancellationToken ct)
     {

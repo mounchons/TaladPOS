@@ -5,7 +5,7 @@ using TaladPOS.Domain.Members;
 namespace TaladPOS.Api.Controllers;
 
 [ApiController]
-[Route("api/members")]
+[Route("api/v1/members")]
 public class MembersController : ControllerBase
 {
     private readonly IMemberRepository _memberRepository;
@@ -21,7 +21,7 @@ public class MembersController : ControllerBase
 
     public record MemberDto(Guid Id, string Name, string PhoneNumber, decimal AccumulatedPurchaseTotal);
 
-    /// <summary>contracts/members.md - GET /api/members (FR-012)</summary>
+    /// <summary>contracts/members.md - GET /api/v1/members (FR-012)</summary>
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<MemberDto>>> Search([FromQuery] string? search, CancellationToken ct)
     {
@@ -29,7 +29,7 @@ public class MembersController : ControllerBase
         return Ok(members.Select(ToDto).ToList());
     }
 
-    /// <summary>contracts/members.md - GET /api/members/{id}</summary>
+    /// <summary>contracts/members.md - GET /api/v1/members/{id}</summary>
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<MemberDto>> GetById(Guid id, CancellationToken ct)
     {
@@ -37,7 +37,7 @@ public class MembersController : ControllerBase
         return member is null ? NotFound() : Ok(ToDto(member));
     }
 
-    /// <summary>contracts/members.md - POST /api/members (FR-010, FR-011)</summary>
+    /// <summary>contracts/members.md - POST /api/v1/members (FR-010, FR-011)</summary>
     [HttpPost]
     public async Task<ActionResult<MemberDto>> Register(RegisterMemberRequestDto request, CancellationToken ct)
     {

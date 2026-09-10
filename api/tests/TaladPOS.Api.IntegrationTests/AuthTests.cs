@@ -17,7 +17,7 @@ public sealed class AuthTests : ApiTestBase
     {
         var mango = await GetProductByNameAsync(await CreateAuthenticatedClientAsync(CashierUsername, CashierPassword), "มะม่วง");
 
-        var response = await Client.PostAsJsonAsync("/api/sales", new
+        var response = await Client.PostAsJsonAsync("/api/v1/sales", new
         {
             memberId = (Guid?)null,
             lineItems = new[] { new { productId = mango.Id, quantity = 1 } },
@@ -32,7 +32,7 @@ public sealed class AuthTests : ApiTestBase
         var authClient = await CreateAuthenticatedClientAsync(CashierUsername, CashierPassword);
         var mango = await GetProductByNameAsync(authClient, "มะม่วง");
 
-        var response = await authClient.PostAsJsonAsync("/api/sales", new
+        var response = await authClient.PostAsJsonAsync("/api/v1/sales", new
         {
             memberId = (Guid?)null,
             lineItems = new[] { new { productId = mango.Id, quantity = 1 } },

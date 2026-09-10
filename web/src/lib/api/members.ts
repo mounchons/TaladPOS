@@ -7,12 +7,12 @@ export interface Member {
   accumulatedPurchaseTotal: number;
 }
 
-// contracts/members.md - GET/POST /api/members (FR-010-FR-012)
+// contracts/members.md - GET/POST /api/v1/members (FR-010-FR-012)
 export function searchMembers(search: string): Promise<Member[]> {
   const query = new URLSearchParams({ search });
-  return apiFetch<Member[]>(`/api/members?${query.toString()}`);
+  return apiFetch<Member[]>(`/api/v1/members?${query.toString()}`);
 }
 
 export function registerMember(input: { name: string; phoneNumber: string }): Promise<Member> {
-  return apiFetch<Member>("/api/members", { method: "POST", body: JSON.stringify(input) });
+  return apiFetch<Member>("/api/v1/members", { method: "POST", body: JSON.stringify(input) });
 }

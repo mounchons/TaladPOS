@@ -5,7 +5,7 @@ namespace TaladPOS.Application.Reports;
 
 public sealed record SalesByStaffRow(Guid StaffId, string StaffName, int BillCount, decimal TotalSalesAmount);
 
-/// <summary>contracts/reports.md - GET /api/reports/sales-by-staff (FR-027)</summary>
+/// <summary>contracts/reports.md - GET /api/v1/reports/sales-by-staff (FR-027)</summary>
 public sealed class GetSalesByStaffReportQuery
 {
     private readonly ISaleRepository _saleRepository;

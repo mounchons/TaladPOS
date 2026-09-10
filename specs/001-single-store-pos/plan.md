@@ -56,12 +56,20 @@ concurrency control (RowVersion) ระดับฐานข้อมูลเ�
 
 | Gate (จาก `.specify/memory/constitution.md`) | สถานะ | หมายเหตุ |
 |---|---|---|
-| I. Separation of API and Frontend — frontend เรียกผ่าน REST เท่านั้น ห้ามเข้าถึง DB ตรง | PASS | `web/` เป็น Next.js เรียก `api/` ผ่าน REST endpoints ตาม `contracts/`; ไม่มี DB driver/connection string ใน `web/` |
+| I. Separation of API and Frontend — frontend เรียกผ่าน REST เท่านั้น ห้ามเข้าถึง DB ตรง **และข้อมูลต้องเปิดผ่าน endpoint ที่มี version** | PASS | `web/` เป็น Next.js เรียก `api/` ผ่าน REST endpoints ตาม `contracts/`; ไม่มี DB driver/connection string ใน `web/`; ทุก endpoint อยู่ใต้ prefix `api/v1/` ตามข้อกำหนด "versioned REST endpoint" ของ constitution บรรทัด 29 |
 | II. API Architecture & Technology Stack (DDD) — .NET Core/ASP.NET Core Web API, EF Core, PostgreSQL, DDD | PASS | `api/` แบ่งเป็น Domain/Application/Infrastructure/Api layers; EF Core + Npgsql ต่อ PostgreSQL; domain rules อยู่ใน Domain layer เท่านั้น |
 | III. Test-First for Business Logic (NON-NEGOTIABLE) — ต้องมี unit test สำหรับ business logic, แยกจาก DB จริง | PASS | ทุก business rule (คำนวณส่วนลด, ตัดสต็อกแบบ concurrency-safe, ยอดสะสมสมาชิก, สถานะโปรโมชั่นตามช่วงวันที่) ต้องมี unit test ใน `api/tests/*.Domain.Tests` ก่อน merge; ใช้ fake repository ไม่พึ่ง PostgreSQL จริง |
 | IV. Frontend Technology Stack — Next.js + Tailwind CSS, REST-only | PASS | `web/` ใช้ Next.js + Tailwind CSS ตามที่กำหนด; PrimeReact เป็น component library เสริมสำหรับ UI (DataTable/Dialog/Button) ไม่ใช่ตัวแทน Tailwind และไม่กระทบการเรียก REST-only (ดู research.md #7) |
 | Repository Structure — แยก `api/` และ `web/` ชัดเจน ไม่แชร์โค้ด/build output | PASS | โครงสร้างโฟลเดอร์ระดับบนสุดคือ `api/` และ `web/` ตาม Project Structure ด้านล่าง จุดเชื่อมต่อเดียวคือ REST contract ใน `specs/001-single-store-pos/contracts/` |
 | Development Workflow & Quality Gates | PASS (บังคับใช้ตอน PR) | ระบุไว้ใน tasks.md/PR review ว่าต้องตรวจ unit test coverage และการไม่เข้าถึง DB ตรงจาก `web/` |
+
+**แก้ไขภายหลัง (พบโดย `/speckit-analyze`)**: การประเมิน gate I รอบแรกดูเฉพาะข้อ "REST-only / ห้ามต่อ DB ตรง"
+แล้วสรุปว่า PASS โดย**ไม่ได้ประเมินประโยคสุดท้ายของ Principle I** ที่ระบุว่า "Any data the frontend needs MUST be
+exposed through a **versioned** REST endpoint" ตอนนั้น endpoint จริงเป็น `api/<resource>` ไม่มี version จึงถือว่า
+**ละเมิด constitution มาตลอด** ทั้งที่ตารางขึ้น PASS
+
+แก้แล้วโดยย้ายทุก endpoint ไปอยู่ใต้ `api/v1/` (controllers, `contracts/*.md`, `web/src/lib/api/`, integration test
+และเอกสารทั้งหมด) — ดู tasks.md T081 บทเรียนคือ gate ที่มีหลายประโยคต้องประเมินให้ครบทุกประโยค ไม่ใช่แค่ประโยคที่เด่นที่สุด
 
 ไม่มี violation ที่ต้องกรอกใน Complexity Tracking
 

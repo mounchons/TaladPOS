@@ -6,7 +6,7 @@ public sealed record UpdateProductRequest(
     Guid ProductId, string Name, string ImageUrl, decimal Price, string? Barcode, int StockQuantity,
     int? LowStockThreshold);
 
-/// <summary>contracts/products.md - PUT /api/products/{id} (FR-015, FR-018)</summary>
+/// <summary>contracts/products.md - PUT /api/v1/products/{id} (FR-015, FR-018)</summary>
 public sealed class UpdateProductUseCase
 {
     private readonly IProductRepository _products;

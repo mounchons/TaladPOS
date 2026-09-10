@@ -1,9 +1,9 @@
 # Contract: Members
 
-**Base path**: `/api/members`
+**Base path**: `/api/v1/members`
 **เกี่ยวข้องกับ**: FR-010–FR-014
 
-## `GET /api/members`
+## `GET /api/v1/members`
 
 ค้นหาสมาชิกตอนขาย (FR-012)
 
@@ -26,7 +26,7 @@
 ]
 ```
 
-## `POST /api/members`
+## `POST /api/v1/members`
 
 สมัครสมาชิกใหม่ (FR-010)
 
@@ -46,11 +46,11 @@
 { "error": "phone_number_already_registered" }
 ```
 
-## `GET /api/members/{id}`
+## `GET /api/v1/members/{id}`
 
 **Auth required**: Manager หรือ Cashier
 **Response 200 OK**: MemberDto เดียว
 **Response 404**: ไม่พบสมาชิก
 
 > หมายเหตุ: `accumulatedPurchaseTotal` ไม่มี endpoint แก้ไขตรง ๆ — ค่านี้ถูกอัปเดตเป็นผลข้างเคียงของ
-> `POST /api/sales` เท่านั้น (ดู `sales.md`) ตาม FR-014
+> `POST /api/v1/sales` เท่านั้น (ดู `sales.md`) ตาม FR-014

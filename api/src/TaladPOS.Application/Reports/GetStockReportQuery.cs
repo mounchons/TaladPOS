@@ -4,7 +4,7 @@ namespace TaladPOS.Application.Reports;
 
 public sealed record StockReportRow(Guid ProductId, string ProductName, int StockQuantity, int LowStockThreshold, bool IsLowStock);
 
-/// <summary>contracts/reports.md - GET /api/reports/stock (FR-028)</summary>
+/// <summary>contracts/reports.md - GET /api/v1/reports/stock (FR-028)</summary>
 public sealed class GetStockReportQuery
 {
     private readonly IProductRepository _productRepository;

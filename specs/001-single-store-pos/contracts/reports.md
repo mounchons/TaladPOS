@@ -1,11 +1,11 @@
 # Contract: Reports
 
-**Base path**: `/api/reports`
+**Base path**: `/api/v1/reports`
 **เกี่ยวข้องกับ**: FR-025–FR-028, FR-029
 
 ทุก endpoint ในไฟล์นี้จำกัดสิทธิ์เฉพาะ **Manager** เท่านั้น (FR-029) — Cashier เรียกแล้วได้ 403 Forbidden
 
-## `GET /api/reports/sales`
+## `GET /api/v1/reports/sales`
 
 รายงานยอดขายรายวัน/รายเดือน (FR-025)
 
@@ -27,7 +27,7 @@
 }
 ```
 
-## `GET /api/reports/best-selling-products`
+## `GET /api/v1/reports/best-selling-products`
 
 รายงานสินค้าขายดี (FR-026)
 
@@ -41,7 +41,7 @@
 ```
 เรียงจาก `quantitySold` มากไปน้อย
 
-## `GET /api/reports/sales-by-staff`
+## `GET /api/v1/reports/sales-by-staff`
 
 รายงานยอดขายแยกตามพนักงาน (FR-027)
 
@@ -54,7 +54,7 @@
 ]
 ```
 
-## `GET /api/reports/stock`
+## `GET /api/v1/reports/stock`
 
 รายงานสต็อกคงเหลือ (FR-028)
 

@@ -4,7 +4,7 @@ namespace TaladPOS.Application.Members;
 
 public sealed record RegisterMemberRequest(string Name, string PhoneNumber);
 
-/// <summary>contracts/members.md - POST /api/members (FR-010, FR-011)</summary>
+/// <summary>contracts/members.md - POST /api/v1/members (FR-010, FR-011)</summary>
 public sealed class RegisterMemberUseCase
 {
     private readonly IMemberRepository _members;

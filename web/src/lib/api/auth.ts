@@ -14,9 +14,9 @@ export interface LoginResponse {
   staff: StaffSummary;
 }
 
-// contracts/auth.md - POST /api/auth/login (FR-007)
+// contracts/auth.md - POST /api/v1/auth/login (FR-007)
 export function login(username: string, password: string): Promise<LoginResponse> {
-  return apiFetch<LoginResponse>("/api/auth/login", {
+  return apiFetch<LoginResponse>("/api/v1/auth/login", {
     method: "POST",
     body: JSON.stringify({ username, password }),
   });

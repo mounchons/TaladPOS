@@ -8,7 +8,7 @@ namespace TaladPOS.Api.Controllers;
 
 /// <summary>contracts/promotions.md - every endpoint here is Manager-only (FR-029).</summary>
 [ApiController]
-[Route("api/promotions")]
+[Route("api/v1/promotions")]
 [Authorize(Roles = nameof(StaffRole.Manager))]
 public class PromotionsController : ControllerBase
 {
@@ -47,7 +47,7 @@ public class PromotionsController : ControllerBase
         DateOnly EndDate,
         bool IsActive);
 
-    /// <summary>contracts/promotions.md - GET /api/promotions</summary>
+    /// <summary>contracts/promotions.md - GET /api/v1/promotions</summary>
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<PromotionDto>>> List([FromQuery] bool activeOnly, CancellationToken ct)
     {
@@ -56,7 +56,7 @@ public class PromotionsController : ControllerBase
         return Ok(promotions.Select(p => ToDto(p, today)).ToList());
     }
 
-    /// <summary>contracts/promotions.md - POST /api/promotions (FR-019-FR-021)</summary>
+    /// <summary>contracts/promotions.md - POST /api/v1/promotions (FR-019-FR-021)</summary>
     [HttpPost]
     public async Task<ActionResult<PromotionDto>> Create(PromotionRequestDto request, CancellationToken ct)
     {
@@ -70,7 +70,7 @@ public class PromotionsController : ControllerBase
         return CreatedAtAction(nameof(List), null, ToDto(promotion, today));
     }
 
-    /// <summary>contracts/promotions.md - PUT /api/promotions/{id}</summary>
+    /// <summary>contracts/promotions.md - PUT /api/v1/promotions/{id}</summary>
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<PromotionDto>> Update(Guid id, PromotionRequestDto request, CancellationToken ct)
     {
@@ -84,7 +84,7 @@ public class PromotionsController : ControllerBase
         return Ok(ToDto(promotion, today));
     }
 
-    /// <summary>contracts/promotions.md - DELETE /api/promotions/{id}</summary>
+    /// <summary>contracts/promotions.md - DELETE /api/v1/promotions/{id}</summary>
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {

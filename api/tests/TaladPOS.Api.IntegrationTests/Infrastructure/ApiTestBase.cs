@@ -27,7 +27,7 @@ public abstract class ApiTestBase : IAsyncLifetime
 
     protected async Task<LoginResult> LoginAsync(string username, string password)
     {
-        var response = await Client.PostAsJsonAsync("/api/auth/login", new { username, password });
+        var response = await Client.PostAsJsonAsync("/api/v1/auth/login", new { username, password });
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
         return new LoginResult(body!.Token, body.Staff.Id, body.Staff.Name, body.Staff.Role);
@@ -43,7 +43,7 @@ public abstract class ApiTestBase : IAsyncLifetime
 
     protected async Task<ProductSummary> GetProductByNameAsync(HttpClient authenticatedClient, string name)
     {
-        var products = await authenticatedClient.GetFromJsonAsync<List<ProductDto>>($"/api/products?search={Uri.EscapeDataString(name)}");
+        var products = await authenticatedClient.GetFromJsonAsync<List<ProductDto>>($"/api/v1/products?search={Uri.EscapeDataString(name)}");
         var match = products!.Single(p => p.Name == name);
         return new ProductSummary(match.Id, match.Name, match.StockQuantity);
     }
