@@ -66,12 +66,17 @@ export default function SalesPage() {
     try {
       const sale = await createSale({
         memberId: selectedMember?.id ?? null,
-        lineItems: cartLines.map((line) => ({ productId: line.product.id, quantity: line.quantity })),
+        lineItems: cartLines.map((line) => ({
+          productId: line.product.id,
+          quantity: line.quantity,
+        })),
       });
       setLastCompletedSale(sale);
       setCartLines([]);
       setSelectedMember(null);
-      searchProducts({ search: query || undefined }).then(setProducts).catch(() => {});
+      searchProducts({ search: query || undefined })
+        .then(setProducts)
+        .catch(() => {});
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setMessage("สินค้าบางรายการหมดสต็อกแล้ว ลดจำนวนในตะกร้าแล้วลองอีกครั้ง");
@@ -84,8 +89,11 @@ export default function SalesPage() {
   }
 
   return (
-    <main className="flex flex-col md:flex-row">
-      <div className="flex-1 px-5 py-5">
+    <main className="flex flex-col md:h-[calc(100dvh-var(--appbar-h))] md:flex-row">
+      {/* The bottom padding clears the register sheet, which is fixed to the
+          bottom of the screen on phones and would otherwise cover the last
+          row of products. */}
+      <div className="flex-1 overflow-y-auto px-5 pb-[var(--register-peek-h)] pt-5 md:pb-5">
         {/* The scanner target: full width, tall, first thing focused. */}
         <InputText
           value={query}

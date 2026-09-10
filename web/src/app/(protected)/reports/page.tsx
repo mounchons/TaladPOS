@@ -50,10 +50,18 @@ export default function ReportsPage() {
 
   useEffect(() => {
     if (staff?.role !== "Manager") return;
-    getSalesReport("daily", today).then(setDailyReport).catch(() => setDailyReport(null));
-    getBestSellingProducts(monthStart, today, 10).then(setBestSelling).catch(() => setBestSelling([]));
-    getSalesByStaff(monthStart, today).then(setByStaff).catch(() => setByStaff([]));
-    getStockReport().then(setStock).catch(() => setStock([]));
+    getSalesReport("daily", today)
+      .then(setDailyReport)
+      .catch(() => setDailyReport(null));
+    getBestSellingProducts(monthStart, today, 10)
+      .then(setBestSelling)
+      .catch(() => setBestSelling([]));
+    getSalesByStaff(monthStart, today)
+      .then(setByStaff)
+      .catch(() => setByStaff([]));
+    getStockReport()
+      .then(setStock)
+      .catch(() => setStock([]));
   }, [staff, today, monthStart]);
 
   // FR-029: /reports is a Manager-only screen, same guard shape as /stock and /promotions.
@@ -76,7 +84,11 @@ export default function ReportsPage() {
           {dailyReport && (
             <div className="grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
               <Stat label="ยอดขายรวม" value={dailyReport.totalSalesAmount.toFixed(2)} unit="บาท" />
-              <Stat label="ส่วนลดรวม" value={dailyReport.totalDiscountAmount.toFixed(2)} unit="บาท" />
+              <Stat
+                label="ส่วนลดรวม"
+                value={dailyReport.totalDiscountAmount.toFixed(2)}
+                unit="บาท"
+              />
               <Stat label="จำนวนบิล" value={String(dailyReport.billCount)} unit="บิล" />
             </div>
           )}
@@ -88,6 +100,7 @@ export default function ReportsPage() {
             value={bestSelling}
             pt={dataTablePT}
             dataKey="productId"
+            responsiveLayout="stack"
             emptyMessage="ยังไม่มียอดขายในช่วงนี้"
           >
             <Column field="productName" header="สินค้า" />
@@ -115,6 +128,7 @@ export default function ReportsPage() {
             value={byStaff}
             pt={dataTablePT}
             dataKey="staffId"
+            responsiveLayout="stack"
             emptyMessage="ยังไม่มียอดขายในช่วงนี้"
           >
             <Column field="staffName" header="พนักงาน" />
@@ -124,13 +138,21 @@ export default function ReportsPage() {
             />
             <Column
               header="ยอดขาย"
-              body={(r: SalesByStaffRow) => <span className="money">{r.totalSalesAmount.toFixed(2)}</span>}
+              body={(r: SalesByStaffRow) => (
+                <span className="money">{r.totalSalesAmount.toFixed(2)}</span>
+              )}
             />
           </DataTable>
         </TabPanel>
 
         <TabPanel header="สต็อกคงเหลือ" pt={tabPanelPT}>
-          <DataTable value={stock} pt={dataTablePT} dataKey="productId" emptyMessage="ยังไม่มีสินค้าในร้าน">
+          <DataTable
+            value={stock}
+            pt={dataTablePT}
+            dataKey="productId"
+            responsiveLayout="stack"
+            emptyMessage="ยังไม่มีสินค้าในร้าน"
+          >
             <Column field="productName" header="สินค้า" />
             <Column
               header="คงเหลือ"

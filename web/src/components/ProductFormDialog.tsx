@@ -133,7 +133,7 @@ export function ProductFormDialog({ visible, product, onHide, onSaved }: Product
           className="mb-3"
         />
 
-        <div className="mb-3 grid grid-cols-2 gap-3">
+        <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-sm text-ink-700" htmlFor="product-stock">
               จำนวนคงเหลือ

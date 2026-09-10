@@ -70,3 +70,79 @@
     background: #fff;
   }
 }
+
+/* Tablet/desktop app bar height. Shared so the sales register rail can be
+   exactly the rest of the viewport instead of guessing the header's height.
+   The tallest thing in the bar is the two-line staff name + role at ~63px, so
+   this leaves a few px of slack for Thai metrics rather than sitting on it. */
+:root {
+  --appbar-h: 4.25rem;
+  /* Clearance for the collapsed register bar on phones. The bar is the drag
+     handle, the total row and the pay button - none of which change size with
+     cart contents, so this is a fixed 12.6rem measured in the browser, plus a
+     little slack. The sales grid pads its bottom by it so the last row of
+     products is never stuck behind the bar. */
+  --register-peek-h: 13.25rem;
+}
+
+/* --- Tables on phones -----------------------------------------------------
+   PrimeReact runs unstyled, which strips its own p-* classes - so the CSS
+   its responsiveLayout="stack" injects can never match. The data-pc-*
+   attributes do survive, so the stacked layout is rebuilt here against those
+   instead. Every DataTable passing responsiveLayout="stack" gets it: below
+   md each row becomes a card and each cell carries the Thai column header
+   PrimeReact already renders into it. Deliberately unlayered so it outranks
+   the Tailwind padding utilities coming from dataTablePT. */
+
+/* The in-cell label exists only for the stacked layout. */
+[data-pc-section="columntitle"] {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  [data-pc-name="datatable"] [data-pc-section="thead"] {
+    display: none;
+  }
+
+  /* One row = one card. */
+  [data-pc-name="datatable"] [data-pc-section="bodyrow"] {
+    display: block;
+    padding: 0.375rem 0;
+  }
+  [data-pc-name="datatable"] [data-pc-section="bodyrow"] + [data-pc-section="bodyrow"] {
+    border-top: 1px solid theme("colors.steel.200");
+  }
+
+  /* Label on the left, value on the right, the way a receipt reads. */
+  [data-pc-name="datatable"] [data-pc-section="bodycell"] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.375rem 1rem;
+  }
+
+  [data-pc-name="datatable"] [data-pc-section="bodycell"] > [data-pc-section="columntitle"] {
+    display: block;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: theme("colors.ink.300");
+  }
+
+  /* Action columns carry header="" - with no label the buttons take the row. */
+  [data-pc-name="datatable"] [data-pc-section="bodycell"] > [data-pc-section="columntitle"]:empty {
+    display: none;
+  }
+  [data-pc-name="datatable"]
+    [data-pc-section="bodycell"]:has(> [data-pc-section="columntitle"]:empty) {
+    justify-content: flex-end;
+    padding-top: 0.625rem;
+  }
+
+  [data-pc-name="datatable"] [data-pc-section="emptymessage"] > td {
+    display: block;
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+}

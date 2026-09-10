@@ -36,3 +36,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+
+# Playwright MCP scratch output (snapshots, console logs, screenshots)
+.playwright-mcp/

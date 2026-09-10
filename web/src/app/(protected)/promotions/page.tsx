@@ -21,12 +21,16 @@ export default function PromotionsPage() {
   const [message, setMessage] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
-    listPromotions().then(setPromotions).catch(() => setPromotions([]));
+    listPromotions()
+      .then(setPromotions)
+      .catch(() => setPromotions([]));
   }, []);
 
   useEffect(() => {
     refresh();
-    searchProducts({}).then(setProducts).catch(() => setProducts([]));
+    searchProducts({})
+      .then(setProducts)
+      .catch(() => setProducts([]));
   }, [refresh]);
 
   // FR-029: /promotions is a Manager-only screen, same guard shape as /stock.
@@ -66,7 +70,7 @@ export default function PromotionsPage() {
 
   return (
     <main className="px-5 py-5">
-      <div className="mb-5 flex items-center justify-between gap-4">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">โปรโมชั่น</h1>
         <Button label="สร้างโปรโมชั่น" icon="pi pi-plus" onClick={openCreateDialog} pt={buttonPT} />
       </div>
@@ -77,6 +81,7 @@ export default function PromotionsPage() {
         value={promotions}
         pt={dataTablePT}
         dataKey="id"
+        responsiveLayout="stack"
         emptyMessage="ยังไม่มีโปรโมชั่น กดสร้างโปรโมชั่นเพื่อเริ่ม"
       >
         <Column
@@ -118,7 +123,11 @@ export default function PromotionsPage() {
           header=""
           body={(promotion: Promotion) => (
             <div className="flex gap-2">
-              <Button label="แก้ไข" onClick={() => openEditDialog(promotion)} pt={secondaryButtonPT} />
+              <Button
+                label="แก้ไข"
+                onClick={() => openEditDialog(promotion)}
+                pt={secondaryButtonPT}
+              />
               <Button label="ลบ" onClick={() => handleDelete(promotion)} pt={secondaryButtonPT} />
             </div>
           )}

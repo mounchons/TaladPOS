@@ -291,11 +291,24 @@ description: "Task list template for feature implementation"
 
 ### Remaining polish tasks
 
-- [ ] T075 [P] Integration test: ยิง `POST /api/sales` สองคำขอพร้อมกันขอซื้อสินค้าชิ้นสุดท้ายชิ้นเดียวกัน (`stockQuantity == 1`) ต้องมีเพียงคำขอเดียวได้ 201 อีกคำขอต้องได้ 409 `insufficient_stock` (research.md #2, quickstart.md ข้อ 5) ใน `api/tests/TaladPOS.Api.IntegrationTests/ConcurrencyTests.cs`
-- [ ] T076 [P] ตรวจสอบว่า `web/` ไม่มี PostgreSQL driver/connection string หรือ dependency เข้าถึงฐานข้อมูลโดยตรงใด ๆ (constitution Principle I) และลบออกถ้าพบ
-- [ ] T077 [P] สร้างเอกสาร OpenAPI/Swagger สำหรับ `api/` ใน `api/src/TaladPOS.Api/Program.cs`
-- [ ] T078 รัน quickstart.md ครบทุก validation scenario (US1–US6 + concurrency + ไม่มี VAT) แล้วบันทึกผล
-- [ ] T079 [P] เขียนคำแนะนำการติดตั้ง/รัน (README) สำหรับ `api/` และ `web/` อ้างอิง quickstart.md
+- [X] T075 [P] Integration test: ยิง `POST /api/sales` สองคำขอพร้อมกันขอซื้อสินค้าชิ้นสุดท้ายชิ้นเดียวกัน (`stockQuantity == 1`) ต้องมีเพียงคำขอเดียวได้ 201 อีกคำขอต้องได้ 409 `insufficient_stock` (research.md #2, quickstart.md ข้อ 5) ใน `api/tests/TaladPOS.Api.IntegrationTests/ConcurrencyTests.cs`
+  - assert ที่ *invariant* ไม่ใช่ลำดับการสลับ: PostgreSQL ล็อกแถวให้สองคำขอเรียงกันอยู่แล้ว ผลที่ถูกต้องคือ "201 หนึ่ง + 409 หนึ่ง + สต็อกลงเอยที่ 0" ไม่ว่าสองคำขอจะซ้อนกันจริงหรือไม่ — การใช้ barrier บังคับให้ซ้อนกันเป๊ะ มีแต่เพิ่มความ flake โดยไม่เพิ่มสัญญาณ
+  - เพิ่ม test ที่สองในไฟล์เดียวกัน (FR-016 อีกด้าน): ตะกร้าที่บรรทัดหลังสต็อกไม่พอ ต้อง rollback การตัดสต็อกของ บรรทัดก่อนหน้าด้วย — เป็นสิ่งที่ transaction ใน `CompleteSaleUseCase` ซื้อมา เพราะ `ExecuteUpdateAsync` เขียนทันทีโดยข้าม change tracker
+  - ยืนยันแล้วว่า `EfUnitOfWork` ใช้ `TaladPOSDbContext` ตัวเดียวกับ repository จริง การตัดสต็อกจึงอยู่ใน transaction เดียวกับการบันทึก Sale ตามที่ FR-016 ต้องการ
+- [X] T076 [P] ตรวจสอบว่า `web/` ไม่มี PostgreSQL driver/connection string หรือ dependency เข้าถึงฐานข้อมูลโดยตรงใด ๆ (constitution Principle I) และลบออกถ้าพบ
+  - **ผลตรวจ: สะอาด ไม่มีอะไรต้องลบ** — dependency ฝั่ง production มี 5 ตัว (next, primeicons, primereact, react, react-dom) ไม่มี DB driver/ORM ทั้งใน `package.json` และใน `package-lock.json` (ตรวจ transitive แล้ว), grep หา `npgsql|postgres|prisma|drizzle|typeorm|knex|sequelize|DATABASE_URL|:5432` ใน source/config ไม่เจอ, ไม่มี route handler และไม่มี server action, env var มีตัวเดียวคือ `NEXT_PUBLIC_API_BASE_URL` และทุกการเรียกข้อมูลผ่าน `src/lib/api/client.ts` จุดเดียว
+  - บันทึกวิธีตรวจซ้ำไว้ใน `web/README.md` หัวข้อ "ขอบเขตของ frontend" แล้ว
+- [X] T077 [P] สร้างเอกสาร OpenAPI/Swagger สำหรับ `api/` ใน `api/src/TaladPOS.Api/Program.cs`
+  - **บั๊กจริงที่เจอ**: `GET /swagger/v1/swagger.json` ตอบ **500** มาตลอด — `AuthController` และ `SalesController` ต่างประกาศ record ซ้อนชื่อ `StaffSummaryDto` เหมือนกัน Swashbuckle จึงชนกันที่ schemaId เดียวกันแล้ว throw (`Can't use schemaId "$StaffSummaryDto"...`) แปลว่าเอกสาร OpenAPI ใช้ไม่ได้เลยแม้จะเรียก `AddSwaggerGen()` ไว้แล้ว → แก้ด้วย `CustomSchemaIds` ที่เติมชื่อ controller นำหน้า type ซ้อน (`AuthStaffSummaryDto` / `SalesStaffSummaryDto`)
+  - เพิ่ม JWT bearer security definition + requirement (จำเป็นจริง ไม่ใช่ของประดับ เพราะทุก endpoint อยู่หลัง `FallbackPolicy.RequireAuthenticatedUser()` ถ้าไม่มีจะไม่มีปุ่ม Authorize และทุกคำขอจาก Swagger UI ได้ 401)
+  - เปิด `GenerateDocumentationFile` เพื่อดึง `<summary>` ของ action (ซึ่งอ้าง contracts/*.md + FR id อยู่แล้ว) เข้าไปในเอกสาร พร้อม `NoWarn 1591` กันเตือนทุก public member ที่ไม่ได้ตั้งใจ document
+  - เพิ่ม regression guard `api/tests/TaladPOS.Api.IntegrationTests/OpenApiDocumentTests.cs` เพราะบั๊กนี้รอดมาได้ จากการที่ไม่มีอะไรเคยเรียกเอกสารนี้เลย
+  - ยืนยันกับ API ที่รันจริง: 21 endpoint ครบทุก controller, มี summary ทุกตัว, security scheme ถูกประกาศ
+- [X] T078 รัน quickstart.md ครบทุก validation scenario (US1–US6 + concurrency + ไม่มี VAT) แล้วบันทึกผล
+  - ผลเต็มพร้อมค่าที่สังเกตได้จริงทุกข้อ: [quickstart-results.md](./quickstart-results.md) — **28/28 PASS** (รันกับ PostgreSQL + `api/` + `web/` ที่รันอยู่จริง ไม่ใช่ mock)
+  - ตรวจฝั่ง `web/` ด้วยเบราว์เซอร์จริงเพิ่ม: ขายผ่าน UI สำเร็จ, สินค้าที่สต็อกหมดถูก disable, หน้ารายงานตรงกับ API, console ไม่มี error
+  - ไม่พบบั๊กของระบบจาก scenario เหล่านี้ (3 ข้อที่ FAIL รอบแรกเป็นบั๊กของสคริปต์ตรวจสอบเอง — เรียก endpoint รายงานด้วย token ของ Cashier ทั้งที่เป็น Manager-only ตามการออกแบบ)
+- [X] T079 [P] เขียนคำแนะนำการติดตั้ง/รัน (README) สำหรับ `api/` และ `web/` อ้างอิง quickstart.md
 
 ---
 

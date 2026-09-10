@@ -39,15 +39,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-steel-50">
-      <header className="border-b border-steel-200 bg-white">
-        <div className="flex flex-col md:flex-row md:items-stretch md:justify-between md:gap-6 md:px-5">
+      {/* md and up the bar is exactly --appbar-h tall (border-box, so the border
+          is included) - the sales register rail subtracts that from the
+          viewport, and a guessed number left it a few px too tall. */}
+      <header className="border-b border-steel-200 bg-white md:h-[var(--appbar-h)]">
+        <div className="flex flex-col md:h-full md:flex-row md:items-stretch md:justify-between md:gap-6 md:px-5">
           {/* Wordmark and account sit on their own row until there is room for
               one line; the links scroll sideways rather than wrapping, since
               Thai has no word spaces and breaks in the wrong places. */}
-          <div className="flex items-center justify-between gap-4 px-5 py-2.5 md:hidden">
-            <span className="font-display text-lg font-semibold tracking-tight text-ink">TaladPOS</span>
-            <div className="flex items-center gap-3">
-              {staff && <span className="text-sm text-ink-700">{staff.name}</span>}
+          <div className="flex items-center justify-between gap-3 px-5 py-2.5 md:hidden">
+            <span className="shrink-0 font-display text-lg font-semibold tracking-tight text-ink">
+              TaladPOS
+            </span>
+            <div className="flex min-w-0 items-center gap-3">
+              {/* Truncate rather than wrap: a Thai name has no word spaces, so
+                  wrapping it breaks mid-word and makes the bar three lines tall
+                  on a 320px screen. */}
+              {staff && <span className="truncate text-sm text-ink-700">{staff.name}</span>}
               <Button label="ออกจากระบบ" onClick={handleLogout} pt={secondaryButtonPT} />
             </div>
           </div>

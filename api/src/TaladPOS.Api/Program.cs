@@ -1,9 +1,11 @@
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using TaladPOS.Api.Middleware;
 using TaladPOS.Application.Auth;
 using TaladPOS.Application.Common;
@@ -104,7 +106,65 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// OpenAPI/Swagger (tasks.md T077). Every endpoint sits behind the
+// RequireAuthenticatedUser fallback policy above, so the security definition
+// is not decoration: without it Swagger UI has no Authorize button and every
+// "Try it out" returns 401, which makes the document useless for exploring
+// the API described in contracts/*.md.
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "TaladPOS API",
+        Version = "v1",
+        Description =
+            "REST API สำหรับระบบ POS ร้านค้าเดี่ยว (specs/001-single-store-pos). "
+            + "`web/` เรียกใช้ผ่าน endpoint เหล่านี้เท่านั้น ไม่เชื่อมต่อฐานข้อมูลโดยตรง "
+            + "(constitution Principle I). ทุก endpoint ต้องล็อกอินก่อน (FR-029) — "
+            + "เรียก POST /api/auth/login เพื่อรับ JWT แล้วกด Authorize ด้านบน "
+            + "ส่วน endpoint ที่สงวนไว้สำหรับผู้จัดการจะตอบ 403 เมื่อเรียกด้วยบัญชี Cashier",
+    });
+
+    // Swashbuckle's default schemaId is the bare type name, so the two
+    // controller-nested `StaffSummaryDto` records (AuthController and
+    // SalesController) collided and made /swagger/v1/swagger.json fail
+    // outright with a 500. Qualifying nested types with their declaring
+    // controller keeps ids unique and still readable (AuthStaffSummaryDto,
+    // SalesStaffSummaryDto), and stops the next same-named DTO from
+    // re-breaking the document.
+    options.CustomSchemaIds(type => type.DeclaringType is null
+        ? type.Name
+        : $"{type.DeclaringType.Name.Replace("Controller", string.Empty)}{type.Name}");
+
+    const string bearerScheme = "Bearer";
+    options.AddSecurityDefinition(bearerScheme, new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "วาง JWT ที่ได้จาก POST /api/auth/login (ไม่ต้องพิมพ์คำว่า \"Bearer\" นำหน้า)",
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = bearerScheme },
+        }] = Array.Empty<string>(),
+    });
+
+    // Surfaces the `<summary>` on each controller action - those already
+    // cite the contracts/*.md section and FR ids they implement, so the
+    // generated document stays traceable back to the spec.
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+});
 
 var app = builder.Build();
 

@@ -2,7 +2,11 @@ import { getToken } from "./tokenStore";
 
 // web/ talks to api/ exclusively over REST (constitution Principle I) - this
 // is the only place that builds request URLs / headers for that boundary.
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000";
+// Fallback matches the `http` launch profile in
+// api/src/TaladPOS.Api/Properties/launchSettings.json (quickstart.md step 1),
+// so a checkout with no .env.local still points at a port `dotnet run`
+// actually listens on.
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5054";
 
 export class ApiError extends Error {
   constructor(

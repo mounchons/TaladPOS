@@ -9,9 +9,12 @@
 // border - no drop shadows, so the one glowing thing on the sales screen is
 // the total.
 
+// whitespace-nowrap because Thai has no word spaces: a button label that wraps
+// breaks mid-word and doubles the control's height, which on a narrow screen
+// drags whatever row it sits in out of shape.
 const CONTROL_BASE =
-  "inline-flex items-center justify-center gap-2 rounded-control px-4 py-2.5 text-sm font-medium " +
-  "transition-colors disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-control " +
+  "px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40";
 
 const FIELD_BASE =
   "w-full rounded-control border border-steel-200 bg-white px-3 py-2.5 text-sm text-ink " +
@@ -24,8 +27,7 @@ export const buttonPT = {
 
 export const secondaryButtonPT = {
   root: {
-    className:
-      `${CONTROL_BASE} border border-steel-200 bg-white text-ink-700 hover:border-ink-300 hover:bg-steel-50`,
+    className: `${CONTROL_BASE} border border-steel-200 bg-white text-ink-700 hover:border-ink-300 hover:bg-steel-50`,
   },
   label: { className: "flex-1" },
 };
@@ -70,9 +72,13 @@ export const darkInputNumberPT = {
 // Structure adapted from PrimeReact's own bundled Tailwind PT preset
 // (node_modules/primereact/passthrough/tailwind) so the real pt key names are
 // correct, re-themed to this app.
+// Pair every DataTable using this with `responsiveLayout="stack"`: below md
+// that turns each row into a card (see the table block in globals.css), which
+// is the only way seven Thai columns fit on a phone. The overflow-x-auto here
+// covers md and up, where the table stays a table.
 export const dataTablePT = {
   root: { className: "overflow-x-auto rounded-control border border-steel-200 bg-white" },
-  table: { className: "w-full border-collapse text-sm" },
+  table: { className: "w-full border-collapse text-sm md:min-w-[44rem]" },
   thead: { className: "bg-steel-50" },
   tbody: {},
   headerRow: {},
@@ -111,12 +117,18 @@ export const darkAutoCompletePT = {
 };
 
 export const dropdownPT = {
+  // flex, not the default block: the trigger is a sibling of the input, so
+  // without it the chevron stacks underneath the field instead of sitting in
+  // its right edge, and the control renders ~16px too tall.
   root: {
     className:
-      "w-full cursor-pointer rounded-control border border-steel-200 bg-white " +
+      "flex w-full cursor-pointer items-center rounded-control border border-steel-200 bg-white " +
       "focus:border-mango focus:outline-none focus:ring-1 focus:ring-mango/50",
   },
-  input: { className: "block overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2.5 text-sm text-ink" },
+  input: {
+    className:
+      "min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap px-3 py-2.5 text-sm text-ink",
+  },
   trigger: { className: "flex w-9 shrink-0 items-center justify-center text-ink-300" },
   panel: { className: "rounded-control border border-steel-200 bg-white shadow-lg" },
   list: { className: "m-0 list-none p-1" },
@@ -140,13 +152,26 @@ export const checkboxPT = {
 };
 
 export const tabViewPT = {
-  nav: { className: "flex list-none border-b border-steel-200" },
+  // Four Thai tab labels are wider than a phone. Scroll them sideways rather
+  // than wrap, same as AppShell's nav - Thai has no word spaces, so a wrapped
+  // label breaks mid-word and the tabs interleave into nonsense.
+  nav: {
+    className:
+      "flex list-none overflow-x-auto border-b border-steel-200 [&::-webkit-scrollbar]:hidden",
+  },
 };
 
 export const tabPanelPT = {
-  headerAction: ({ parent, context }: { parent: { state: { activeIndex: number } }; context: { index: number } }) => ({
+  headerAction: ({
+    parent,
+    context,
+  }: {
+    parent: { state: { activeIndex: number } };
+    context: { index: number };
+  }) => ({
     className:
-      "-mb-px cursor-pointer select-none border-b-2 px-4 py-3 text-sm transition-colors " +
+      "-mb-px shrink-0 cursor-pointer select-none whitespace-nowrap border-b-2 px-4 py-3 " +
+      "text-sm transition-colors " +
       (parent.state.activeIndex === context.index
         ? "border-mango font-medium text-ink"
         : "border-transparent text-ink-500 hover:text-ink"),
@@ -155,11 +180,22 @@ export const tabPanelPT = {
 };
 
 export const dialogPT = {
-  root: { className: "w-full max-w-md rounded-control border border-steel-200 bg-white" },
-  header: { className: "flex items-center justify-between border-b border-steel-100 px-5 py-4" },
+  // Capped and scrollable so a long form still fits a short phone, with the
+  // scroll on the content rather than the whole dialog - otherwise the title
+  // and its close button scroll out of reach.
+  root: {
+    className:
+      "flex max-h-[90dvh] w-[calc(100vw-2rem)] max-w-md flex-col overflow-hidden " +
+      "rounded-control border border-steel-200 bg-white",
+  },
+  header: {
+    className: "flex shrink-0 items-center justify-between border-b border-steel-100 px-5 py-4",
+  },
   headerTitle: { className: "font-display text-base font-medium text-ink" },
   closeButton: { className: "rounded p-1 text-ink-300 hover:bg-steel-50 hover:text-ink" },
-  content: { className: "px-5 py-5" },
-  footer: { className: "flex justify-end gap-2 border-t border-steel-100 px-5 py-3" },
+  content: { className: "min-h-0 flex-1 overflow-y-auto px-5 py-5" },
+  footer: {
+    className: "flex shrink-0 justify-end gap-2 border-t border-steel-100 px-5 py-3",
+  },
   mask: { className: "bg-ink/50" },
 };

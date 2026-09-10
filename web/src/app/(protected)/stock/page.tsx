@@ -5,7 +5,12 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { dataTablePT, inputTextPT, buttonPT, secondaryButtonPT } from "@/styles/primereact-passthrough";
+import {
+  dataTablePT,
+  inputTextPT,
+  buttonPT,
+  secondaryButtonPT,
+} from "@/styles/primereact-passthrough";
 import { deleteProduct, searchProducts, type Product } from "@/lib/api/products";
 import { ProductFormDialog } from "@/components/ProductFormDialog";
 import { ManagerOnly } from "@/components/ManagerOnly";
@@ -65,7 +70,7 @@ export default function StockPage() {
 
   return (
     <main className="px-5 py-5">
-      <div className="mb-5 flex items-center justify-between gap-4">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">สต็อกสินค้า</h1>
         <Button label="เพิ่มสินค้า" icon="pi pi-plus" onClick={openCreateDialog} pt={buttonPT} />
       </div>
@@ -80,7 +85,13 @@ export default function StockPage() {
 
       {message && <p className="mb-4 text-sm text-chili">{message}</p>}
 
-      <DataTable value={products} pt={dataTablePT} dataKey="id" emptyMessage="ยังไม่มีสินค้า กดเพิ่มสินค้าเพื่อเริ่ม">
+      <DataTable
+        value={products}
+        pt={dataTablePT}
+        dataKey="id"
+        responsiveLayout="stack"
+        emptyMessage="ยังไม่มีสินค้า กดเพิ่มสินค้าเพื่อเริ่ม"
+      >
         <Column
           header="รูป"
           body={(product: Product) => (
@@ -93,7 +104,10 @@ export default function StockPage() {
           header="บาร์โค้ด"
           body={(p: Product) => <span className="money text-ink-500">{p.barcode ?? "—"}</span>}
         />
-        <Column header="ราคา" body={(p: Product) => <span className="money">{p.price.toFixed(2)}</span>} />
+        <Column
+          header="ราคา"
+          body={(p: Product) => <span className="money">{p.price.toFixed(2)}</span>}
+        />
         <Column
           header="คงเหลือ"
           body={(p: Product) => (
@@ -116,7 +130,11 @@ export default function StockPage() {
           header=""
           body={(product: Product) => (
             <div className="flex gap-2">
-              <Button label="แก้ไข" onClick={() => openEditDialog(product)} pt={secondaryButtonPT} />
+              <Button
+                label="แก้ไข"
+                onClick={() => openEditDialog(product)}
+                pt={secondaryButtonPT}
+              />
               <Button label="ลบ" onClick={() => handleDelete(product)} pt={secondaryButtonPT} />
             </div>
           )}
