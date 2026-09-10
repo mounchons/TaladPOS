@@ -305,7 +305,7 @@ description: "Task list template for feature implementation"
 
 ### Remaining polish tasks
 
-- [X] T075 [P] Integration test: ยิง `POST /api/v1/sales` สองคำขอพร้อมกันขอซื้อสินค้าชิ้นสุดท้ายชิ้นเดียวกัน (`stockQuantity == 1`) ต้องมีเพียงคำขอเดียวได้ 201 อีกคำขอต้องได้ 409 `insufficient_stock` (research.md #2, quickstart.md ข้อ 5) ใน `api/tests/TaladPOS.Api.IntegrationTests/ConcurrencyTests.cs`
+- [X] T075 [P] Integration test: ยิง `POST /api/v1/sales` สองคำขอพร้อมกันขอซื้อสินค้าชิ้นสุดท้ายชิ้นเดียวกัน (`stockQuantity == 1`) ต้องมีเพียงคำขอเดียวได้ 201 อีกคำขอต้องได้ 409 `insufficient_stock` (research.md #2, quickstart.md ข้อ 6) ใน `api/tests/TaladPOS.Api.IntegrationTests/ConcurrencyTests.cs`
   - assert ที่ *invariant* ไม่ใช่ลำดับการสลับ: PostgreSQL ล็อกแถวให้สองคำขอเรียงกันอยู่แล้ว ผลที่ถูกต้องคือ "201 หนึ่ง + 409 หนึ่ง + สต็อกลงเอยที่ 0" ไม่ว่าสองคำขอจะซ้อนกันจริงหรือไม่ — การใช้ barrier บังคับให้ซ้อนกันเป๊ะ มีแต่เพิ่มความ flake โดยไม่เพิ่มสัญญาณ
   - เพิ่ม test ที่สองในไฟล์เดียวกัน (FR-016 อีกด้าน): ตะกร้าที่บรรทัดหลังสต็อกไม่พอ ต้อง rollback การตัดสต็อกของ บรรทัดก่อนหน้าด้วย — เป็นสิ่งที่ transaction ใน `CompleteSaleUseCase` ซื้อมา เพราะ `ExecuteUpdateAsync` เขียนทันทีโดยข้าม change tracker
   - ยืนยันแล้วว่า `EfUnitOfWork` ใช้ `TaladPOSDbContext` ตัวเดียวกับ repository จริง การตัดสต็อกจึงอยู่ใน transaction เดียวกับการบันทึก Sale ตามที่ FR-016 ต้องการ
@@ -329,8 +329,12 @@ description: "Task list template for feature implementation"
   - **กับดักที่เจอระหว่างแก้**: `[Route("api/products")]` ไม่มี `/` นำหน้า ขณะที่ path ในโค้ดฝั่งเรียกเป็น `"/api/products"` — regex รอบแรกที่จับเฉพาะ `/api/` จึงแก้แต่ฝั่งผู้เรียกกับ comment ส่วน route attribute ไม่ถูกแตะ ทำให้ integration test ล้ม 6/8 (client ยิง `/api/v1/...` แต่เซิร์ฟเวอร์ยัง serve `api/...`) — ต้องแก้ route attribute แยกอีกชุด
   - ต้องกัน `@/lib/api/<resource>` ที่เป็น **import path ของ TypeScript** ไม่ใช่ endpoint (24 จุด) ออกจากการแทนที่ ไม่งั้น import พังทั้งโปรเจกต์
   - ตรวจแล้ว: `dotnet test TaladPOS.sln` ผ่าน 74/74 โดย `OpenApiDocumentTests` ยืนยันว่า OpenAPI document ประกาศ path เป็น `/api/v1/...` จริง
-- [ ] T080 รัน quickstart.md ให้ครบทั้ง 29 scenario อีกครั้ง (เดิม 28 + US1 ข้อ 6 ที่เพิ่มตอน TD02 — ใบเสร็จแสดงเป็น modal, พิมพ์แล้วได้เฉพาะสลิปหน้าเดียว, ลิงก์ "ใบเสร็จบิลล่าสุด" เปิดซ้ำได้, แตะนอก dialog ไม่ปิด) แล้วอัปเดตผลใน `specs/001-single-store-pos/quickstart-results.md`
-  - เหตุผลที่ยังค้าง: ผล 28/28 ใน quickstart-results.md รัน**ก่อน** TD02 เส้นทางใบเสร็จ modal/พิมพ์จึงถูกตรวจแยกตอนทำ TD02 (สั่งพิมพ์ PDF จริงจากทั้งสองทาง) แต่ยังไม่เคยรันรวมเป็นชุดเดียวกับ scenario อื่น
+- [X] T080 รัน quickstart.md ให้ครบทุก scenario อีกครั้ง แล้วอัปเดตผลใน `specs/001-single-store-pos/quickstart-results.md` — ทำรวมกับ E1 + E2 จาก `/speckit-analyze` เพราะเป็นการรันชุดเดียวกัน
+  - **ผล: 31 PASS / 0 FAIL / 2 N/A (รวม 33 scenario)** รันกับ PostgreSQL + `api/` + `web/` จริง ยิงผ่าน `/api/v1/*` หลัง T081
+  - **E1 (FR-026)**: เพิ่ม US6 ข้อ 5 ตรวจ `GET /api/v1/reports/best-selling-products` เทียบกับผลรวม `quantity` ที่คำนวณเองจากบิลจริง — ก่อนหน้านี้ endpoint นี้มี unit test (T068) และมีจริงในระบบ แต่**ไม่เคยถูกเรียก end-to-end เลย** ผลรอบนี้: 10 แถว อันดับ 1 = 40 ชิ้น เรียงมาก→น้อยถูกต้อง และ `quantitySold` ตรงทุกแถว
+  - **E2 (SC traceability)**: เดิมไม่มี scenario ใดอ้าง SC เลย เพิ่มหัวข้อ 5 ใน quickstart.md ผูก SC ทั้ง 6 ข้อเข้ากับ scenario ที่พิสูจน์มัน พร้อมเพิ่มการตรวจใหม่ 2 ข้อ — **SC-001** จับเวลาตะกร้า 5 ชิ้นครบวงจร (ได้ 0.05 วิ จากเพดาน 60) และ **SC-002** กระทบยอดสต็อก (ขาย 4 ชิ้น สต็อกลดพอดี 4) ส่วน **SC-005** ระบุไว้ตรง ๆ ว่าเป็นผลลัพธ์ด้านการใช้งานที่ scenario อัตโนมัติพิสูจน์แทนไม่ได้ แทนที่จะปล่อยเงียบ
+  - **US1 ข้อ 6 (ใบเสร็จ modal จาก TD02)** ตรวจผ่านเบราว์เซอร์จริง: modal เด้ง ยอด 45.00 ตรงกับ response, แตะนอกกรอบไม่ปิด, สั่งพิมพ์ได้ PDF หน้าเดียวมีเฉพาะสลิป (แถบเมนู/แผงตะกร้า = hidden), ลิงก์ "ใบเสร็จบิลล่าสุด" เปิดซ้ำได้, API error 0 ครั้ง
+  - **ไม่พบบั๊กของระบบ** — 5 scenario ที่ล้มระหว่างทางมาจากสต็อกสินค้า seed หมดจากการรันทดสอบซ้ำ (US1-4 ได้ 409 ซึ่งถูกต้องตาม FR-005 แล้ว scenario ที่อ้างบิลนั้นล้มตามกัน) แก้ด้วยการเติมสต็อกในขั้น arrangement ก่อนเริ่มวัด ไม่ใช่การแก้เกณฑ์ให้ผ่าน
 
 ---
 

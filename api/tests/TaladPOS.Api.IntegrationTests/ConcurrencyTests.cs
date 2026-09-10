@@ -10,7 +10,7 @@ using TaladPOS.Infrastructure.Persistence;
 namespace TaladPOS.Api.IntegrationTests;
 
 /// <summary>
-/// tasks.md T075 - the concurrency guarantee from quickstart.md section 5:
+/// tasks.md T075 - the concurrency guarantee from quickstart.md section 6:
 /// two registers racing for the same last unit must not both succeed, and
 /// stock must never go negative.
 ///
@@ -28,7 +28,7 @@ public sealed class ConcurrencyTests : ApiTestBase
     }
 
     /// <summary>
-    /// quickstart.md section 5 (Concurrency) / FR-016: two simultaneous
+    /// quickstart.md section 6 (Concurrency) / FR-016: two simultaneous
     /// POST /api/v1/sales for the last unit in stock.
     ///
     /// The assertions describe the *invariant*, not a particular
