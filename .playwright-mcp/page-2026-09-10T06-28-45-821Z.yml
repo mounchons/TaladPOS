@@ -1,0 +1,15 @@
+- generic [active] [ref=f7e1]:
+  - alert [ref=f7e2]
+  - generic [ref=f7e3]:
+    - banner [ref=f7e4]:
+      - navigation [ref=f7e5]:
+        - generic [ref=f7e6]: TaladPOS
+        - link "ขายสินค้า" [ref=f7e7] [cursor=pointer]:
+          - /url: /sales
+      - generic [ref=f7e8]:
+        - generic [ref=f7e9]:
+          - text: แคชเชียร์
+          - generic [ref=f7e10]: (แคชเชียร์)
+        - button "ออกจากระบบ" [ref=f7e11] [cursor=pointer]
+    - main [ref=f7e13]:
+      - paragraph [ref=f7e14]: หน้านี้สำหรับผู้จัดการเท่านั้น

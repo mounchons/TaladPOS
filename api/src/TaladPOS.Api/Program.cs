@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 using TaladPOS.Api.Middleware;
 using TaladPOS.Application.Auth;
 using TaladPOS.Application.Common;
+using TaladPOS.Application.Members;
 using TaladPOS.Application.Products;
+using TaladPOS.Application.Promotions;
+using TaladPOS.Application.Reports;
 using TaladPOS.Application.Sales;
 using TaladPOS.Domain.Staff;
 using TaladPOS.Infrastructure.Auth;
@@ -30,6 +34,28 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped<CompleteSaleUseCase>();
+
+// --- Stock management (US3: FR-015, FR-017, FR-018) ---
+builder.Services.AddScoped<CreateProductUseCase>();
+builder.Services.AddScoped<UpdateProductUseCase>();
+builder.Services.AddScoped<DeleteProductUseCase>();
+
+// --- Membership (US4: FR-010-FR-014) ---
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
+builder.Services.AddScoped<RegisterMemberUseCase>();
+
+// --- Promotions (US5: FR-019-FR-022) ---
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+builder.Services.AddScoped<CreatePromotionUseCase>();
+builder.Services.AddScoped<UpdatePromotionUseCase>();
+builder.Services.AddScoped<DeletePromotionUseCase>();
+
+// --- Sales history & reports (US6: FR-024-FR-028) ---
+builder.Services.AddScoped<GetSalesHistoryQuery>();
+builder.Services.AddScoped<GetDailyOrMonthlySalesReportQuery>();
+builder.Services.AddScoped<GetBestSellingProductsReportQuery>();
+builder.Services.AddScoped<GetSalesByStaffReportQuery>();
+builder.Services.AddScoped<GetStockReportQuery>();
 
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var signingKey = jwtSection["SigningKey"]
@@ -73,7 +99,10 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(webAppOrigin).AllowAnyHeader().AllowAnyMethod());
 });
 
-builder.Services.AddControllers();
+// Promotion.Scope (Item/Bill) travels over the wire as a string per
+// contracts/promotions.md, not System.Text.Json's numeric enum default.
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

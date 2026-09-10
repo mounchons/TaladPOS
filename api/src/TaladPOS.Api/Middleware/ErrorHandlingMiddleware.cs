@@ -1,4 +1,5 @@
 using System.Text.Json;
+using TaladPOS.Domain.Members;
 using TaladPOS.Domain.Products;
 
 namespace TaladPOS.Api.Middleware;
@@ -28,6 +29,14 @@ public class ErrorHandlingMiddleware
         catch (InsufficientStockException ex)
         {
             await WriteErrorAsync(context, StatusCodes.Status409Conflict, "insufficient_stock", new { ex.ProductId });
+        }
+        catch (DuplicateBarcodeException ex)
+        {
+            await WriteErrorAsync(context, StatusCodes.Status409Conflict, "duplicate_barcode", new { ex.Barcode });
+        }
+        catch (DuplicatePhoneNumberException)
+        {
+            await WriteErrorAsync(context, StatusCodes.Status409Conflict, "phone_number_already_registered", null);
         }
         catch (ArgumentException ex)
         {

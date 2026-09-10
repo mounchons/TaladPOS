@@ -16,20 +16,31 @@ export function ProductCard({
       type="button"
       onClick={() => onSelect(product)}
       disabled={disabled}
-      className={`flex flex-col items-center rounded-lg border border-gray-200 bg-white p-3 text-center shadow-sm transition hover:shadow-md ${
-        disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+      className={`group flex flex-col overflow-hidden rounded-control border bg-white text-left transition-colors ${
+        disabled
+          ? "cursor-not-allowed border-steel-100 opacity-50"
+          : "cursor-pointer border-steel-200 hover:border-ink active:border-mango"
       }`}
     >
-      <div className="relative mb-2 h-24 w-24 overflow-hidden rounded-md bg-gray-100">
+      <div className="relative aspect-square w-full overflow-hidden bg-steel-100">
         {/* eslint-disable-next-line @next/next/no-img-element -- product image URLs are arbitrary (manager-entered, FR-015), so next/image's fixed remote-domain allowlist doesn't fit */}
-        <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />
+        <img src={product.imageUrl} alt="" className="h-full w-full object-cover" />
+        {disabled && (
+          <span className="absolute inset-x-0 bottom-0 bg-chili px-2 py-1 text-center text-xs font-medium text-white">
+            สินค้าหมด
+          </span>
+        )}
+        {!disabled && product.isLowStock && (
+          <span className="absolute right-2 top-2 rounded-[3px] bg-white/95 px-1.5 py-0.5 text-xs font-medium text-chili">
+            เหลือ {product.stockQuantity}
+          </span>
+        )}
       </div>
-      <span className="text-sm font-medium text-gray-900">{product.name}</span>
-      <span className="text-sm text-emerald-700">{product.price.toFixed(2)} บาท</span>
-      {disabled && <span className="mt-1 text-xs font-semibold text-red-600">สินค้าหมด</span>}
-      {!disabled && product.isLowStock && (
-        <span className="mt-1 text-xs font-semibold text-amber-600">ใกล้หมด ({product.stockQuantity})</span>
-      )}
+
+      <div className="flex flex-1 flex-col justify-between gap-1 px-3 py-2.5">
+        <span className="text-sm leading-snug text-ink-700">{product.name}</span>
+        <span className="money text-xl font-semibold text-ink">{product.price.toFixed(2)}</span>
+      </div>
     </button>
   );
 }

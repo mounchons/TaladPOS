@@ -1,0 +1,10 @@
+- main [ref=f2e2]:
+  - generic [ref=f2e3]:
+    - heading "เข้าสู่ระบบ TaladPOS" [level=1] [ref=f2e4]
+    - text: ชื่อผู้ใช้
+    - textbox "ชื่อผู้ใช้" [active] [ref=f2e5]: cashier
+    - text: รหัสผ่าน
+    - generic [ref=f2e7]:
+      - textbox [ref=f2e8]: Cashier123!
+      - switch "Show Password" [checked] [ref=f2e10]
+    - button "เข้าสู่ระบบ" [ref=f2e12]

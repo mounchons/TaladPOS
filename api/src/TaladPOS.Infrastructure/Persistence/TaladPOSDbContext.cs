@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using TaladPOS.Domain.Members;
 using TaladPOS.Domain.Products;
+using TaladPOS.Domain.Promotions;
 using TaladPOS.Domain.Sales;
 using TaladPOS.Domain.Staff;
 
@@ -19,6 +21,10 @@ public class TaladPOSDbContext : DbContext
     public DbSet<Sale> Sales => Set<Sale>();
 
     public DbSet<SaleLineItem> SaleLineItems => Set<SaleLineItem>();
+
+    public DbSet<Member> Members => Set<Member>();
+
+    public DbSet<Promotion> Promotions => Set<Promotion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

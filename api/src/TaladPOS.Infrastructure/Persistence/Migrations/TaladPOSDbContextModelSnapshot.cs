@@ -22,6 +22,33 @@ namespace TaladPOS.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("TaladPOS.Domain.Members.Member", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AccumulatedPurchaseTotal")
+                        .HasColumnType("numeric(12,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique();
+
+                    b.ToTable("members", (string)null);
+                });
+
             modelBuilder.Entity("TaladPOS.Domain.Products.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -57,6 +84,37 @@ namespace TaladPOS.Infrastructure.Persistence.Migrations
                         .HasFilter("\"Barcode\" IS NOT NULL");
 
                     b.ToTable("products", (string)null);
+                });
+
+            modelBuilder.Entity("TaladPOS.Domain.Promotions.Promotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AppliesToMembersOnly")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("DiscountPercentage")
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("promotions", (string)null);
                 });
 
             modelBuilder.Entity("TaladPOS.Domain.Sales.Sale", b =>

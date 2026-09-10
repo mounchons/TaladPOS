@@ -14,6 +14,9 @@ public class StaffRepository : IStaffRepository
         _dbContext = dbContext;
     }
 
+    public Task<Staff?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+        _dbContext.Staff.FirstOrDefaultAsync(s => s.Id == id, ct);
+
     public Task<Staff?> GetByUsernameAsync(string username, CancellationToken ct = default) =>
         _dbContext.Staff.SingleOrDefaultAsync(s => s.Username == username, ct);
 
@@ -25,4 +28,7 @@ public class StaffRepository : IStaffRepository
         await _dbContext.Staff.AddAsync(staff, ct);
         await _dbContext.SaveChangesAsync(ct);
     }
+
+    public async Task<IReadOnlyList<Staff>> GetAllAsync(CancellationToken ct = default) =>
+        await _dbContext.Staff.ToListAsync(ct);
 }

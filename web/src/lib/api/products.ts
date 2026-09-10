@@ -24,3 +24,25 @@ export function searchProducts(params: {
   const qs = query.toString();
   return apiFetch<Product[]>(`/api/products${qs ? `?${qs}` : ""}`);
 }
+
+export interface ProductInput {
+  name: string;
+  imageUrl: string;
+  price: number;
+  barcode: string | null;
+  stockQuantity: number;
+  lowStockThreshold: number;
+}
+
+// contracts/products.md - POST/PUT/DELETE /api/products (FR-015, FR-018, Manager only - FR-029)
+export function createProduct(input: ProductInput): Promise<Product> {
+  return apiFetch<Product>("/api/products", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function updateProduct(id: string, input: ProductInput): Promise<Product> {
+  return apiFetch<Product>(`/api/products/${id}`, { method: "PUT", body: JSON.stringify(input) });
+}
+
+export function deleteProduct(id: string): Promise<void> {
+  return apiFetch<void>(`/api/products/${id}`, { method: "DELETE" });
+}

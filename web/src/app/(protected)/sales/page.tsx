@@ -5,8 +5,10 @@ import { InputText } from "primereact/inputtext";
 import { inputTextPT } from "@/styles/primereact-passthrough";
 import { ProductCard } from "@/components/ProductCard";
 import { Cart, type CartLine } from "@/components/Cart";
+import { MemberFormDialog } from "@/components/MemberFormDialog";
 import { searchProducts, type Product } from "@/lib/api/products";
-import { createSale } from "@/lib/api/sales";
+import { createSale, type Sale } from "@/lib/api/sales";
+import type { Member } from "@/lib/api/members";
 import { ApiError } from "@/lib/api/client";
 
 export default function SalesPage() {
@@ -15,6 +17,9 @@ export default function SalesPage() {
   const [cartLines, setCartLines] = useState<CartLine[]>([]);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [memberDialogVisible, setMemberDialogVisible] = useState(false);
+  const [lastCompletedSale, setLastCompletedSale] = useState<Sale | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -31,6 +36,8 @@ export default function SalesPage() {
   }, [query]);
 
   function addToCart(product: Product) {
+    setLastCompletedSale(null);
+    setMessage(null);
     setCartLines((prev) => {
       const existing = prev.find((line) => line.product.id === product.id);
       if (existing) {
@@ -58,17 +65,18 @@ export default function SalesPage() {
     setIsCheckingOut(true);
     try {
       const sale = await createSale({
+        memberId: selectedMember?.id ?? null,
         lineItems: cartLines.map((line) => ({ productId: line.product.id, quantity: line.quantity })),
       });
-      setMessage(`ชำระเงินสำเร็จ ยอดรวม ${sale.totalAmount.toFixed(2)} บาท`);
+      setLastCompletedSale(sale);
       setCartLines([]);
-      setQuery((q) => q); // trigger a refresh of stock numbers
+      setSelectedMember(null);
       searchProducts({ search: query || undefined }).then(setProducts).catch(() => {});
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
-        setMessage("สินค้าบางรายการหมดสต็อกแล้ว กรุณาตรวจสอบตะกร้าอีกครั้ง");
+        setMessage("สินค้าบางรายการหมดสต็อกแล้ว ลดจำนวนในตะกร้าแล้วลองอีกครั้ง");
       } else {
-        setMessage("เกิดข้อผิดพลาด ไม่สามารถชำระเงินได้");
+        setMessage("ชำระเงินไม่สำเร็จ ตรวจการเชื่อมต่อแล้วกดชำระเงินอีกครั้ง");
       }
     } finally {
       setIsCheckingOut(false);
@@ -76,22 +84,35 @@ export default function SalesPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col gap-4 bg-gray-50 p-4 md:flex-row">
-      <div className="flex-1">
-        <h1 className="mb-4 text-xl font-semibold text-gray-900">หน้าขายสินค้า</h1>
+    <main className="flex flex-col md:flex-row">
+      <div className="flex-1 px-5 py-5">
+        {/* The scanner target: full width, tall, first thing focused. */}
         <InputText
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="ค้นหาชื่อสินค้าหรือสแกนบาร์โค้ด"
+          placeholder="สแกนบาร์โค้ด หรือพิมพ์ชื่อสินค้า"
           pt={inputTextPT}
-          className="mb-4"
+          className="!py-3.5 !text-base"
+          autoFocus
         />
-        {message && <p className="mb-4 rounded-md bg-white p-2 text-sm text-gray-800 shadow-sm">{message}</p>}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} onSelect={addToCart} />
-          ))}
-        </div>
+
+        {message && (
+          <p className="mt-4 rounded-control border border-chili/30 bg-chili/5 px-4 py-3 text-sm text-chili">
+            {message}
+          </p>
+        )}
+
+        {products.length === 0 ? (
+          <p className="mt-16 text-center text-sm text-ink-300">
+            {query ? `ไม่พบสินค้าที่ตรงกับ "${query}"` : "ยังไม่มีสินค้าในร้าน"}
+          </p>
+        ) : (
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} onSelect={addToCart} />
+            ))}
+          </div>
+        )}
       </div>
 
       <Cart
@@ -100,6 +121,19 @@ export default function SalesPage() {
         onRemove={removeFromCart}
         onCheckout={checkout}
         isCheckingOut={isCheckingOut}
+        selectedMember={selectedMember}
+        onSelectMember={setSelectedMember}
+        onOpenRegisterMember={() => setMemberDialogVisible(true)}
+        lastCompletedSale={lastCompletedSale}
+      />
+
+      <MemberFormDialog
+        visible={memberDialogVisible}
+        onHide={() => setMemberDialogVisible(false)}
+        onRegistered={(member) => {
+          setSelectedMember(member);
+          setMemberDialogVisible(false);
+        }}
       />
     </main>
   );

@@ -19,4 +19,17 @@ public interface IProductRepository
     /// answer).
     /// </summary>
     Task<bool> TryDecreaseStockAsync(Guid productId, int quantity, CancellationToken ct = default);
+
+    /// <summary>
+    /// True if another product already has this barcode. Pass
+    /// <paramref name="excludeProductId"/> when checking during an update so
+    /// a product doesn't collide with its own unchanged barcode.
+    /// </summary>
+    Task<bool> BarcodeExistsAsync(string barcode, Guid? excludeProductId, CancellationToken ct = default);
+
+    Task AddAsync(Product product, CancellationToken ct = default);
+
+    Task UpdateAsync(Product product, CancellationToken ct = default);
+
+    Task DeleteAsync(Product product, CancellationToken ct = default);
 }

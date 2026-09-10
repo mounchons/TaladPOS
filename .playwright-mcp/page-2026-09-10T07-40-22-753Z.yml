@@ -1,0 +1,14 @@
+- generic [ref=f15e1]:
+  - main [ref=f15e2]:
+    - generic [ref=f15e3]:
+      - paragraph [ref=f15e4]: TaladPOS
+      - generic [ref=f15e5]:
+        - heading "เปิดร้าน" [level=1] [ref=f15e6]
+        - generic [ref=f15e7]: ชื่อผู้ใช้
+        - textbox "ชื่อผู้ใช้" [active] [ref=f15e8]: cashier
+        - generic [ref=f15e9]: รหัสผ่าน
+        - generic [ref=f15e11]:
+          - textbox [ref=f15e12]: Cashier123!
+          - switch "Show Password" [checked] [ref=f15e14]
+        - button "เข้าสู่ระบบ" [ref=f15e16] [cursor=pointer]
+  - alert [ref=f15e18]

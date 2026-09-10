@@ -9,11 +9,21 @@ export interface SaleLineItemDto {
   lineTotal: number;
 }
 
+export interface StaffSummary {
+  id: string;
+  name: string;
+}
+
+export interface MemberSummary {
+  id: string;
+  name: string;
+}
+
 export interface Sale {
   id: string;
   createdAt: string;
-  staffId: string;
-  memberId: string | null;
+  staff: StaffSummary | null;
+  member: MemberSummary | null;
   lineItems: SaleLineItemDto[];
   subtotalAmount: number;
   discountAmount: number;
@@ -33,4 +43,25 @@ export function createSale(request: {
     method: "POST",
     body: JSON.stringify({ memberId: request.memberId ?? null, lineItems: request.lineItems }),
   });
+}
+
+// contracts/sales.md - GET /api/sales (FR-024)
+export function searchSales(params: {
+  from?: string;
+  to?: string;
+  staffId?: string;
+  memberId?: string;
+}): Promise<Sale[]> {
+  const query = new URLSearchParams();
+  if (params.from) query.set("from", params.from);
+  if (params.to) query.set("to", params.to);
+  if (params.staffId) query.set("staffId", params.staffId);
+  if (params.memberId) query.set("memberId", params.memberId);
+  const qs = query.toString();
+  return apiFetch<Sale[]>(`/api/sales${qs ? `?${qs}` : ""}`);
+}
+
+// contracts/sales.md - GET /api/sales/{id}/receipt (FR-030)
+export function getReceipt(saleId: string): Promise<Sale> {
+  return apiFetch<Sale>(`/api/sales/${saleId}/receipt`);
 }

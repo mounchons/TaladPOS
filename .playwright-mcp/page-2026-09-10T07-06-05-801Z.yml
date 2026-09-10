@@ -1,0 +1,33 @@
+- generic [active] [ref=f2e1]:
+  - alert [ref=f2e2]
+  - generic [ref=f2e3]:
+    - banner [ref=f2e4]:
+      - navigation [ref=f2e5]:
+        - generic [ref=f2e6]: TaladPOS
+        - link "ขายสินค้า" [ref=f2e7] [cursor=pointer]:
+          - /url: /sales
+        - link "จัดการสต็อก" [ref=f2e8] [cursor=pointer]:
+          - /url: /stock
+        - link "โปรโมชั่น" [ref=f2e9] [cursor=pointer]:
+          - /url: /promotions
+      - generic [ref=f2e10]:
+        - generic [ref=f2e11]:
+          - text: ผู้จัดการร้าน
+          - generic [ref=f2e12]: (ผู้จัดการ)
+        - button "ออกจากระบบ" [ref=f2e13] [cursor=pointer]
+    - main [ref=f2e15]:
+      - generic [ref=f2e16]:
+        - heading "หน้าขายสินค้า" [level=1] [ref=f2e17]
+        - textbox "ค้นหาชื่อสินค้าหรือสแกนบาร์โค้ด" [ref=f2e18]
+      - complementary [ref=f2e19]:
+        - heading "ตะกร้าสินค้า" [level=2] [ref=f2e20]
+        - generic [ref=f2e21]:
+          - paragraph [ref=f2e22]: สมาชิก (ไม่บังคับ)
+          - generic [ref=f2e23]:
+            - combobox "ค้นหาสมาชิกด้วยชื่อหรือเบอร์โทร" [ref=f2e25]
+            - button "+ สมัครสมาชิกใหม่" [ref=f2e26] [cursor=pointer]
+        - paragraph [ref=f2e27]: ยังไม่มีสินค้าในตะกร้า
+        - generic [ref=f2e28]:
+          - generic [ref=f2e29]: ยอดรวม
+          - generic [ref=f2e30]: 0.00 บาท
+        - button "ชำระเงิน" [disabled] [ref=f2e31]

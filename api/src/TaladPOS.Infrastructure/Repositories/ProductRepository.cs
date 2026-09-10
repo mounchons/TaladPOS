@@ -48,4 +48,25 @@ public class ProductRepository : IProductRepository
 
         return affectedRows > 0;
     }
+
+    public Task<bool> BarcodeExistsAsync(string barcode, Guid? excludeProductId, CancellationToken ct = default) =>
+        _dbContext.Products.AnyAsync(
+            p => p.Barcode == barcode && (excludeProductId == null || p.Id != excludeProductId), ct);
+
+    public async Task AddAsync(Product product, CancellationToken ct = default)
+    {
+        await _dbContext.Products.AddAsync(product, ct);
+        await _dbContext.SaveChangesAsync(ct);
+    }
+
+    public async Task UpdateAsync(Product product, CancellationToken ct = default)
+    {
+        await _dbContext.SaveChangesAsync(ct);
+    }
+
+    public async Task DeleteAsync(Product product, CancellationToken ct = default)
+    {
+        _dbContext.Products.Remove(product);
+        await _dbContext.SaveChangesAsync(ct);
+    }
 }

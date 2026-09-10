@@ -1,18 +1,24 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Kanit, IBM_Plex_Sans_Thai_Looped } from "next/font/google";
 import "primeicons/primeicons.css";
 import "./globals.css";
 import { AppProviders } from "./providers";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+// Loopless geometric Thai - the face of Thai shop signage. Headings and
+// every price, so numbers read from across the counter.
+const kanit = Kanit({
+  subsets: ["thai", "latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-kanit",
+  display: "swap",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+
+// Looped (หัวกลม) Thai - what Thai readers scan fastest at UI sizes.
+const plexThai = IBM_Plex_Sans_Thai_Looped({
+  subsets: ["thai", "latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-thai",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -27,9 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${kanit.variable} ${plexThai.variable}`}>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

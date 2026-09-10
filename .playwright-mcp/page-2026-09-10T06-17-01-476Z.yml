@@ -1,0 +1,31 @@
+- generic [active] [ref=e2]:
+  - alert [ref=e1]
+  - generic [ref=e16]:
+    - banner [ref=e17]:
+      - generic [ref=e18]: TaladPOS
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - text: แคชเชียร์
+          - generic [ref=e21]: (แคชเชียร์)
+        - button "ออกจากระบบ" [ref=e22] [cursor=pointer]
+    - main [ref=e24]:
+      - generic [ref=e25]:
+        - heading "หน้าขายสินค้า" [level=1] [ref=e26]
+        - textbox "ค้นหาชื่อสินค้าหรือสแกนบาร์โค้ด" [ref=e27]
+        - generic [ref=e28]:
+          - button "แอปเปิ้ล แอปเปิ้ล 60.00 บาท ใกล้หมด (2)" [ref=e29] [cursor=pointer]:
+            - img "แอปเปิ้ล" [ref=e31]
+            - generic [ref=e32]: แอปเปิ้ล
+            - generic [ref=e33]: 60.00 บาท
+            - generic [ref=e34]: ใกล้หมด (2)
+          - button "มะม่วง มะม่วง 45.00 บาท" [ref=e35] [cursor=pointer]:
+            - img "มะม่วง" [ref=e37]
+            - generic [ref=e38]: มะม่วง
+            - generic [ref=e39]: 45.00 บาท
+      - complementary [ref=e40]:
+        - heading "ตะกร้าสินค้า" [level=2] [ref=e41]
+        - paragraph [ref=e42]: ยังไม่มีสินค้าในตะกร้า
+        - generic [ref=e43]:
+          - generic [ref=e44]: ยอดรวม
+          - generic [ref=e45]: 0.00 บาท
+        - button "ชำระเงิน" [disabled] [ref=e46]
