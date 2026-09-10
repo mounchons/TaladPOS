@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TaladPOS.Application.Common;
 using TaladPOS.Application.Products;
 using TaladPOS.Domain.Products;
 using TaladPOS.Infrastructure.Persistence;
@@ -37,6 +38,54 @@ public class ProductRepository : IProductRepository
         // IsLowStock is a computed property (not a mapped column), so this
         // filter must run in-memory after the database query.
         return lowStockOnly ? products.Where(p => p.IsLowStock).ToList() : products;
+    }
+
+    public async Task<PagedResult<Product>> SearchPagedAsync(
+        string? search, string? barcode, bool lowStockOnly, PageRequest page, CancellationToken ct = default)
+    {
+        var query = BuildSearchQuery(search, barcode);
+
+        if (lowStockOnly)
+        {
+            // The unpaged SearchAsync filters this in memory because IsLowStock
+            // is a computed property. That is not an option here: filtering
+            // after the slice would page the unfiltered set and report a
+            // TotalCount for rows the caller never asked for. The predicate is
+            // written out so PostgreSQL does the filter, the count and the
+            // slice together - it must stay in step with Product.IsLowStock.
+            query = query.Where(p => p.StockQuantity > 0 && p.StockQuantity <= p.LowStockThreshold);
+        }
+
+        var totalCount = await query.CountAsync(ct);
+
+        // Ordered before paging: without a deterministic sort PostgreSQL may
+        // return rows in any order, so the same product could appear on two
+        // pages while another appears on none. Name, then Id to break ties.
+        var items = await query
+            .OrderBy(p => p.Name)
+            .ThenBy(p => p.Id)
+            .Skip(page.Skip)
+            .Take(page.Take)
+            .ToListAsync(ct);
+
+        return PagedResult<Product>.From(items, page, totalCount);
+    }
+
+    private IQueryable<Product> BuildSearchQuery(string? search, string? barcode)
+    {
+        var query = _dbContext.Products.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(p => EF.Functions.ILike(p.Name, $"%{search}%"));
+        }
+
+        if (!string.IsNullOrWhiteSpace(barcode))
+        {
+            query = query.Where(p => p.Barcode == barcode);
+        }
+
+        return query;
     }
 
     public async Task<bool> TryDecreaseStockAsync(Guid productId, int quantity, CancellationToken ct = default)

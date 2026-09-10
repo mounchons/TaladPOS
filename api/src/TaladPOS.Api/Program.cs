@@ -133,9 +133,26 @@ builder.Services.AddSwaggerGen(options =>
     // controller keeps ids unique and still readable (AuthStaffSummaryDto,
     // SalesStaffSummaryDto), and stops the next same-named DTO from
     // re-breaking the document.
-    options.CustomSchemaIds(type => type.DeclaringType is null
-        ? type.Name
-        : $"{type.DeclaringType.Name.Replace("Controller", string.Empty)}{type.Name}");
+    // Closed generics need the same treatment for the same reason:
+    // PagedResult<ProductDto> and PagedResult<SaleDto> both arrive as the bare
+    // name "PagedResult`1", which is one id for two shapes - the identical 500
+    // as before, just from a different direction. Naming them after their type
+    // arguments (PagedResultOfProductsProductDto) keeps each envelope distinct.
+    static string SchemaId(Type type)
+    {
+        if (type.IsGenericType)
+        {
+            var baseName = type.Name[..type.Name.IndexOf('`')];
+            var args = string.Concat(type.GetGenericArguments().Select(SchemaId));
+            return $"{baseName}Of{args}";
+        }
+
+        return type.DeclaringType is null
+            ? type.Name
+            : $"{type.DeclaringType.Name.Replace("Controller", string.Empty)}{type.Name}";
+    }
+
+    options.CustomSchemaIds(SchemaId);
 
     const string bearerScheme = "Bearer";
     options.AddSecurityDefinition(bearerScheme, new OpenApiSecurityScheme

@@ -1,6 +1,77 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* daisyUI's semantic slots, pointed at the palette below so `btn`, `input`,
+   `table` and `modal` come out in the shop's colours rather than daisyUI's
+   defaults. This block styles daisyUI components; the @theme block below is
+   what generates the bg-*/text-* utilities the markup uses directly. Both are
+   needed - neither one produces the other. */
+@plugin "daisyui/theme" {
+  name: "talad";
+  default: true;
+  color-scheme: light;
+
+  --color-primary: #f5a524; /* mango - money and "you are here" */
+  --color-primary-content: #17242f;
+  --color-secondary: #24384a;
+  --color-secondary-content: #ffffff;
+  --color-accent: #2f7d4f;
+  --color-accent-content: #ffffff;
+  --color-neutral: #17242f;
+  --color-neutral-content: #ffffff;
+
+  --color-base-100: #ffffff;
+  --color-base-200: #f0f3f5; /* steel-50 */
+  --color-base-300: #e2e8ec; /* steel-100 */
+  --color-base-content: #17242f; /* ink */
+
+  --color-info: #4a6376;
+  --color-info-content: #ffffff;
+  --color-success: #2f7d4f; /* leaf */
+  --color-success-content: #ffffff;
+  --color-warning: #d98a0b;
+  --color-warning-content: #ffffff;
+  --color-error: #c8362b; /* chili */
+  --color-error-content: #ffffff;
+
+  /* Small and consistent on things you touch, matching --radius-control. */
+  --radius-selector: 5px;
+  --radius-field: 5px;
+  --radius-box: 5px;
+  --border: 1px;
+}
+
+/* The design tokens that used to live in tailwind.config.ts. Tailwind 4 reads
+   them from here, so the config file is gone - one place to look instead of
+   two. Every custom colour/font/radius utility used across the app is
+   generated from this block; drop a line and the class silently stops
+   existing. */
+@theme {
+  /* Cool galvanized-steel ground so produce colour reads against it,
+     the way fruit looks on market shelving. */
+  --color-ink: #17242f;
+  --color-ink-700: #24384a;
+  --color-ink-500: #4a6376;
+  --color-ink-300: #8598a6;
+
+  --color-steel-50: #f0f3f5;
+  --color-steel-100: #e2e8ec;
+  --color-steel-200: #cfd8de;
+
+  /* Ripe Thai mango. Reserved for money and for "you are here". */
+  --color-mango: #f5a524;
+  --color-mango-600: #d98a0b;
+  --color-mango-100: #fdf0d6;
+
+  --color-leaf: #2f7d4f;
+  --color-chili: #c8362b;
+
+  --font-display: var(--font-kanit), sans-serif;
+  --font-sans: var(--font-plex-thai), sans-serif;
+
+  /* Small and consistent on things you touch; structural panels stay square. */
+  --radius-control: 5px;
+}
 
 @layer base {
   body {
@@ -22,26 +93,26 @@
 
   /* One visible focus treatment everywhere, in the accent colour. */
   :focus-visible {
-    outline: 2px solid theme("colors.mango.DEFAULT");
+    outline: 2px solid var(--color-mango);
     outline-offset: 2px;
   }
 }
 
-@layer components {
-  /* Money. Tabular so digits never jitter as a total counts up, and always
-     in the display face - a price is a headline in this product. */
-  .money {
-    font-family: var(--font-kanit), sans-serif;
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
-  }
+/* Money. Tabular so digits never jitter as a total counts up, and always
+   in the display face - a price is a headline in this product.
+   `@utility` rather than `@layer components`: v4 drops the components layer,
+   and this is a utility in every sense - one class, one job, no variants. */
+@utility money {
+  font-family: var(--font-kanit), sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
 
-  /* The one piece of non-user-triggered motion in the app: the receipt
-     settling into place after a sale closes, so the cashier sees what just
-     happened. Nothing else animates on entry. */
-  .receipt-settle {
-    animation: receipt-settle 260ms cubic-bezier(0.2, 0.7, 0.3, 1);
-  }
+/* The one piece of non-user-triggered motion in the app: the receipt
+   settling into place after a sale closes, so the cashier sees what just
+   happened. Nothing else animates on entry. */
+@utility receipt-settle {
+  animation: receipt-settle 260ms cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 @keyframes receipt-settle {
@@ -99,6 +170,29 @@
   }
 }
 
+/* --- Touch targets on phones ---------------------------------------------
+   daisyUI sizes controls for a mouse: btn and input come out 40px tall and
+   btn-sm 32px, which is below the 44px a fingertip needs. Raising the floor
+   once here beats appending a height class to forty-odd controls, and it
+   only applies where fingers are actually used - on a desktop the mouse is
+   precise and the tighter rhythm reads better.
+
+   Checkboxes are the deliberate exception: a 44px checkbox looks broken. The
+   label wraps the box and is the real target, so it gets the height instead. */
+@media (max-width: 767.98px) {
+  .btn,
+  .input,
+  .select,
+  .tab {
+    min-height: 44px;
+    height: auto;
+  }
+
+  label:has(> .checkbox) {
+    min-height: 44px;
+  }
+}
+
 /* Tablet/desktop app bar height. Shared so the sales register rail can be
    exactly the rest of the viewport instead of guessing the header's height.
    The tallest thing in the bar is the two-line staff name + role at ~63px, so
@@ -111,66 +205,4 @@
      little slack. The sales grid pads its bottom by it so the last row of
      products is never stuck behind the bar. */
   --register-peek-h: 13.25rem;
-}
-
-/* --- Tables on phones -----------------------------------------------------
-   PrimeReact runs unstyled, which strips its own p-* classes - so the CSS
-   its responsiveLayout="stack" injects can never match. The data-pc-*
-   attributes do survive, so the stacked layout is rebuilt here against those
-   instead. Every DataTable passing responsiveLayout="stack" gets it: below
-   md each row becomes a card and each cell carries the Thai column header
-   PrimeReact already renders into it. Deliberately unlayered so it outranks
-   the Tailwind padding utilities coming from dataTablePT. */
-
-/* The in-cell label exists only for the stacked layout. */
-[data-pc-section="columntitle"] {
-  display: none;
-}
-
-@media (max-width: 767.98px) {
-  [data-pc-name="datatable"] [data-pc-section="thead"] {
-    display: none;
-  }
-
-  /* One row = one card. */
-  [data-pc-name="datatable"] [data-pc-section="bodyrow"] {
-    display: block;
-    padding: 0.375rem 0;
-  }
-  [data-pc-name="datatable"] [data-pc-section="bodyrow"] + [data-pc-section="bodyrow"] {
-    border-top: 1px solid theme("colors.steel.200");
-  }
-
-  /* Label on the left, value on the right, the way a receipt reads. */
-  [data-pc-name="datatable"] [data-pc-section="bodycell"] {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.375rem 1rem;
-  }
-
-  [data-pc-name="datatable"] [data-pc-section="bodycell"] > [data-pc-section="columntitle"] {
-    display: block;
-    flex-shrink: 0;
-    font-size: 0.75rem;
-    line-height: 1.5;
-    color: theme("colors.ink.300");
-  }
-
-  /* Action columns carry header="" - with no label the buttons take the row. */
-  [data-pc-name="datatable"] [data-pc-section="bodycell"] > [data-pc-section="columntitle"]:empty {
-    display: none;
-  }
-  [data-pc-name="datatable"]
-    [data-pc-section="bodycell"]:has(> [data-pc-section="columntitle"]:empty) {
-    justify-content: flex-end;
-    padding-top: 0.625rem;
-  }
-
-  [data-pc-name="datatable"] [data-pc-section="emptymessage"] > td {
-    display: block;
-    padding: 2rem 1rem;
-    text-align: center;
-  }
 }

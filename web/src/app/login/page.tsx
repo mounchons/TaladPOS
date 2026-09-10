@@ -2,10 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
-import { Button } from "primereact/button";
-import { inputTextPT, passwordPT, buttonPT } from "@/styles/primereact-passthrough";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { ApiError } from "@/lib/api/client";
 
@@ -48,12 +44,12 @@ export default function LoginPage() {
           <label className="mb-1.5 block text-sm text-ink-700" htmlFor="username">
             ชื่อผู้ใช้
           </label>
-          <InputText
+          <input
             id="username"
+            type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            pt={inputTextPT}
-            className="mb-4"
+            className="input mb-4 w-full rounded-control border-steel-200 bg-white"
             autoFocus
             required
           />
@@ -61,14 +57,15 @@ export default function LoginPage() {
           <label className="mb-1.5 block text-sm text-ink-700" htmlFor="password">
             รหัสผ่าน
           </label>
-          <Password
+          {/* A native password field rather than a masked-toggle widget: the
+              browser's own reveal control and password manager both work, and
+              nothing here needs the strength meter PrimeReact shipped. */}
+          <input
             id="password"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            pt={passwordPT}
-            className="mb-5"
-            feedback={false}
-            toggleMask
+            className="input mb-5 w-full rounded-control border-steel-200 bg-white"
             required
           />
 
@@ -78,13 +75,13 @@ export default function LoginPage() {
             </p>
           )}
 
-          <Button
+          <button
             type="submit"
-            label={isSubmitting ? "กำลังเข้าสู่ระบบ" : "เข้าสู่ระบบ"}
             disabled={isSubmitting}
-            pt={buttonPT}
-            className="w-full !py-3"
-          />
+            className="btn h-auto w-full rounded-control border-ink bg-ink py-3 font-display font-medium text-white hover:border-mango hover:bg-mango hover:text-ink"
+          >
+            {isSubmitting ? "กำลังเข้าสู่ระบบ" : "เข้าสู่ระบบ"}
+          </button>
         </form>
       </div>
     </main>

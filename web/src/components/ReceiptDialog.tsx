@@ -1,8 +1,6 @@
 "use client";
 
-import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
-import { buttonPT, secondaryButtonPT, receiptDialogPT } from "@/styles/primereact-passthrough";
+import { Modal, modalButton } from "@/components/Modal";
 import { Receipt } from "@/components/Receipt";
 import type { Sale } from "@/lib/api/sales";
 
@@ -10,6 +8,9 @@ import type { Sale } from "@/lib/api/sales";
 // instead of on a separate page - leaving the register loaded and one tap
 // from the next customer. The footer buttons carry no `print:hidden`: the
 // print stylesheet in globals.css already prints the slip alone.
+//
+// Modal is deliberately not dismissable by an outside click (see its comment):
+// a stray tap must not throw away a receipt the customer is still waiting for.
 export function ReceiptDialog({
   sale,
   visible,
@@ -20,29 +21,26 @@ export function ReceiptDialog({
   onHide: () => void;
 }) {
   return (
-    <Dialog
+    <Modal
       visible={visible && sale !== null}
       onHide={onHide}
-      header="ขายสำเร็จ"
-      pt={receiptDialogPT}
-      modal
-      // Deliberately not dismissableMask: at a register the next tap is
-      // usually a product, and a stray tap outside must not throw away a
-      // receipt the customer is still waiting for. Closing is the explicit
-      // button or Escape - same as the member dialog next to it.
+      title="ขายสำเร็จ"
+      className="max-w-md"
+      // Receipt carries its own px-6 py-7; the modal must not add a second
+      // layer on top of it.
+      bodyClassName=""
       footer={
         <>
-          <Button label="ขายรายการต่อไป" onClick={onHide} pt={secondaryButtonPT} />
-          <Button
-            label="พิมพ์ใบเสร็จ"
-            icon="pi pi-print"
-            onClick={() => window.print()}
-            pt={buttonPT}
-          />
+          <button type="button" onClick={onHide} className={modalButton.secondary}>
+            ขายรายการต่อไป
+          </button>
+          <button type="button" onClick={() => window.print()} className={modalButton.primary}>
+            พิมพ์ใบเสร็จ
+          </button>
         </>
       }
     >
       {sale && <Receipt sale={sale} />}
-    </Dialog>
+    </Modal>
   );
 }

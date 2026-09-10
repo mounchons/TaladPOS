@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Button } from "primereact/button";
-import { secondaryButtonPT } from "@/styles/primereact-passthrough";
 import { useAuth } from "@/lib/auth/AuthContext";
 
 const ROLE_LABEL_TH: Record<string, string> = {
@@ -56,7 +54,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   wrapping it breaks mid-word and makes the bar three lines tall
                   on a 320px screen. */}
               {staff && <span className="truncate text-sm text-ink-700">{staff.name}</span>}
-              <Button label="ออกจากระบบ" onClick={handleLogout} pt={secondaryButtonPT} />
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="btn btn-sm shrink-0 rounded-control border-steel-200 bg-white font-display font-medium text-ink-700 hover:border-ink hover:bg-white"
+              >
+                ออกจากระบบ
+              </button>
             </div>
           </div>
 
@@ -95,7 +99,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </span>
               </span>
             )}
-            <Button label="ออกจากระบบ" onClick={handleLogout} pt={secondaryButtonPT} />
+            <button
+                type="button"
+                onClick={handleLogout}
+                className="btn btn-sm shrink-0 rounded-control border-steel-200 bg-white font-display font-medium text-ink-700 hover:border-ink hover:bg-white"
+              >
+                ออกจากระบบ
+              </button>
           </div>
         </div>
       </header>

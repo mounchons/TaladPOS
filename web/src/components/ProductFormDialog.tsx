@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
-import { InputNumber } from "primereact/inputnumber";
-import { Button } from "primereact/button";
-import { dialogPT, inputTextPT, inputNumberPT, buttonPT, secondaryButtonPT } from "@/styles/primereact-passthrough";
+import { Modal, modalButton } from "@/components/Modal";
 import { createProduct, updateProduct, type Product, type ProductInput } from "@/lib/api/products";
 import { ApiError } from "@/lib/api/client";
 
@@ -24,6 +20,9 @@ const emptyForm: ProductInput = {
   stockQuantity: 0,
   lowStockThreshold: 5,
 };
+
+const FIELD = "input w-full rounded-control border-steel-200 bg-white";
+const LABEL = "mb-1.5 block text-sm text-ink-700";
 
 // tasks.md T044 (US3): create/edit form used by web/src/app/stock/page.tsx.
 export function ProductFormDialog({ visible, product, onHide, onSaved }: ProductFormDialogProps) {
@@ -54,7 +53,10 @@ export function ProductFormDialog({ visible, product, onHide, onSaved }: Product
     setError(null);
     setIsSubmitting(true);
     try {
-      const input: ProductInput = { ...form, barcode: form.barcode?.trim() ? form.barcode.trim() : null };
+      const input: ProductInput = {
+        ...form,
+        barcode: form.barcode?.trim() ? form.barcode.trim() : null,
+      };
       if (product) {
         await updateProduct(product.id, input);
       } else {
@@ -75,103 +77,123 @@ export function ProductFormDialog({ visible, product, onHide, onSaved }: Product
   }
 
   return (
-    <Dialog
+    <Modal
       visible={visible}
       onHide={onHide}
-      header={product ? "แก้ไขสินค้า" : "เพิ่มสินค้าใหม่"}
-      pt={dialogPT}
-      modal
+      title={product ? "แก้ไขสินค้า" : "เพิ่มสินค้าใหม่"}
+      footer={
+        <>
+          <button type="button" onClick={onHide} className={modalButton.secondary}>
+            ยกเลิก
+          </button>
+          {/* Outside the <form>, so it is wired back to it by id - the footer
+              is a sibling of the form in the dialog's layout. */}
+          <button
+            type="submit"
+            form="product-form"
+            disabled={isSubmitting}
+            className={modalButton.primary}
+          >
+            {isSubmitting ? "กำลังบันทึก..." : "บันทึก"}
+          </button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit}>
-        <label className="mb-1.5 block text-sm text-ink-700" htmlFor="product-name">
+      <form id="product-form" onSubmit={handleSubmit}>
+        <label className={LABEL} htmlFor="product-name">
           ชื่อสินค้า
         </label>
-        <InputText
+        <input
           id="product-name"
+          type="text"
           value={form.name}
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          pt={inputTextPT}
-          className="mb-3"
+          className={`${FIELD} mb-3`}
           required
         />
 
-        <label className="mb-1.5 block text-sm text-ink-700" htmlFor="product-image">
+        <label className={LABEL} htmlFor="product-image">
           URL รูปภาพ
         </label>
-        <InputText
+        <input
           id="product-image"
+          type="url"
           value={form.imageUrl}
           onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
-          pt={inputTextPT}
-          className="mb-3"
+          className={`${FIELD} mb-3`}
           required
         />
 
-        <label className="mb-1.5 block text-sm text-ink-700" htmlFor="product-price">
+        <label className={LABEL} htmlFor="product-price">
           ราคา (บาท)
         </label>
-        <InputNumber
-          inputId="product-price"
+        {/* step="0.01" and min="0.01" carry the same rule the API enforces
+            (price > 0, two decimals) into the browser's own validation, so a
+            bad price is caught before the request rather than by a 400. */}
+        <input
+          id="product-price"
+          type="number"
+          inputMode="decimal"
+          step="0.01"
+          min="0.01"
           value={form.price}
-          onValueChange={(e) => setForm((f) => ({ ...f, price: e.value ?? 0 }))}
-          mode="decimal"
-          minFractionDigits={2}
-          maxFractionDigits={2}
-          min={0.01}
-          pt={inputNumberPT}
-          className="mb-3"
+          onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) || 0 }))}
+          className={`${FIELD} money mb-3`}
+          required
         />
 
-        <label className="mb-1.5 block text-sm text-ink-700" htmlFor="product-barcode">
+        <label className={LABEL} htmlFor="product-barcode">
           บาร์โค้ด (ไม่บังคับ)
         </label>
-        <InputText
+        <input
           id="product-barcode"
+          type="text"
           value={form.barcode ?? ""}
           onChange={(e) => setForm((f) => ({ ...f, barcode: e.target.value }))}
-          pt={inputTextPT}
-          className="mb-3"
+          className={`${FIELD} money mb-3`}
         />
 
         <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-sm text-ink-700" htmlFor="product-stock">
+            <label className={LABEL} htmlFor="product-stock">
               จำนวนคงเหลือ
             </label>
-            <InputNumber
-              inputId="product-stock"
+            <input
+              id="product-stock"
+              type="number"
+              inputMode="numeric"
+              min="0"
               value={form.stockQuantity}
-              onValueChange={(e) => setForm((f) => ({ ...f, stockQuantity: e.value ?? 0 }))}
-              min={0}
-              pt={inputNumberPT}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, stockQuantity: Number(e.target.value) || 0 }))
+              }
+              className={`${FIELD} money`}
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm text-ink-700" htmlFor="product-threshold">
+            <label className={LABEL} htmlFor="product-threshold">
               เกณฑ์ใกล้หมด
             </label>
-            <InputNumber
-              inputId="product-threshold"
+            <input
+              id="product-threshold"
+              type="number"
+              inputMode="numeric"
+              min="0"
               value={form.lowStockThreshold}
-              onValueChange={(e) => setForm((f) => ({ ...f, lowStockThreshold: e.value ?? 0 }))}
-              min={0}
-              pt={inputNumberPT}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, lowStockThreshold: Number(e.target.value) || 0 }))
+              }
+              className={`${FIELD} money`}
             />
           </div>
         </div>
 
-        {error && <p className="mb-3 rounded-control border border-chili/30 bg-chili/5 px-3 py-2.5 text-sm text-chili">{error}</p>}
-
-        <div className="mt-4 flex justify-end gap-2">
-          <Button type="button" label="ยกเลิก" onClick={onHide} pt={secondaryButtonPT} />
-          <Button
-            type="submit"
-            label={isSubmitting ? "กำลังบันทึก..." : "บันทึก"}
-            disabled={isSubmitting}
-            pt={buttonPT}
-          />
-        </div>
+        {error && (
+          <p className="rounded-control border border-chili/30 bg-chili/5 px-3 py-2.5 text-sm text-chili">
+            {error}
+          </p>
+        )}
       </form>
-    </Dialog>
+    </Modal>
   );
 }

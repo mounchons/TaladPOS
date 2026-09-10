@@ -245,6 +245,43 @@ utility class เดิมอย่าง `bg-steel-50`, `text-ink-300`, `border
 อยู่เพื่อกัน purge preset นั้นโดยเฉพาะ, และ `web/tailwind.config.ts` ทั้งไฟล์ **จะถูกลบทิ้งทั้งหมด** พร้อม
 dependency `primereact` และ `primeicons`
 
+### 8.1 สิ่งที่เกิดขึ้นจริงตอน implement (บันทึกหลังทำเสร็จ — T126)
+
+**Next.js 14.2.35 ทำงานกับ Tailwind 4 ได้โดยไม่ต้องอัปเกรด** — ความเสี่ยงที่ระบุไว้ข้างบนไม่เกิดขึ้นจริง
+`npm run build` ผ่านตั้งแต่ครั้งแรกและทุกหน้าเปิดได้ ไม่ต้องใช้ทางถอย (daisyUI 4 + Tailwind 3) เลย
+
+**สิ่งที่แผนประเมินไว้ไม่ครบ**:
+
+1. **มี `theme()` สามจุดไม่ใช่จุดเดียว** — นอกจากบรรทัด ~25 (`colors.mango.DEFAULT`) ยังมีอีกสองจุดใน
+   บล็อก CSS ของตาราง PrimeReact (`colors.steel.200`, `colors.ink.300`) ที่แผนไม่ได้นับ
+   ทั้งหมดเปลี่ยนเป็น `var(--color-*)` แล้ว
+
+2. **`font-display` เสียแบบเงียบ ๆ — ข้อบกพร่องที่ร้ายแรงที่สุดของรอบนี้** ย้ายธีมเข้า `@theme` แล้ว
+   `--font-display: var(--font-kanit), sans-serif` ถูกวางไว้ที่ `:root` แต่ `next/font` ประกาศ
+   `--font-kanit` ไว้ที่ `<body>` — custom property ที่มี `var()` ข้างในถูก resolve **ณ element ที่
+   ประกาศมัน** ไม่ใช่ ณ ที่ใช้ ดังนั้น `--font-display` จึงกลายเป็น guaranteed-invalid ที่ `:root`
+   และทุก `font-display` ตกกลับไปใช้ฟอนต์ของ body **โดยไม่มี error, ไม่มี warning, build ผ่านปกติ**
+   Tailwind 3 ไม่เจอปัญหานี้เพราะ utility เขียน `font-family` ลงบน element ตรง ๆ ไม่ผ่านตัวแปรกลาง
+   → แก้โดยย้าย `kanit.variable`/`plexThai.variable` จาก `<body>` ไป `<html>` ใน `layout.tsx`
+   → **บทเรียน**: ตรวจ Tailwind 4 ด้วยการอ่าน `getComputedStyle` ของ class จริง ไม่ใช่แค่ดูว่า build ผ่าน
+
+3. **Tailwind 4 ไม่ต้องมี `content` glob** — ไฟล์ `src/styles/primereact-passthrough.ts` ที่ v3 ต้อง
+   ประกาศ glob พิเศษให้ ถูก auto-detect ของ v4 สแกนเจอเอง ยืนยันแล้วว่า class ที่มีเฉพาะในไฟล์นั้น
+   (`hover:bg-mango-100/40`, `border-steel-100`) ยังถูกสร้างครบก่อนที่ไฟล์จะถูกลบทิ้ง
+
+4. **`@layer components` ใช้ต่อได้ แต่เปลี่ยนเป็น `@utility` แล้ว** ตามรูปแบบ v4 (`.money`, `.receipt-settle`)
+
+5. **daisyUI ตั้งขนาด control สำหรับเมาส์** — `btn`/`input` สูง 40px และ `btn-sm` 32px ซึ่งต่ำกว่า 44px
+   ที่นิ้วต้องการ แก้ด้วยกฎเดียวใน `@media (max-width: 767.98px)` แทนการไล่ใส่ class ทีละปุ่ม 47 จุด
+
+**ผลข้างเคียงที่ดีเกินคาด**: bundle เล็กลงมาก — `/promotions` 247→101 kB (−59%),
+`/sales/history` 237→92 kB (−61%), `/stock` 225→101 kB (−55%) ดูตารางเต็มใน quickstart-results.md
+
+**ข้อบกพร่องฝั่ง API ที่เจอ**: `PagedResult<ProductDto>` กับ `PagedResult<SaleDto>` ได้ schemaId เดียวกัน
+คือ `` PagedResult`1 `` (เพราะ `CustomSchemaIds` เดิมใช้ `type.Name` เมื่อ `DeclaringType is null` ซึ่ง
+generic ระดับบนสุดเข้าเงื่อนไขนี้) ทำให้ Swagger พัง 500 แบบเดียวกับที่ `StaffSummaryDto` เคยทำ
+→ ขยาย `CustomSchemaIds` ให้แยกชื่อ closed generic และเพิ่ม assertion ใน `OpenApiDocumentTests` ให้จับไว้
+
 ## 9. component ที่ daisyUI ไม่มีของแทน — ขอบเขตการถอด PrimeReact
 
 **Decision**: ถอด PrimeReact ออก **ทั้งหมด** ไม่เหลือ dependency ค้าง โดยจับคู่ของแทนดังนี้

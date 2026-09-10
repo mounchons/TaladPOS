@@ -1,3 +1,4 @@
+using TaladPOS.Application.Common;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -43,10 +44,20 @@ public abstract class ApiTestBase : IAsyncLifetime
 
     protected async Task<ProductSummary> GetProductByNameAsync(HttpClient authenticatedClient, string name)
     {
-        var products = await authenticatedClient.GetFromJsonAsync<List<ProductDto>>($"/api/v1/products?search={Uri.EscapeDataString(name)}");
-        var match = products!.Single(p => p.Name == name);
+        // GET /api/v1/products returns a paged envelope, not a bare array
+        // (contracts/products.md). pageSize is explicit rather than left to the
+        // default of 20: the dev/test database accumulates products across runs,
+        // and a lookup that silently searched only the first page would start
+        // failing on a row it can see perfectly well.
+        var page = await authenticatedClient.GetFromJsonAsync<PagedResponse<ProductDto>>(
+            $"/api/v1/products?search={Uri.EscapeDataString(name)}&pageSize={PageRequest.MaxPageSize}");
+        var match = page!.Items.Single(p => p.Name == name);
         return new ProductSummary(match.Id, match.Name, match.StockQuantity);
     }
+
+    /// <summary>Mirrors PagedResult&lt;T&gt; on the wire (contracts/*.md).</summary>
+    protected sealed record PagedResponse<T>(
+        IReadOnlyList<T> Items, int Page, int PageSize, int TotalCount, int TotalPages);
 
     private sealed record LoginResponseDto(string Token, DateTime ExpiresAt, StaffDto Staff);
 

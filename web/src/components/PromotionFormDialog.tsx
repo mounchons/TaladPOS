@@ -1,21 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Dialog } from "primereact/dialog";
-import { Dropdown } from "primereact/dropdown";
-import { InputNumber } from "primereact/inputnumber";
-import { Calendar } from "primereact/calendar";
-import { Checkbox } from "primereact/checkbox";
-import { Button } from "primereact/button";
-import {
-  dialogPT,
-  dropdownPT,
-  inputNumberPT,
-  calendarPT,
-  checkboxPT,
-  buttonPT,
-  secondaryButtonPT,
-} from "@/styles/primereact-passthrough";
+import { Modal, modalButton } from "@/components/Modal";
 import {
   createPromotion,
   updatePromotion,
@@ -44,11 +30,6 @@ function toDateOnly(date: Date): string {
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
-}
-
-function fromDateOnly(value: string): Date {
-  const [y, m, d] = value.split("-").map(Number);
-  return new Date(y, m - 1, d);
 }
 
 const today = new Date();
@@ -112,90 +93,118 @@ export function PromotionFormDialog({ visible, promotion, products, onHide, onSa
   }
 
   return (
-    <Dialog
+    <Modal
       visible={visible}
       onHide={onHide}
-      header={promotion ? "แก้ไขโปรโมชั่น" : "สร้างโปรโมชั่นใหม่"}
-      pt={dialogPT}
-      modal
+      title={promotion ? "แก้ไขโปรโมชั่น" : "สร้างโปรโมชั่นใหม่"}
+      footer={
+        <>
+          <button type="button" onClick={onHide} className={modalButton.secondary}>
+            ยกเลิก
+          </button>
+          <button
+            type="submit"
+            form="promotion-form"
+            disabled={isSubmitting}
+            className={modalButton.primary}
+          >
+            {isSubmitting ? "กำลังบันทึก..." : "บันทึก"}
+          </button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit}>
+      <form id="promotion-form" onSubmit={handleSubmit}>
         <label className="mb-1.5 block text-sm text-ink-700">ขอบเขต</label>
-        <Dropdown
+        <select
           value={form.scope}
-          options={scopeOptions}
-          onChange={(e) => setForm((f) => ({ ...f, scope: e.value }))}
-          pt={dropdownPT}
-          className="mb-3"
-        />
+          onChange={(e) => setForm((f) => ({ ...f, scope: e.target.value as PromotionInput["scope"] }))}
+          className="select mb-3 w-full rounded-control border-steel-200 bg-white"
+        >
+          {scopeOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
 
         {form.scope === "Item" && (
           <>
             <label className="mb-1.5 block text-sm text-ink-700">สินค้า</label>
-            <Dropdown
-              value={form.productId}
-              options={products.map((p) => ({ label: p.name, value: p.id }))}
-              onChange={(e) => setForm((f) => ({ ...f, productId: e.value }))}
-              placeholder="เลือกสินค้า"
-              pt={dropdownPT}
-              className="mb-3"
-            />
+            <select
+              value={form.productId ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, productId: e.target.value || null }))}
+              className="select mb-3 w-full rounded-control border-steel-200 bg-white"
+            >
+              <option value="">เลือกสินค้า</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
           </>
         )}
 
         <label className="mb-1.5 block text-sm text-ink-700">ส่วนลด (%)</label>
-        <InputNumber
+        <input
+          type="number"
+          inputMode="decimal"
+          step="0.01"
+          min="0.01"
+          max="100"
           value={form.discountPercentage}
-          onValueChange={(e) => setForm((f) => ({ ...f, discountPercentage: e.value ?? 0 }))}
-          min={0.01}
-          max={100}
-          maxFractionDigits={2}
-          pt={inputNumberPT}
-          className="mb-3"
+          onChange={(e) =>
+            setForm((f) => ({ ...f, discountPercentage: Number(e.target.value) || 0 }))
+          }
+          className="input money mb-3 w-full rounded-control border-steel-200 bg-white"
+          required
         />
 
         <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-sm text-ink-700">วันที่เริ่ม</label>
-            <Calendar
-              value={fromDateOnly(form.startDate)}
-              onChange={(e) => e.value && setForm((f) => ({ ...f, startDate: toDateOnly(e.value as Date) }))}
-              dateFormat="dd/mm/yy"
-              pt={calendarPT}
+            {/* A native date input: the OS picker is what a manager already
+                knows on a tablet, and its value is the ISO yyyy-mm-dd the API
+                wants, so no formatting round trip. */}
+            <input
+              type="date"
+              value={form.startDate}
+              onChange={(e) => e.target.value && setForm((f) => ({ ...f, startDate: e.target.value }))}
+              className="input money w-full rounded-control border-steel-200 bg-white"
+              required
             />
           </div>
           <div>
             <label className="mb-1.5 block text-sm text-ink-700">วันที่สิ้นสุด</label>
-            <Calendar
-              value={fromDateOnly(form.endDate)}
-              onChange={(e) => e.value && setForm((f) => ({ ...f, endDate: toDateOnly(e.value as Date) }))}
-              dateFormat="dd/mm/yy"
-              pt={calendarPT}
+            <input
+              type="date"
+              value={form.endDate}
+              // The API is the authority on start <= end (it answers 400), but
+              // min here stops the impossible range being submitted at all.
+              min={form.startDate}
+              onChange={(e) => e.target.value && setForm((f) => ({ ...f, endDate: e.target.value }))}
+              className="input money w-full rounded-control border-steel-200 bg-white"
+              required
             />
           </div>
         </div>
 
         <label className="mb-4 flex items-center gap-2 text-sm text-ink-700">
-          <Checkbox
+          <input
+            type="checkbox"
             checked={form.appliesToMembersOnly}
-            onChange={(e) => setForm((f) => ({ ...f, appliesToMembersOnly: e.checked ?? false }))}
-            pt={checkboxPT}
+            onChange={(e) => setForm((f) => ({ ...f, appliesToMembersOnly: e.target.checked }))}
+            className="checkbox checkbox-sm"
           />
           ส่วนลดสำหรับสมาชิกเท่านั้น
         </label>
 
-        {error && <p className="mb-3 rounded-control border border-chili/30 bg-chili/5 px-3 py-2.5 text-sm text-chili">{error}</p>}
-
-        <div className="mt-4 flex justify-end gap-2">
-          <Button type="button" label="ยกเลิก" onClick={onHide} pt={secondaryButtonPT} />
-          <Button
-            type="submit"
-            label={isSubmitting ? "กำลังบันทึก..." : "บันทึก"}
-            disabled={isSubmitting}
-            pt={buttonPT}
-          />
-        </div>
+        {error && (
+          <p className="rounded-control border border-chili/30 bg-chili/5 px-3 py-2.5 text-sm text-chili">
+            {error}
+          </p>
+        )}
       </form>
-    </Dialog>
+    </Modal>
   );
 }

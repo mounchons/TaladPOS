@@ -2,150 +2,170 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Calendar } from "primereact/calendar";
-import { Checkbox } from "primereact/checkbox";
-import { Button } from "primereact/button";
-import {
-  dataTablePT,
-  calendarPT,
-  checkboxPT,
-  secondaryButtonPT,
-} from "@/styles/primereact-passthrough";
-import { searchSales, type Sale } from "@/lib/api/sales";
+import { DataTable, type DataTableColumn } from "@/components/DataTable";
+import { searchSalesPaged, type Sale } from "@/lib/api/sales";
 import { MemberSearch } from "@/components/MemberSearch";
 import type { Member } from "@/lib/api/members";
 import { useAuth } from "@/lib/auth/AuthContext";
 
-function toDateOnly(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+const PAGE_SIZE = 20;
 
 // tasks.md T072 (US6): sales history with date/staff/member filters (contracts/sales.md GET /api/v1/sales).
 export default function SalesHistoryPage() {
   const { staff } = useAuth();
   const router = useRouter();
-  const [from, setFrom] = useState<Date | null>(null);
-  const [to, setTo] = useState<Date | null>(null);
+  // Dates are held as the ISO strings <input type="date"> speaks natively,
+  // which is also what the API wants - no Date round trip in between.
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [onlyMine, setOnlyMine] = useState(false);
   const [member, setMember] = useState<Member | null>(null);
+  const [page, setPage] = useState(1);
   const [sales, setSales] = useState<Sale[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Sales history is the fastest-growing table in the shop, so this is real
+  // server paging: the API returns one page plus the filtered count, ordered
+  // newest first with a stable tiebreak so no bill appears twice across pages.
   const refresh = useCallback(() => {
     setIsLoading(true);
-    searchSales({
-      from: from ? toDateOnly(from) : undefined,
-      to: to ? toDateOnly(to) : undefined,
+    searchSalesPaged({
+      from: from || undefined,
+      to: to || undefined,
       staffId: onlyMine ? staff?.id : undefined,
       memberId: member?.id,
+      page,
+      pageSize: PAGE_SIZE,
     })
-      .then(setSales)
-      .catch(() => setSales([]))
+      .then((result) => {
+        setSales(result.items);
+        setTotalCount(result.totalCount);
+      })
+      .catch(() => {
+        setSales([]);
+        setTotalCount(0);
+      })
       .finally(() => setIsLoading(false));
-  }, [from, to, onlyMine, member, staff]);
+  }, [from, to, onlyMine, member, staff, page]);
 
   useEffect(() => {
     refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount; refresh() is triggered explicitly below
-  }, []);
+  }, [refresh]);
+
+  const columns: DataTableColumn<Sale>[] = [
+    {
+      header: "วันที่",
+      cell: (s) => (
+        <span className="money whitespace-nowrap text-ink-500">
+          {new Date(s.createdAt).toLocaleString("th-TH")}
+        </span>
+      ),
+    },
+    { header: "พนักงาน", cell: (s) => s.staff?.name ?? "—" },
+    { header: "สมาชิก", cell: (s) => s.member?.name ?? "—" },
+    {
+      header: "รายการ",
+      className: "text-right",
+      cell: (s) => <span className="money">{s.lineItems.length}</span>,
+    },
+    {
+      header: "ส่วนลด",
+      className: "text-right",
+      cell: (s) =>
+        s.discountAmount > 0 ? (
+          <span className="money text-mango-600">{s.discountAmount.toFixed(2)}</span>
+        ) : (
+          <span className="text-ink-300">—</span>
+        ),
+    },
+    {
+      header: "ยอดรวม",
+      className: "text-right",
+      cell: (s) => <span className="money font-medium">{s.totalAmount.toFixed(2)}</span>,
+    },
+    {
+      header: "",
+      className: "text-right",
+      cell: (s) => (
+        <button
+          type="button"
+          onClick={() => router.push(`/sales/receipt/${s.id}`)}
+          className="btn btn-sm rounded-control border-steel-200 bg-white font-display font-medium text-ink-700 hover:border-ink hover:bg-white"
+        >
+          ใบเสร็จ
+        </button>
+      ),
+    },
+  ];
+
+  const fieldClass = "input w-full rounded-control border-steel-200 bg-white";
 
   return (
     <main className="px-5 py-5">
       <h1 className="mb-5 text-xl font-semibold">ประวัติการขาย</h1>
 
-      <div className="mb-4 rounded-control border border-steel-200 bg-white p-4">
+      <DataTable
+        columns={columns}
+        rows={sales}
+        rowKey={(s) => s.id}
+        page={page}
+        pageSize={PAGE_SIZE}
+        totalCount={totalCount}
+        onPageChange={setPage}
+        // Same mechanism as /stock (T111): narrowing the range while on a later
+        // page sends the table back to page 1 instead of showing nothing.
+        filterKey={`${from}|${to}|${onlyMine}|${member?.id ?? ""}`}
+        isLoading={isLoading}
+        emptyText="ไม่พบบิลขายในเงื่อนไขนี้ ลองขยายช่วงวันที่"
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <label className="mb-1.5 block text-sm text-ink-700">จากวันที่</label>
-            <Calendar
+            <label className="mb-1.5 block text-sm text-ink-700" htmlFor="history-from">
+              จากวันที่
+            </label>
+            <input
+              id="history-from"
+              type="date"
               value={from}
-              onChange={(e) => setFrom((e.value as Date) ?? null)}
-              dateFormat="dd/mm/yy"
-              pt={calendarPT}
-              showButtonBar
+              onChange={(e) => setFrom(e.target.value)}
+              className={`${fieldClass} money`}
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm text-ink-700">ถึงวันที่</label>
-            <Calendar
+            <label className="mb-1.5 block text-sm text-ink-700" htmlFor="history-to">
+              ถึงวันที่
+            </label>
+            <input
+              id="history-to"
+              type="date"
               value={to}
-              onChange={(e) => setTo((e.value as Date) ?? null)}
-              dateFormat="dd/mm/yy"
-              pt={calendarPT}
-              showButtonBar
+              // The API answers 400 on an impossible range; min stops it here.
+              min={from || undefined}
+              onChange={(e) => setTo(e.target.value)}
+              className={`${fieldClass} money`}
             />
           </div>
           <div className="sm:col-span-2 lg:col-span-1">
             <label className="mb-1.5 block text-sm text-ink-700">สมาชิก</label>
             <MemberSearch selected={member} onSelect={setMember} />
           </div>
-          {/* Bottom-aligned so the checkbox and the button sit on the field
-              baseline on one row, and stack sanely once the grid collapses. */}
+          {/* Bottom-aligned so the checkbox sits on the field baseline on one
+              row, and stacks sanely once the grid collapses. No search button:
+              changing a filter refetches, which is one less thing to press at
+              a counter. */}
           <div className="flex flex-wrap items-center gap-4 lg:self-end lg:pb-1">
-            <label className="flex items-center gap-2 text-sm text-ink-700">
-              <Checkbox
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-ink-700">
+              <input
+                type="checkbox"
                 checked={onlyMine}
-                onChange={(e) => setOnlyMine(e.checked ?? false)}
-                pt={checkboxPT}
+                onChange={(e) => setOnlyMine(e.target.checked)}
+                className="checkbox checkbox-sm"
               />
               เฉพาะบิลของฉัน
             </label>
-            <Button label="ค้นหา" icon="pi pi-search" onClick={refresh} pt={secondaryButtonPT} />
           </div>
         </div>
-      </div>
-
-      <DataTable
-        value={sales}
-        pt={dataTablePT}
-        dataKey="id"
-        loading={isLoading}
-        responsiveLayout="stack"
-        emptyMessage="ไม่พบบิลขายในเงื่อนไขนี้ ลองขยายช่วงวันที่"
-      >
-        <Column
-          header="วันที่"
-          body={(s: Sale) => (
-            <span className="money text-ink-500">
-              {new Date(s.createdAt).toLocaleString("th-TH")}
-            </span>
-          )}
-        />
-        <Column header="พนักงาน" body={(s: Sale) => s.staff?.name ?? "—"} />
-        <Column header="สมาชิก" body={(s: Sale) => s.member?.name ?? "—"} />
-        <Column
-          header="รายการ"
-          body={(s: Sale) => <span className="money">{s.lineItems.length}</span>}
-        />
-        <Column
-          header="ส่วนลด"
-          body={(s: Sale) =>
-            s.discountAmount > 0 ? (
-              <span className="money text-mango-600">{s.discountAmount.toFixed(2)}</span>
-            ) : (
-              <span className="text-ink-300">—</span>
-            )
-          }
-        />
-        <Column
-          header="ยอดรวม"
-          body={(s: Sale) => <span className="money font-medium">{s.totalAmount.toFixed(2)}</span>}
-        />
-        <Column
-          header=""
-          body={(s: Sale) => (
-            <Button
-              label="ใบเสร็จ"
-              onClick={() => router.push(`/sales/receipt/${s.id}`)}
-              pt={secondaryButtonPT}
-            />
-          )}
-        />
       </DataTable>
     </main>
   );

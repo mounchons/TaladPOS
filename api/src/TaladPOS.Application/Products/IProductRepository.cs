@@ -1,3 +1,4 @@
+using TaladPOS.Application.Common;
 using TaladPOS.Domain.Products;
 
 namespace TaladPOS.Application.Products;
@@ -8,6 +9,17 @@ public interface IProductRepository
 
     Task<IReadOnlyList<Product>> SearchAsync(
         string? search, string? barcode, bool lowStockOnly, CancellationToken ct = default);
+
+    /// <summary>
+    /// contracts/products.md - the paged form of <see cref="SearchAsync"/>.
+    ///
+    /// Kept separate rather than replacing it: the stock report
+    /// (GetStockReportQuery) needs every row, and handing it a page would
+    /// silently truncate the report. TotalCount counts the filtered set, so
+    /// filtering, counting and slicing all happen in one place.
+    /// </summary>
+    Task<PagedResult<Product>> SearchPagedAsync(
+        string? search, string? barcode, bool lowStockOnly, PageRequest page, CancellationToken ct = default);
 
     /// <summary>
     /// Atomic conditional decrement (research.md #2): issues

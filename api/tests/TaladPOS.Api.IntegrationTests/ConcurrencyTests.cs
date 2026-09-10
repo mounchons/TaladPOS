@@ -73,8 +73,8 @@ public sealed class ConcurrencyTests : ApiTestBase
         afterSale.StockQuantity.Should().Be(0);
 
         // FR-016: the rejected checkout must not have left a Sale behind.
-        var sales = await cashierClient.GetFromJsonAsync<List<SalesController.SaleDto>>("/api/v1/sales");
-        sales.Should().ContainSingle()
+        var sales = await cashierClient.GetFromJsonAsync<PagedResponse<SalesController.SaleDto>>("/api/v1/sales");
+        sales!.Items.Should().ContainSingle()
             .Which.LineItems.Should().ContainSingle(li => li.ProductId == mango.Id && li.Quantity == 1);
     }
 
@@ -113,8 +113,9 @@ public sealed class ConcurrencyTests : ApiTestBase
         mangoAfter.StockQuantity.Should().Be(mango.StockQuantity, "the first line's deduction must be rolled back");
         appleAfter.StockQuantity.Should().Be(apple.StockQuantity);
 
-        var sales = await cashierClient.GetFromJsonAsync<List<SalesController.SaleDto>>("/api/v1/sales");
-        sales!.Should().BeEmpty("a rejected checkout is never persisted");
+        var sales = await cashierClient.GetFromJsonAsync<PagedResponse<SalesController.SaleDto>>("/api/v1/sales");
+        sales!.Items.Should().BeEmpty("a rejected checkout is never persisted");
+        sales.TotalCount.Should().Be(0, "the envelope's count must agree with its items");
     }
 
     /// <summary>

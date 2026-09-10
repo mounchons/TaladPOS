@@ -230,6 +230,11 @@ public class CompleteSaleUseCaseTests
             string? search, string? barcode, bool lowStockOnly, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<Product>>(_products.Values.ToList());
 
+        public Task<PagedResult<Product>> SearchPagedAsync(
+            string? search, string? barcode, bool lowStockOnly, PageRequest page,
+            CancellationToken ct = default) =>
+            throw new NotSupportedException("Not exercised by these tests.");
+
         public Task<bool> TryDecreaseStockAsync(Guid productId, int quantity, CancellationToken ct = default)
         {
             if (!_products.TryGetValue(productId, out var product) || product.StockQuantity < quantity)
@@ -337,6 +342,15 @@ public class CompleteSaleUseCaseTests
 
         public Task<IReadOnlyList<Sale>> SearchAsync(
             DateTime? from, DateTime? to, Guid? staffId, Guid? memberId, CancellationToken ct = default) =>
+            throw new NotSupportedException("Not exercised by these tests.");
+
+        // These fakes back tests that aggregate over every matching bill, never
+        // a page of them (research.md #6). Throwing rather than returning an
+        // empty page keeps an accidental future call loud instead of silently
+        // reporting zero takings.
+        public Task<PagedResult<Sale>> SearchPagedAsync(
+            DateTime? from, DateTime? to, Guid? staffId, Guid? memberId, PageRequest page,
+            CancellationToken ct = default) =>
             throw new NotSupportedException("Not exercised by these tests.");
     }
 

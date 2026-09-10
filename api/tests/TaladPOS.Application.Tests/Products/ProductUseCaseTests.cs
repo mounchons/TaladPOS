@@ -1,3 +1,4 @@
+using TaladPOS.Application.Common;
 using FluentAssertions;
 using TaladPOS.Application.Products;
 using TaladPOS.Domain.Products;
@@ -86,6 +87,11 @@ public class ProductUseCaseTests
         public Task<IReadOnlyList<Product>> SearchAsync(
             string? search, string? barcode, bool lowStockOnly, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<Product>>(_products.Values.ToList());
+
+        public Task<PagedResult<Product>> SearchPagedAsync(
+            string? search, string? barcode, bool lowStockOnly, PageRequest page,
+            CancellationToken ct = default) =>
+            throw new NotSupportedException("Not exercised by these tests.");
 
         public Task<bool> TryDecreaseStockAsync(Guid productId, int quantity, CancellationToken ct = default) =>
             throw new NotSupportedException("Not exercised by these tests.");

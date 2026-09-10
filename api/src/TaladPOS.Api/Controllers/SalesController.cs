@@ -1,3 +1,4 @@
+using TaladPOS.Application.Common;
 using Microsoft.AspNetCore.Mvc;
 using TaladPOS.Application.Auth;
 using TaladPOS.Application.Members;
@@ -72,12 +73,22 @@ public class SalesController : ControllerBase
 
     /// <summary>contracts/sales.md - GET /api/v1/sales (ประวัติการขาย, FR-024)</summary>
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<SaleDto>>> List(
+    public async Task<ActionResult<PagedResult<SaleDto>>> List(
         [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] Guid? staffId, [FromQuery] Guid? memberId,
-        CancellationToken ct)
+        [FromQuery] int? page = null, [FromQuery] int? pageSize = null,
+        CancellationToken ct = default)
     {
-        var sales = await _getSalesHistoryQuery.ExecuteAsync(from, to, staffId, memberId, ct);
-        return Ok(await ToDtosAsync(sales, ct));
+        if (!PageRequest.TryCreate(page, pageSize, out var pageRequest))
+        {
+            return BadRequest(new { error = "invalid_pagination" });
+        }
+
+        var sales = await _getSalesHistoryQuery.ExecuteAsync(from, to, staffId, memberId, pageRequest, ct);
+
+        // ToDtosAsync resolves staff/member names, so it has to run on the page
+        // rather than inside Map - the envelope is rebuilt around its result.
+        var dtos = await ToDtosAsync(sales.Items, ct);
+        return Ok(new PagedResult<SaleDto>(dtos, sales.Page, sales.PageSize, sales.TotalCount));
     }
 
     /// <summary>contracts/sales.md - GET /api/v1/sales/{id}</summary>

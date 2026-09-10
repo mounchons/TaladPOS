@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { InputText } from "primereact/inputtext";
-import { inputTextPT } from "@/styles/primereact-passthrough";
 import { ProductCard } from "@/components/ProductCard";
 import { Cart, type CartLine } from "@/components/Cart";
 import { MemberFormDialog } from "@/components/MemberFormDialog";
@@ -97,13 +95,15 @@ export default function SalesPage() {
           bottom of the screen on phones and would otherwise cover the last
           row of products. */}
       <div className="flex-1 overflow-y-auto px-5 pb-[var(--register-peek-h)] pt-5 md:pb-5">
-        {/* The scanner target: full width, tall, first thing focused. */}
-        <InputText
+        {/* The scanner target: full width, tall, first thing focused.
+            h-auto/py-3.5 overrides daisyUI's fixed control height - a barcode
+            scanner is aimed at by feel, so this stays taller than a form field. */}
+        <input
+          type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="สแกนบาร์โค้ด หรือพิมพ์ชื่อสินค้า"
-          pt={inputTextPT}
-          className="!py-3.5 !text-base"
+          className="input h-auto w-full rounded-control border-steel-200 bg-white py-3.5 text-base"
           autoFocus
         />
 

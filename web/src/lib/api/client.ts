@@ -8,6 +8,23 @@ import { getToken } from "./tokenStore";
 // actually listens on.
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5054";
 
+/**
+ * The envelope every paged endpoint returns (contracts/products.md,
+ * contracts/sales.md). Declared here rather than in one of the resource
+ * modules so products.ts and sales.ts import the same shape instead of
+ * declaring it twice and drifting apart.
+ */
+export interface PagedResult<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+/** The API rejects anything above this with 400 invalid_pagination. */
+export const MAX_PAGE_SIZE = 100;
+
 export class ApiError extends Error {
   constructor(
     public status: number,

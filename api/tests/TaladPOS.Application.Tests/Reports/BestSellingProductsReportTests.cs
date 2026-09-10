@@ -1,3 +1,4 @@
+using TaladPOS.Application.Common;
 using FluentAssertions;
 using TaladPOS.Application.Reports;
 using TaladPOS.Application.Sales;
@@ -65,5 +66,14 @@ public class BestSellingProductsReportTests
         public Task<IReadOnlyList<Sale>> SearchAsync(
             DateTime? from, DateTime? to, Guid? staffId, Guid? memberId, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<Sale>>(_sales.ToList());
+
+        // These fakes back tests that aggregate over every matching bill, never
+        // a page of them (research.md #6). Throwing rather than returning an
+        // empty page keeps an accidental future call loud instead of silently
+        // reporting zero takings.
+        public Task<PagedResult<Sale>> SearchPagedAsync(
+            DateTime? from, DateTime? to, Guid? staffId, Guid? memberId, PageRequest page,
+            CancellationToken ct = default) =>
+            throw new NotSupportedException("Not exercised by these tests.");
     }
 }

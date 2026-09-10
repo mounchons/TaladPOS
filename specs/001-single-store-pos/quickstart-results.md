@@ -1,4 +1,4 @@
-# ผลการรัน Quickstart Validation (tasks.md T080)
+# ผลการรัน Quickstart Validation
 
 **วันที่รัน**: 2026-09-10 (UTC)
 **อ้างอิง**: [quickstart.md](./quickstart.md) — US1–US6 + หัวข้อ 5 (Success Criteria) + หัวข้อ 6 (Non-Functional)
@@ -126,12 +126,138 @@ NFR-1 ยังถูกครอบด้วย integration test อัตโ�
 | ปิดแล้วเปิดซ้ำจาก "ใบเสร็จบิลล่าสุด" | ปิดสำเร็จ แล้วเปิดกลับมาได้ | PASS |
 | API error จากเบราว์เซอร์ | **0 ครั้ง** (ทุกคำขอไป `/api/v1/*` สำเร็จหมด) | PASS |
 
+## รอบที่ 2 — daisyUI + Tailwind 4 + Server Paging (tasks.md T124)
+
+**วันที่รัน**: 2026-09-10 (UTC) · **ผลรวม**: **31 PASS / 0 FAIL / 2 N/A** (หัวข้อ 4–6)
+พร้อม **13 PASS / 0 FAIL** (หัวข้อ 7.2–7.3 paging) และ **35 PASS / 0 FAIL** (หัวข้อ 7.5 responsive)
+รวมทั้งหมด **79 PASS / 0 FAIL / 2 N/A**
+
+### 7.1 Tailwind 4 + ถอด PrimeReact
+
+| # | ตรวจ | ผลที่สังเกตได้ | ผล |
+|---|---|---|---|
+| 1 | `npm run build` | exit 0, 9 route, ไม่มี error | PASS |
+| 2 | `npx next lint` | ✔ No ESLint warnings or errors | PASS |
+| 3 | เปิดครบ 6 หน้า | console error = 0 | PASS |
+| 4 | `grep -r primereact web/src` | ไม่พบเลย | PASS |
+| 5 | `tailwind.config.ts`, `src/styles/primereact-passthrough.ts` | ลบทั้งสองไฟล์แล้ว | PASS |
+| 6 | `primereact` / `primeicons` ใน `package.json` | ถอดออกแล้ว (`npm uninstall` ลบ 6 packages) | PASS |
+
+**ขนาด bundle ที่ลดลงจริง** (First Load JS จาก `npm run build` ก่อน/หลัง):
+
+| หน้า | ก่อน | หลัง | ลดลง |
+|---|---|---|---|
+| `/promotions` | 247 kB | 101 kB | −59% |
+| `/sales/history` | 237 kB | 91.6 kB | −61% |
+| `/stock` | 225 kB | 101 kB | −55% |
+| `/reports` | 221 kB | 99.7 kB | −55% |
+| `/sales` | 164 kB | 93.7 kB | −43% |
+| `/login` | 135 kB | 89.3 kB | −34% |
+
+### 7.2–7.3 Server paging (13 scenario)
+
+| # | Scenario | ผลที่สังเกตได้ | ผล |
+|---|---|---|---|
+| 7.2-1 | `products?page=1&pageSize=2` | 200, items=2, totalPages=8 จาก totalCount=16 | PASS |
+| 7.2-2 | `page=2` ไม่ซ้ำหน้า 1 | id ซ้ำ = 0 | PASS |
+| 7.2-3 | ไม่ส่ง page/pageSize | page=1, pageSize=20 | PASS |
+| 7.2-4 | `pageSize=101` | **400** `{"error":"invalid_pagination"}` ไม่ปัดลงเป็น 100 | PASS |
+| 7.2-5 | `page=0` | **400** `{"error":"invalid_pagination"}` | PASS |
+| 7.2-6 | `search=<ตรงชิ้นเดียว>` | `totalCount=1` — นับหลังกรอง | PASS |
+| 7.2-7 | `page=9999` | 200, `items=[]`, `totalCount` ยังถูก (ไม่ใช่ 404) | PASS |
+| 7.3-1 | `sales?page=1&pageSize=2` | 200, items=2, totalPages=28 จาก totalCount=55 | PASS |
+| 7.3-2 | `sales page=2` ไม่ซ้ำ | id ซ้ำ = 0 | PASS |
+| 7.3-5 | `sales?pageSize=0` | **400** `invalid_pagination` | PASS |
+| 7.3-8 | เรียกซ้ำสองครั้ง | ลำดับ id เหมือนเดิม (เรียงคงที่ `CreatedAtUtc desc, Id`) | PASS |
+| 7.3-9 | กรองช่วงวันที่ = วันนี้ | ทุกบิลใน `items` เป็นของวันนี้ | PASS |
+| 7.3-10 | ลำดับเวลา | ใหม่ → เก่า ถูกต้อง | PASS |
+
+### 7.4 Datagrid filter (ตรวจผ่านเบราว์เซอร์)
+
+| หน้า | ผลที่สังเกตได้ | ผล |
+|---|---|---|
+| `/stock` | 28 สินค้า → หน้า 1 มี 20 แถว, หน้า 2 มี 8 แถว, เนื้อหาไม่ซ้ำกัน | PASS |
+| `/stock` | **อยู่หน้า 2 แล้วกรอง "ทุเรียน" → เด้งกลับหน้า 1** เหลือ 5 แถว `totalCount=5` | PASS |
+| `/promotions` | สวิตช์ "เฉพาะที่ใช้ได้ตอนนี้" ส่ง `activeOnly` ไป API | PASS |
+| `/sales/history` | ช่วงวันที่ + พนักงาน + สมาชิก ส่งไป API ทั้งหมด, paging จริง | PASS |
+
+> การรีเซ็ตหน้าอยู่ใน `DataTable` เอง (รับ `filterKey`) ไม่ได้เขียนซ้ำในแต่ละหน้า
+> ทุกหน้าที่ใช้ component นี้จึงได้พฤติกรรมเดียวกัน
+
+### 7.5 Responsive (35 scenario: 5 หน้า × 4 ความกว้าง + เกณฑ์แผงแคชเชียร์)
+
+| # | เกณฑ์ | ผลที่สังเกตได้ | ผล |
+|---|---|---|---|
+| 1 | ไม่มี horizontal overflow | 5 หน้า × 360/768/1024/1440 = 20 ช่อง, overflow = 0px ทุกช่อง | PASS |
+| 2 | แผงแคชเชียร์ ≤32% | 768px: 31.2% · **900px: 270px = 30.0% (ชั้นวาง 70.0%)** · 1024px: 30.0% · 1100px: 30.0% | PASS |
+| 3 | ตารางเลื่อนในกล่องตัวเอง | ทุก datagrid ที่ ≤768px อยู่ใน `.overflow-x-auto` และไม่ทำให้หน้าเลื่อน | PASS |
+| 4 | ปุ่ม/ช่องกรอก ≥44px ที่ 360px | ผ่านครบทุกหน้า | PASS |
+
+**ก่อนแก้ (วัดไว้ก่อนเริ่มรอบนี้)**: ที่ 900px แผงกว้างคงที่ 384px = **42.7%** ชั้นวางเหลือ 516px = 57.3%
+grid เหลือ 3 คอลัมน์ กว้างคอลัมน์ละ 147px — **ตก**เกณฑ์ข้อ 2
+**หลังแก้**: แผงเป็น `clamp(15rem,30%,24rem)` → 270px = 30.0% ชั้นวาง 630px = 70.0% grid ได้ 4 คอลัมน์
+
+> **ข้อ 4 มีข้อยกเว้นที่ตั้งใจ**: ปุ่มใน `<dialog>` ที่**ปิดอยู่** ไม่ถูกนับเป็น touch target
+> เพราะ daisyUI ไม่ได้ใช้ `display:none` กับ modal ที่ปิด แต่ใช้ opacity/visibility + `scale(0.95)`
+> ทำให้ยังวัดขนาดได้ที่ 95% ของจริง (44 × 0.95 = 41.8px) ตรวจซ้ำโดย**เปิด modal จริง**ที่ 360px แล้ว —
+> ทุก control สูง 44px พอดี ไม่มีตัวไหนต่ำกว่า จึงเป็นการตัดสิ่งที่กดไม่ได้ออก ไม่ใช่การเลี่ยงเกณฑ์ที่ตก
+
+### 7.6 ไม่ทำของเดิมพัง
+
+| ตรวจ | ผลที่สังเกตได้ | ผล |
+|---|---|---|
+| `dotnet test TaladPOS.sln` | **93 PASS / 0 FAIL** (Domain 45, Application 39, Integration 9) | PASS |
+| หัวข้อ 4 (US1–US6) + 5 (SC) + 6 (NFR) | **31 PASS / 0 FAIL / 2 N/A** — ไม่แย่ลงกว่ารอบ T080 | PASS |
+| ใบเสร็จ modal + พิมพ์ (US1 ข้อ 6) | `<dialog>` ของ daisyUI: `:modal` = true, คลิกนอกกล่องไม่ปิด, ไม่มี backdrop ที่กดปิดได้, พิมพ์ได้ **1 หน้า** สลิปกว้าง 352px (= 22rem) app bar/แผงซ่อนหมด | PASS |
+| `MemberSearch` ที่เขียนเองแทน AutoComplete | พิมพ์ "08" → 9 ตัวเลือก, `aria-expanded=true`, ↓ ตั้ง `aria-activedescendant`, Enter เลือกแล้วแผงแสดงสมาชิก + ยอดสะสม 135.00 | PASS |
+| ส่งฟอร์มผ่าน UI จริง (`/stock`) | ปุ่ม submit อยู่**นอก** `<form>` ผูกด้วย `form="product-form"` → กดแล้วบันทึกจริง, dialog ปิด, จำนวนสินค้า 21→22 | PASS |
+
+**สิ่งที่ต้องแก้ก่อนถึงจะเชื่อผลได้ (T121)**: scenario เดิมในหัวข้อ 4–6 เรียก list endpoint โดยไม่ส่ง `pageSize`
+หลังเปลี่ยนเป็น envelope จะได้แค่ 20 แถวแรกแล้ว**ยังขึ้น PASS** — เป็นการตรวจที่อ่อนลงเงียบ ๆ
+จึงเพิ่ม `listAll()` ที่ไล่อ่านทุกหน้าจนครบก่อนรัน หลักฐานว่าจำเป็นจริง:
+
+| ข้อ | ถ้าไม่แก้ | หลังแก้ (รอบนี้) |
+|---|---|---|
+| NFR-3 (ไม่มี VAT) | ตรวจ 20 บิลแล้ว PASS | **ตรวจครบ 75 บิล** (= `totalCount` พอดี) violations=0 |
+| US6-1 | เห็นบิลเฉพาะหน้าแรก | เห็นครบ 70 บิลของวันนี้ |
+| SC-002 | เทียบสต็อกแค่ 20 ตัวแรก | เทียบครบทุกสินค้า, ขาย 4 → 197→193 |
+
+### หลักฐานอื่นจากรอบนี้
+
+- **US6-5** (สินค้าขายดี, FR-026/SC-006): 200, rows=10, อันดับ 1 = 63 ชิ้น, เรียงมาก→น้อยถูก, `quantitySold` ตรงกับผลรวมจากบิลจริงทุกแถว
+- **SC-001**: 0.05 วินาที จากเพดาน 60 — **วัดเฉพาะเวลา HTTP ของ API ไม่รวมเวลาที่พนักงานกดจริง**
+- **NFR-1** (concurrency): ยังคุมด้วย `ConcurrencyTests.cs` ที่ปรับให้อ่าน envelope แล้ว
+
+> **หมายเหตุเรื่องลำดับการตรวจ**: `ReceiptDialog` ถูกเขียนใหม่ให้ใช้ `Modal.tsx` ร่วมกับฟอร์มอื่น
+> **หลังจาก**ตรวจครั้งแรกไปแล้ว ตัวเลขในตารางนี้จึงเป็นผลจากการ**ตรวจซ้ำบนโค้ดปัจจุบัน** ไม่ใช่ผลรอบก่อน
+> การรวมเข้ากับ `Modal` ทำให้ padding ซ้อนกันสองชั้น (`Modal` มี `px-6 py-5` + `Receipt` มี `px-6 py-7`)
+> จึงเพิ่ม prop `bodyClassName` ให้ `Modal` แล้วให้ `ReceiptDialog` ส่งค่าว่าง
+
+### ข้อบกพร่องที่เจอระหว่างทำและแก้แล้ว
+
+1. **`font-display` เงียบ ๆ กลายเป็นฟอนต์ผิดหลังย้ายไป Tailwind 4** — `@theme` วาง token ไว้ที่ `:root`
+   แต่ `next/font` ประกาศ `--font-kanit` ไว้ที่ `<body>` custom property ที่มี `var()` ถูก resolve
+   ที่ element ที่ประกาศมัน `--font-display` จึงกลายเป็น invalid ที่ `:root` แล้วทุก `font-display`
+   ตกกลับไปใช้ฟอนต์ body โดยไม่มี error ใด ๆ — แก้โดยย้าย font variable ไปไว้ที่ `<html>`
+   (Tailwind 3 ไม่เจอเพราะ utility เขียน `font-family` ลงบน element ตรง ๆ ไม่ผ่าน custom property)
+2. **schemaId ชนกันรอบสอง** — `PagedResult<ProductDto>` กับ `PagedResult<SaleDto>` ได้ id เดียวกันคือ
+   `` PagedResult`1 `` ทำให้ `/swagger/v1/swagger.json` พังแบบเดียวกับที่ `StaffSummaryDto` เคยทำ
+   แก้โดยขยาย `CustomSchemaIds` ให้แยกชื่อ closed generic (`PagedResultOfProductsProductDto`)
+   และเพิ่ม assertion ใน `OpenApiDocumentTests` ให้จับไว้
+
+3. **padding ซ้อนกันในใบเสร็จ** — ตอนรวม `ReceiptDialog` เข้ากับ `Modal` ที่ใช้ร่วมกัน สลิปได้ padding
+   สองชั้นรวม 48px ต่อข้าง แก้ด้วย prop `bodyClassName` ที่ override ได้ ตรวจซ้ำแล้วสลิปยังกว้าง 352px
+   และพิมพ์ออกมา 1 หน้าเหมือนเดิม
+
+---
+
 ## ประวัติการรัน
 
 | รอบ | ผล | หมายเหตุ |
 |---|---|---|
 | ก่อนหน้า (T078) | 28/28 PASS | ยิงไปที่ `/api/<resource>` ซึ่งเป็น path ณ เวลานั้น ยังไม่ครอบคลุมใบเสร็จ modal (TD02), FR-026 (E1) และ SC (E2) |
-| **รอบนี้ (T080)** | **31 PASS / 0 FAIL / 2 N/A** | ยิง `/api/v1/*` หลัง T081 และเพิ่ม scenario US1-6, US6-5, SC-001, SC-002 |
+| T080 | 31 PASS / 0 FAIL / 2 N/A | ยิง `/api/v1/*` หลัง T081 และเพิ่ม scenario US1-6, US6-5, SC-001, SC-002 |
+| **รอบนี้ (T124)** | **79 PASS / 0 FAIL / 2 N/A** | daisyUI 5 + Tailwind 4 + server paging — เพิ่มหัวข้อ 7 (paging 13, responsive 35) และทำให้ NFR-3 ตรวจครบ 75 บิลแทน 20 |
 
 ## สรุปสิ่งที่พบ
 

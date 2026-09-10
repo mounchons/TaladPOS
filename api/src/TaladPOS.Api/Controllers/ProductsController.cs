@@ -1,3 +1,4 @@
+using TaladPOS.Application.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaladPOS.Application.Products;
@@ -43,14 +44,23 @@ public class ProductsController : ControllerBase
 
     /// <summary>contracts/products.md - GET /api/v1/products (FR-001, FR-002, FR-017)</summary>
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts(
+    public async Task<ActionResult<PagedResult<ProductDto>>> GetProducts(
         [FromQuery] string? search,
         [FromQuery] string? barcode,
         [FromQuery] bool lowStockOnly = false,
+        [FromQuery] int? page = null,
+        [FromQuery] int? pageSize = null,
         CancellationToken ct = default)
     {
-        var products = await _productRepository.SearchAsync(search, barcode, lowStockOnly, ct);
-        return Ok(products.Select(ToDto).ToList());
+        // Rejected rather than clamped (contracts/products.md): a caller that
+        // asked for 500 rows and silently got 100 would treat them as all of them.
+        if (!PageRequest.TryCreate(page, pageSize, out var pageRequest))
+        {
+            return BadRequest(new { error = "invalid_pagination" });
+        }
+
+        var products = await _productRepository.SearchPagedAsync(search, barcode, lowStockOnly, pageRequest, ct);
+        return Ok(products.Map(ToDto));
     }
 
     /// <summary>contracts/products.md - GET /api/v1/products/{id}</summary>

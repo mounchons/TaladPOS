@@ -38,6 +38,28 @@ public sealed class OpenApiDocumentTests : ApiTestBase
     }
 
     /// <summary>
+    /// The paged envelopes are the second way this document has broken: both
+    /// closed generics arrive as the bare name "PagedResult`1", so without the
+    /// generic branch in CustomSchemaIds (Program.cs) one silently overwrites
+    /// the other and generation throws. Asserting both keys pins the fix.
+    /// </summary>
+    [Fact]
+    public void SwaggerDocument_GivesEachPagedEnvelopeItsOwnSchema()
+    {
+        var document = GenerateDocument();
+
+        document.Components.Schemas.Should().ContainKeys(
+            "PagedResultOfProductsProductDto",
+            "PagedResultOfSalesSaleDto");
+
+        // The envelope's own fields have to be in the document too - a client
+        // generated from it needs TotalCount to build a pager at all.
+        var envelope = document.Components.Schemas["PagedResultOfProductsProductDto"];
+        envelope.Properties.Keys.Should().Contain(
+            ["items", "page", "pageSize", "totalCount", "totalPages"]);
+    }
+
+    /// <summary>
     /// Every endpoint sits behind the RequireAuthenticatedUser fallback
     /// policy (FR-029), so the document must advertise the bearer scheme -
     /// otherwise Swagger UI renders no Authorize button and every request

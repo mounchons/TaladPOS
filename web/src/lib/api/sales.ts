@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { apiFetch, MAX_PAGE_SIZE, type PagedResult } from "./client";
 
 export interface SaleLineItemDto {
   productId: string;
@@ -46,19 +46,51 @@ export function createSale(request: {
 }
 
 // contracts/sales.md - GET /api/v1/sales (FR-024)
+function saleQuery(params: {
+  from?: string;
+  to?: string;
+  staffId?: string;
+  memberId?: string;
+  page?: number;
+  pageSize?: number;
+}): string {
+  const query = new URLSearchParams();
+  if (params.from) query.set("from", params.from);
+  if (params.to) query.set("to", params.to);
+  if (params.staffId) query.set("staffId", params.staffId);
+  if (params.memberId) query.set("memberId", params.memberId);
+  if (params.page) query.set("page", String(params.page));
+  if (params.pageSize) query.set("pageSize", String(params.pageSize));
+  const qs = query.toString();
+  return `/api/v1/sales${qs ? `?${qs}` : ""}`;
+}
+
+/**
+ * contracts/sales.md - the paged form, for the history datagrid. Bills come
+ * back newest first with a stable tiebreak, so paging never shows one bill
+ * twice or skips another.
+ */
+export function searchSalesPaged(params: {
+  from?: string;
+  to?: string;
+  staffId?: string;
+  memberId?: string;
+  page: number;
+  pageSize: number;
+}): Promise<PagedResult<Sale>> {
+  return apiFetch<PagedResult<Sale>>(saleQuery(params));
+}
+
+/** As with searchProducts: pageSize is explicit so "all of them" stays true. */
 export function searchSales(params: {
   from?: string;
   to?: string;
   staffId?: string;
   memberId?: string;
 }): Promise<Sale[]> {
-  const query = new URLSearchParams();
-  if (params.from) query.set("from", params.from);
-  if (params.to) query.set("to", params.to);
-  if (params.staffId) query.set("staffId", params.staffId);
-  if (params.memberId) query.set("memberId", params.memberId);
-  const qs = query.toString();
-  return apiFetch<Sale[]>(`/api/v1/sales${qs ? `?${qs}` : ""}`);
+  return apiFetch<PagedResult<Sale>>(saleQuery({ ...params, pageSize: MAX_PAGE_SIZE })).then(
+    (page) => page.items,
+  );
 }
 
 // contracts/sales.md - GET /api/v1/sales/{id}/receipt (FR-030)

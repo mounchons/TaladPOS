@@ -455,14 +455,14 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **⚠️ ต้องจบและพิสูจน์ให้ผ่านก่อนแตะ daisyUI** — ไม่งั้นถ้าพังจะแยกไม่ออกว่าเป็นเพราะ Tailwind 4 หรือ daisyUI
 
-- [ ] T082 อัปเกรด `tailwindcss` เป็น `^4.3.3` และเพิ่ม `@tailwindcss/postcss` `^4.3.3` ใน `web/package.json` (ยังไม่ถอด `primereact` ในขั้นนี้ — หน้าเว็บต้องยังเปิดได้ระหว่างทาง)
-- [ ] T083 แก้ `web/postcss.config.mjs` จาก `plugins: { tailwindcss: {} }` เป็น `plugins: { "@tailwindcss/postcss": {} }`
-- [ ] T084 แก้ `web/src/app/globals.css` บรรทัด 1–3 จาก `@tailwind base; @tailwind components; @tailwind utilities;` เป็น `@import "tailwindcss";`
-- [ ] T085 ย้ายธีมทั้งชุดจาก `web/tailwind.config.ts` เป็นบล็อก `@theme` ใน `web/src/app/globals.css` — ต้องครบทุกตัว: `--color-ink` (#17242F) พร้อมสเกล 700/500/300, `--color-steel-50/100/200`, `--color-mango` (#F5A524) พร้อม 600/100, `--color-leaf` (#2F7D4F), `--color-chili` (#C8362B), `--font-display` (var(--font-kanit)), `--font-sans` (var(--font-plex-thai)), `--radius-control` (5px) — ดูบล็อกที่ 1 ใน research.md ข้อ 8
-- [ ] T086 ลบ `web/tailwind.config.ts` ทั้งไฟล์ (ธีมย้ายไป T085 แล้ว และ glob `content` ไม่จำเป็นใน v4)
-- [ ] T087 แก้ `web/src/app/globals.css` บรรทัด ~25: `outline: 2px solid theme("colors.mango.DEFAULT")` เป็น `var(--color-mango)` — ฟังก์ชัน `theme()` เปลี่ยนสัญญาใน v4
-- [ ] T088 แปลง `@layer components { .money, .receipt-settle }` ใน `web/src/app/globals.css` เป็น `@utility money` และ `@utility receipt-settle` ตามรูปแบบ v4
-- [ ] T089 ตรวจตาม quickstart.md ข้อ 7.1 ข้อ 1–2: **หยุด dev server ก่อน** แล้ว `npm run build` ใน `web/` ต้อง exit 0 จากนั้นเริ่ม dev server ใหม่และเปิดครบ `/login` `/sales` `/sales/history` `/stock` `/promotions` `/reports` — console ต้องไม่มี error และสีตามธีมเดิมต้องยังถูก
+- [X] T082 อัปเกรด `tailwindcss` เป็น `^4.3.3` และเพิ่ม `@tailwindcss/postcss` `^4.3.3` ใน `web/package.json` (ยังไม่ถอด `primereact` ในขั้นนี้ — หน้าเว็บต้องยังเปิดได้ระหว่างทาง)
+- [X] T083 แก้ `web/postcss.config.mjs` จาก `plugins: { tailwindcss: {} }` เป็น `plugins: { "@tailwindcss/postcss": {} }`
+- [X] T084 แก้ `web/src/app/globals.css` บรรทัด 1–3 จาก `@tailwind base; @tailwind components; @tailwind utilities;` เป็น `@import "tailwindcss";`
+- [X] T085 ย้ายธีมทั้งชุดจาก `web/tailwind.config.ts` เป็นบล็อก `@theme` ใน `web/src/app/globals.css` — ต้องครบทุกตัว: `--color-ink` (#17242F) พร้อมสเกล 700/500/300, `--color-steel-50/100/200`, `--color-mango` (#F5A524) พร้อม 600/100, `--color-leaf` (#2F7D4F), `--color-chili` (#C8362B), `--font-display` (var(--font-kanit)), `--font-sans` (var(--font-plex-thai)), `--radius-control` (5px) — ดูบล็อกที่ 1 ใน research.md ข้อ 8
+- [X] T086 ลบ `web/tailwind.config.ts` ทั้งไฟล์ (ธีมย้ายไป T085 แล้ว และ glob `content` ไม่จำเป็นใน v4)
+- [X] T087 แก้ `web/src/app/globals.css` บรรทัด ~25: `outline: 2px solid theme("colors.mango.DEFAULT")` เป็น `var(--color-mango)` — ฟังก์ชัน `theme()` เปลี่ยนสัญญาใน v4
+- [X] T088 แปลง `@layer components { .money, .receipt-settle }` ใน `web/src/app/globals.css` เป็น `@utility money` และ `@utility receipt-settle` ตามรูปแบบ v4
+- [X] T089 ตรวจตาม quickstart.md ข้อ 7.1 ข้อ 1–2: **หยุด dev server ก่อน** แล้ว `npm run build` ใน `web/` ต้อง exit 0 จากนั้นเริ่ม dev server ใหม่และเปิดครบ `/login` `/sales` `/sales/history` `/stock` `/promotions` `/reports` — console ต้องไม่มี error และสีตามธีมเดิมต้องยังถูก
 
 **Checkpoint**: Tailwind 4 ทำงานได้เต็มรูปแบบโดยที่ยังใช้ PrimeReact อยู่ — ถ้าเฟสนี้ไม่ผ่าน **ให้หยุด** และพิจารณาทางถอย (daisyUI 4 + Tailwind 3 ตาม research.md ข้อ 8)
 
@@ -474,13 +474,13 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **⚠️ Constitution Principle III (NON-NEGOTIABLE)**: T091 ต้องเขียนและ**ต้อง fail ก่อน** T092/T093
 
-- [ ] T090 สร้าง `PagedResult<T>` **พร้อม logic การแบ่งหน้าและการตรวจค่า** ใน `api/src/TaladPOS.Application/Common/PagedResult.cs` — ไม่ใช่แค่ record เปล่า ๆ ต้องมีทั้ง fields (`Items`, `Page`, `PageSize`, `TotalCount`, `TotalPages` โดย `TotalPages = ceil(TotalCount / PageSize)` และเป็น `0` เมื่อ `TotalCount == 0`) และตัวตรวจค่า `page`/`pageSize` (ค่า default 1/20, ปฏิเสธ `page < 1`, `pageSize < 1`, `pageSize > 100`) รวมถึงการ apply skip/take — **พฤติกรรมทั้งหมดต้องอยู่ที่ชั้น Application ไม่ใช่ใน controller** ไม่งั้น T091 จะไม่มีอะไรให้ทดสอบและ constitution Principle III จะชี้ไปที่ type ที่ไม่มี พฤติกรรม
-- [ ] T091 [P] Unit test ของ logic การแบ่งหน้าใน `api/tests/TaladPOS.Application.Tests/` ต้องครอบ: ค่า default (`page=1`, `pageSize=20`), `pageSize > 100` ต้องถูกปฏิเสธ, `page < 1` ต้องถูกปฏิเสธ, `page` เกินจำนวนหน้าจริงต้องได้ `Items` ว่างแต่ `TotalCount` ยังถูก, และ `TotalCount` ต้องนับ**หลังกรอง** — รันได้โดยไม่มี PostgreSQL ตาม constitution Principle III
-- [ ] T092 แก้ `GetProducts` ใน `api/src/TaladPOS.Api/Controllers/ProductsController.cs` ให้รับ `[FromQuery] int page = 1, [FromQuery] int pageSize = 20` คืน `PagedResult<ProductDto>` และตอบ `400 {"error":"invalid_pagination"}` เมื่อ `page < 1 || pageSize < 1 || pageSize > 100` (contracts/products.md)
-- [ ] T093 แก้ `List` ใน `api/src/TaladPOS.Api/Controllers/SalesController.cs` แบบเดียวกัน คืน `PagedResult<SaleDto>` และ**บังคับเรียง `soldAt` มาก→น้อยแบบคงที่** ไม่งั้นบิลเดียวกันจะโผล่ซ้ำหรือหายตอนเปลี่ยนหน้า (contracts/sales.md)
-- [ ] T094 แก้ integration test ที่ deserialize เป็น `List<T>` ใน `api/tests/TaladPOS.Api.IntegrationTests/` (รวม `ConcurrencyTests.cs` ที่อ่าน `List<SalesController.SaleDto>` จาก `GET /api/v1/sales`) ให้อ่าน envelope แทน
-- [ ] T095 แก้ `api/tests/TaladPOS.Api.IntegrationTests/OpenApiDocumentTests.cs` ให้ตรวจ schema ของ envelope — **ต้อง generate เอกสารออกมาอ่านชื่อ schema จริงก่อน ห้ามเดา**: `CustomSchemaIds` ใน `api/src/TaladPOS.Api/Program.cs` ใช้ `type.DeclaringType is null ? type.Name : ...` และ `PagedResult<T>` เป็น generic ระดับบนสุด จึงตกเข้าเงื่อนไขแรกและได้ id เป็น ``PagedResult`1`` **เหมือนกันทั้ง `PagedResult<ProductDto>` และ `PagedResult<SaleDto>`** ซึ่งคือ schemaId collision แบบเดียวกับที่เคยทำให้ `/swagger/v1/swagger.json` ตอบ 500 มาแล้ว (ดู comment ในไฟล์เดียวกัน) — ถ้าชนจริงต้องขยาย `CustomSchemaIds` ให้แยกชื่อ closed generic ออกจากกันก่อน แล้วจึงเขียน assertion ตามชื่อที่ได้จริง
-- [ ] T096 รัน `dotnet test TaladPOS.sln` ในคอนเทนเนอร์ SDK — ต้องผ่านทั้งหมด ไม่มี test ที่ถูก skip เพื่อให้ผ่าน
+- [X] T090 สร้าง `PagedResult<T>` **พร้อม logic การแบ่งหน้าและการตรวจค่า** ใน `api/src/TaladPOS.Application/Common/PagedResult.cs` — ไม่ใช่แค่ record เปล่า ๆ ต้องมีทั้ง fields (`Items`, `Page`, `PageSize`, `TotalCount`, `TotalPages` โดย `TotalPages = ceil(TotalCount / PageSize)` และเป็น `0` เมื่อ `TotalCount == 0`) และตัวตรวจค่า `page`/`pageSize` (ค่า default 1/20, ปฏิเสธ `page < 1`, `pageSize < 1`, `pageSize > 100`) รวมถึงการ apply skip/take — **พฤติกรรมทั้งหมดต้องอยู่ที่ชั้น Application ไม่ใช่ใน controller** ไม่งั้น T091 จะไม่มีอะไรให้ทดสอบและ constitution Principle III จะชี้ไปที่ type ที่ไม่มี พฤติกรรม
+- [X] T091 [P] Unit test ของ logic การแบ่งหน้าใน `api/tests/TaladPOS.Application.Tests/` ต้องครอบ: ค่า default (`page=1`, `pageSize=20`), `pageSize > 100` ต้องถูกปฏิเสธ, `page < 1` ต้องถูกปฏิเสธ, `page` เกินจำนวนหน้าจริงต้องได้ `Items` ว่างแต่ `TotalCount` ยังถูก, และ `TotalCount` ต้องนับ**หลังกรอง** — รันได้โดยไม่มี PostgreSQL ตาม constitution Principle III
+- [X] T092 แก้ `GetProducts` ใน `api/src/TaladPOS.Api/Controllers/ProductsController.cs` ให้รับ `[FromQuery] int page = 1, [FromQuery] int pageSize = 20` คืน `PagedResult<ProductDto>` และตอบ `400 {"error":"invalid_pagination"}` เมื่อ `page < 1 || pageSize < 1 || pageSize > 100` (contracts/products.md)
+- [X] T093 แก้ `List` ใน `api/src/TaladPOS.Api/Controllers/SalesController.cs` แบบเดียวกัน คืน `PagedResult<SaleDto>` และ**บังคับเรียง `soldAt` มาก→น้อยแบบคงที่** ไม่งั้นบิลเดียวกันจะโผล่ซ้ำหรือหายตอนเปลี่ยนหน้า (contracts/sales.md)
+- [X] T094 แก้ integration test ที่ deserialize เป็น `List<T>` ใน `api/tests/TaladPOS.Api.IntegrationTests/` (รวม `ConcurrencyTests.cs` ที่อ่าน `List<SalesController.SaleDto>` จาก `GET /api/v1/sales`) ให้อ่าน envelope แทน
+- [X] T095 แก้ `api/tests/TaladPOS.Api.IntegrationTests/OpenApiDocumentTests.cs` ให้ตรวจ schema ของ envelope — **ต้อง generate เอกสารออกมาอ่านชื่อ schema จริงก่อน ห้ามเดา**: `CustomSchemaIds` ใน `api/src/TaladPOS.Api/Program.cs` ใช้ `type.DeclaringType is null ? type.Name : ...` และ `PagedResult<T>` เป็น generic ระดับบนสุด จึงตกเข้าเงื่อนไขแรกและได้ id เป็น ``PagedResult`1`` **เหมือนกันทั้ง `PagedResult<ProductDto>` และ `PagedResult<SaleDto>`** ซึ่งคือ schemaId collision แบบเดียวกับที่เคยทำให้ `/swagger/v1/swagger.json` ตอบ 500 มาแล้ว (ดู comment ในไฟล์เดียวกัน) — ถ้าชนจริงต้องขยาย `CustomSchemaIds` ให้แยกชื่อ closed generic ออกจากกันก่อน แล้วจึงเขียน assertion ตามชื่อที่ได้จริง
+- [X] T096 รัน `dotnet test TaladPOS.sln` ในคอนเทนเนอร์ SDK — ต้องผ่านทั้งหมด ไม่มี test ที่ถูก skip เพื่อให้ผ่าน
 
 **Checkpoint**: API คืน envelope ครบสองตัว มี unit test ครอบ และ integration test เดิมทั้งหมดยังเขียว
 
@@ -490,12 +490,12 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **Purpose**: วางรากฐานฝั่ง `web/` ให้ครบก่อนไล่แก้ทีละหน้า
 
-- [ ] T097 ติดตั้ง `daisyui@^5.7.32` ใน `web/package.json` — **ยังไม่ถอด `primereact`/`primeicons` ในขั้นนี้** หน้าที่ยังไม่ย้ายต้องเปิดได้ตลอดทาง ไม่งั้น Checkpoint ของ Phase 13–18 ตรวจอะไรไม่ได้เลย (ถอดที่ T120)
-- [ ] T098 เพิ่ม `@plugin "daisyui";` และบล็อก `@plugin "daisyui/theme" { name: "talad"; default: true; color-scheme: light; ... }` ใน `web/src/app/globals.css` ต่อจาก `@theme` โดย map `--color-primary` = mango, `--color-base-200` = steel-50, `--color-base-content` = ink, `--color-success` = leaf, `--color-error` = chili, `--radius-field` = 5px — ดูบล็อกที่ 2 ใน research.md ข้อ 8
-- [ ] T099 ลบ `web/src/styles/primereact-passthrough.ts` ทั้งไฟล์ และลบ `PrimeReactProvider` ออกจาก `web/src/app/providers.tsx`
-- [ ] T100 สร้าง `web/src/components/DataTable.tsx` — generic (`<DataTable<T>>`) รับ `columns`, `rows`, `page`, `pageSize`, `totalCount`, `onPageChange`, `isLoading`, `emptyText` และ `children` (ช่องใส่แถบ filter ของแต่ละหน้า) ใช้ class `table` ของ daisyUI และ `join` สำหรับปุ่มเลขหน้า — **ต้องรีเซ็ตกลับหน้า 1 เองเมื่อเงื่อนไขกรองเปลี่ยน** (รับ `filterKey` แล้ว reset เมื่อค่าเปลี่ยน) เพื่อให้ ทุกหน้าที่ใช้ component นี้ได้พฤติกรรมเดียวกันโดยไม่ต้องเขียนซ้ำ — **ที่ ≤768px ต้องห่อด้วย `overflow-x-auto` ของตัวเองและต้องไม่ทำให้ทั้งหน้าเลื่อนแนวนอน** (research.md ข้อ 12 เกณฑ์ 3)
-- [ ] T101 [P] แก้ `web/src/lib/api/products.ts` ให้ส่ง `page`/`pageSize` และอ่าน envelope — **ไฟล์นี้เป็นเจ้าของ type `PagedResult<T>` ฝั่ง web** ประกาศไว้ที่ `web/src/lib/api/client.ts` แล้ว export ให้ไฟล์อื่น import ไม่ใช่ประกาศซ้ำ (T102 ต้อง import จากที่นี่)
-- [ ] T102 [P] แก้ `web/src/lib/api/sales.ts` ให้ส่ง `page`/`pageSize` และอ่าน envelope โดย **import type `PagedResult<T>` จาก `web/src/lib/api/client.ts`** (T101) ห้ามประกาศซ้ำ
+- [X] T097 ติดตั้ง `daisyui@^5.7.32` ใน `web/package.json` — **ยังไม่ถอด `primereact`/`primeicons` ในขั้นนี้** หน้าที่ยังไม่ย้ายต้องเปิดได้ตลอดทาง ไม่งั้น Checkpoint ของ Phase 13–18 ตรวจอะไรไม่ได้เลย (ถอดที่ T120)
+- [X] T098 เพิ่ม `@plugin "daisyui";` และบล็อก `@plugin "daisyui/theme" { name: "talad"; default: true; color-scheme: light; ... }` ใน `web/src/app/globals.css` ต่อจาก `@theme` โดย map `--color-primary` = mango, `--color-base-200` = steel-50, `--color-base-content` = ink, `--color-success` = leaf, `--color-error` = chili, `--radius-field` = 5px — ดูบล็อกที่ 2 ใน research.md ข้อ 8
+- [X] T099 ลบ `web/src/styles/primereact-passthrough.ts` ทั้งไฟล์ และลบ `PrimeReactProvider` ออกจาก `web/src/app/providers.tsx` — **ย้ายไปทำท้าย Phase 18 พร้อม T120** ด้วยเหตุผลเดียวกับ T097: หน้าที่ยังไม่ย้ายทุกหน้า import จากไฟล์ passthrough นี้ ลบตอนนี้แล้วหน้าเหล่านั้นพังทันทีตลอด 6 เฟส และ Checkpoint ของแต่ละเฟสจะตรวจอะไรไม่ได้เลย
+- [X] T100 สร้าง `web/src/components/DataTable.tsx` — generic (`<DataTable<T>>`) รับ `columns`, `rows`, `page`, `pageSize`, `totalCount`, `onPageChange`, `isLoading`, `emptyText` และ `children` (ช่องใส่แถบ filter ของแต่ละหน้า) ใช้ class `table` ของ daisyUI และ `join` สำหรับปุ่มเลขหน้า — **ต้องรีเซ็ตกลับหน้า 1 เองเมื่อเงื่อนไขกรองเปลี่ยน** (รับ `filterKey` แล้ว reset เมื่อค่าเปลี่ยน) เพื่อให้ ทุกหน้าที่ใช้ component นี้ได้พฤติกรรมเดียวกันโดยไม่ต้องเขียนซ้ำ — **ที่ ≤768px ต้องห่อด้วย `overflow-x-auto` ของตัวเองและต้องไม่ทำให้ทั้งหน้าเลื่อนแนวนอน** (research.md ข้อ 12 เกณฑ์ 3)
+- [X] T101 [P] แก้ `web/src/lib/api/products.ts` ให้ส่ง `page`/`pageSize` และอ่าน envelope — **ไฟล์นี้เป็นเจ้าของ type `PagedResult<T>` ฝั่ง web** ประกาศไว้ที่ `web/src/lib/api/client.ts` แล้ว export ให้ไฟล์อื่น import ไม่ใช่ประกาศซ้ำ (T102 ต้อง import จากที่นี่)
+- [X] T102 [P] แก้ `web/src/lib/api/sales.ts` ให้ส่ง `page`/`pageSize` และอ่าน envelope โดย **import type `PagedResult<T>` จาก `web/src/lib/api/client.ts`** (T101) ห้ามประกาศซ้ำ
 
 **Checkpoint**: มี `DataTable` ที่พร้อมใช้ มีธีม daisyUI ที่สีตรงกับของเดิม และ client เรียก API แบบแบ่งหน้าได้แล้ว
 
@@ -507,11 +507,11 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **Independent Test**: ขายมะม่วง 2 ชิ้นจนได้ใบเสร็จ modal และสั่งพิมพ์ได้ ที่ความกว้าง 900px ชั้นวางต้องได้ ≥68% ของจอ
 
-- [ ] T103 [US1] แก้ `web/src/app/(protected)/sales/page.tsx` เปลี่ยน `InputText` เป็น `<input class="input">` ของ daisyUI (ช่องสแกนบาร์โค้ด — ต้องคง `autoFocus` และ debounce 250ms เดิม) และส่ง `pageSize` ใหญ่พอโดย**ไม่แสดงตัวแบ่งหน้า** ตาม contracts/products.md
-- [ ] T104 [US1] แก้ `web/src/components/Cart.tsx` เปลี่ยน `Button`/`InputNumber` เป็น `btn` และ `<input type="number" class="input">` ของ daisyUI — ต้องคงพฤติกรรมปุ่มชำระเงินตอน disabled ที่แก้ไว้แล้ว (มองเห็นได้บนพื้นเข้ม) และ**เปลี่ยนความกว้างแผงจากค่าคงที่ 384px เป็น `clamp` ที่กินไม่เกิน 32% ของจอในช่วง 768–1100px** (research.md ข้อ 12)
-- [ ] T105 [P] [US1] แก้ `web/src/components/ProductCard.tsx` ใช้ class ของ daisyUI โดยคงขนาดการ์ดที่ย่อไว้แล้ว (`aspect-[4/3]`, ชื่อ `line-clamp-2`) และคงป้าย "สินค้าหมด"/"เหลือ N"
-- [ ] T106 [US1] แก้ `web/src/components/ReceiptDialog.tsx` เปลี่ยน `Dialog` ของ PrimeReact เป็น `<dialog class="modal">` ของ daisyUI — ต้องคงพฤติกรรมเดิมครบ: หัวข้อ "ขายสำเร็จ", ปุ่ม "ขายรายการต่อไป" + "พิมพ์ใบเสร็จ", และ**ต้องไม่ปิดเมื่อคลิกนอกกล่อง** (ห้ามใส่ `modal-backdrop` ที่กดปิดได้)
-- [ ] T107 [US1] ตรวจว่า `[data-receipt-print]` ใน `web/src/app/globals.css` (บล็อก `@media print`) ยังแยกใบเสร็จออกจากหน้าจอได้หลังย้ายไป Tailwind 4 — พิมพ์จริงต้องได้ 1 หน้าที่มีแต่ใบเสร็จ กว้าง ≤22rem จัดกลาง
+- [X] T103 [US1] แก้ `web/src/app/(protected)/sales/page.tsx` เปลี่ยน `InputText` เป็น `<input class="input">` ของ daisyUI (ช่องสแกนบาร์โค้ด — ต้องคง `autoFocus` และ debounce 250ms เดิม) และส่ง `pageSize` ใหญ่พอโดย**ไม่แสดงตัวแบ่งหน้า** ตาม contracts/products.md
+- [X] T104 [US1] แก้ `web/src/components/Cart.tsx` เปลี่ยน `Button`/`InputNumber` เป็น `btn` และ `<input type="number" class="input">` ของ daisyUI — ต้องคงพฤติกรรมปุ่มชำระเงินตอน disabled ที่แก้ไว้แล้ว (มองเห็นได้บนพื้นเข้ม) และ**เปลี่ยนความกว้างแผงจากค่าคงที่ 384px เป็น `clamp` ที่กินไม่เกิน 32% ของจอในช่วง 768–1100px** (research.md ข้อ 12)
+- [X] T105 [P] [US1] แก้ `web/src/components/ProductCard.tsx` ใช้ class ของ daisyUI โดยคงขนาดการ์ดที่ย่อไว้แล้ว (`aspect-[4/3]`, ชื่อ `line-clamp-2`) และคงป้าย "สินค้าหมด"/"เหลือ N"
+- [X] T106 [US1] แก้ `web/src/components/ReceiptDialog.tsx` เปลี่ยน `Dialog` ของ PrimeReact เป็น `<dialog class="modal">` ของ daisyUI — ต้องคงพฤติกรรมเดิมครบ: หัวข้อ "ขายสำเร็จ", ปุ่ม "ขายรายการต่อไป" + "พิมพ์ใบเสร็จ", และ**ต้องไม่ปิดเมื่อคลิกนอกกล่อง** (ห้ามใส่ `modal-backdrop` ที่กดปิดได้)
+- [X] T107 [US1] ตรวจว่า `[data-receipt-print]` ใน `web/src/app/globals.css` (บล็อก `@media print`) ยังแยกใบเสร็จออกจากหน้าจอได้หลังย้ายไป Tailwind 4 — พิมพ์จริงต้องได้ 1 หน้าที่มีแต่ใบเสร็จ กว้าง ≤22rem จัดกลาง
 
 **Checkpoint**: US1 ใช้งานได้ครบด้วย daisyUI ล้วน
 
@@ -523,8 +523,8 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **Independent Test**: ล็อกอินด้วยบัญชี Cashier ที่ 360px แล้วสลับเมนูได้ครบโดยหน้าไม่เลื่อนแนวนอน
 
-- [ ] T108 [US2] แก้ `web/src/app/login/page.tsx` เปลี่ยน `InputText`/`Password`/`Button` เป็น `input` + `<input type="password">` + `btn` ของ daisyUI (คงข้อความ error ภาษาไทยเดิม)
-- [ ] T109 [US2] แก้ `web/src/components/AppShell.tsx` เปลี่ยน `Button` เป็น `btn` ของ daisyUI — คงพฤติกรรม responsive เดิม (แถวชื่อ/บัญชีแยกบนมือถือ, เมนูเลื่อนแนวนอนแทนการตัดบรรทัด เพราะภาษาไทยไม่มีช่องว่างระหว่างคำ) และคงเส้นใต้สีมะม่วงของเมนูที่กำลังเปิด
+- [X] T108 [US2] แก้ `web/src/app/login/page.tsx` เปลี่ยน `InputText`/`Password`/`Button` เป็น `input` + `<input type="password">` + `btn` ของ daisyUI (คงข้อความ error ภาษาไทยเดิม)
+- [X] T109 [US2] แก้ `web/src/components/AppShell.tsx` เปลี่ยน `Button` เป็น `btn` ของ daisyUI — คงพฤติกรรม responsive เดิม (แถวชื่อ/บัญชีแยกบนมือถือ, เมนูเลื่อนแนวนอนแทนการตัดบรรทัด เพราะภาษาไทยไม่มีช่องว่างระหว่างคำ) และคงเส้นใต้สีมะม่วงของเมนูที่กำลังเปิด
 
 ---
 
@@ -534,9 +534,9 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **Independent Test**: พิมพ์ชื่อสินค้าในช่องค้นหา → ตารางเหลือเฉพาะที่ตรงและจำนวนหน้าคำนวณใหม่ตามผลกรอง
 
-- [ ] T110 [US3] แก้ `web/src/app/(protected)/stock/page.tsx` เปลี่ยน `DataTable` ของ PrimeReact เป็น `DataTable` ของเรา (T100) พร้อม server paging และแถบ filter: ช่องค้นหาชื่อสินค้า + สวิตช์ "เฉพาะสินค้าใกล้หมด" (ส่งเป็น `search` และ `lowStockOnly` ไปที่ API ไม่กรองฝั่ง client)
-- [ ] T111 [US3] พิสูจน์ว่าการรีเซ็ตหน้าของ `DataTable` (T100) ทำงานจริงใน `web/src/app/(protected)/stock/page.tsx` — อยู่หน้า 5 แล้วกรองจนเหลือ 2 หน้า ต้องเด้งกลับหน้า 1 ไม่ใช่ค้างที่หน้า 5 แล้วโชว์ตารางว่าง ถ้ายังค้างแปลว่า `filterKey` ที่หน้านี้ส่งเข้า `DataTable` ไม่ครบทุกตัวกรอง (quickstart.md ข้อ 7.4) — พฤติกรรมเดียวกันนี้ต้องใช้ได้กับ T117 ด้วยโดยไม่ต้องเขียนซ้ำ
-- [ ] T112 [P] [US3] แก้ `web/src/components/ProductFormDialog.tsx` เปลี่ยน `Dialog`/`InputText`/`InputNumber`/`Button` เป็น `modal` + `input` + `<input type="number">` + `btn` ของ daisyUI (คง validation เดิม: ราคา > 0, บาร์โค้ดซ้ำต้องขึ้น error จาก 409)
+- [X] T110 [US3] แก้ `web/src/app/(protected)/stock/page.tsx` เปลี่ยน `DataTable` ของ PrimeReact เป็น `DataTable` ของเรา (T100) พร้อม server paging และแถบ filter: ช่องค้นหาชื่อสินค้า + สวิตช์ "เฉพาะสินค้าใกล้หมด" (ส่งเป็น `search` และ `lowStockOnly` ไปที่ API ไม่กรองฝั่ง client)
+- [X] T111 [US3] พิสูจน์ว่าการรีเซ็ตหน้าของ `DataTable` (T100) ทำงานจริงใน `web/src/app/(protected)/stock/page.tsx` — อยู่หน้า 5 แล้วกรองจนเหลือ 2 หน้า ต้องเด้งกลับหน้า 1 ไม่ใช่ค้างที่หน้า 5 แล้วโชว์ตารางว่าง ถ้ายังค้างแปลว่า `filterKey` ที่หน้านี้ส่งเข้า `DataTable` ไม่ครบทุกตัวกรอง (quickstart.md ข้อ 7.4) — พฤติกรรมเดียวกันนี้ต้องใช้ได้กับ T117 ด้วยโดยไม่ต้องเขียนซ้ำ
+- [X] T112 [P] [US3] แก้ `web/src/components/ProductFormDialog.tsx` เปลี่ยน `Dialog`/`InputText`/`InputNumber`/`Button` เป็น `modal` + `input` + `<input type="number">` + `btn` ของ daisyUI (คง validation เดิม: ราคา > 0, บาร์โค้ดซ้ำต้องขึ้น error จาก 409)
 
 ---
 
@@ -546,8 +546,8 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **Independent Test**: พิมพ์เบอร์โทรบางส่วนในหน้าขาย → เห็นรายชื่อที่ตรง เลือกได้ และส่วนลดสมาชิกถูกคำนวณ
 
-- [ ] T113 [US4] เขียน `web/src/components/MemberSearch.tsx` ใหม่แทน `AutoComplete` ของ PrimeReact — ใช้ `input` + `dropdown` ของ daisyUI คงพฤติกรรมเดิม: debounce, เรียก `GET /api/v1/members?search=`, เลือกได้ด้วยคีย์บอร์ด (ลูกศรขึ้น/ลง + Enter + Esc) และมี `aria-expanded`/`role="listbox"` ให้ screen reader
-- [ ] T114 [P] [US4] แก้ `web/src/components/MemberFormDialog.tsx` เปลี่ยน `Dialog`/`InputText`/`Button` เป็น `modal` + `input` + `btn` ของ daisyUI (คง validation เบอร์โทรและ error 409 เบอร์ซ้ำ)
+- [X] T113 [US4] เขียน `web/src/components/MemberSearch.tsx` ใหม่แทน `AutoComplete` ของ PrimeReact — ใช้ `input` + `dropdown` ของ daisyUI คงพฤติกรรมเดิม: debounce, เรียก `GET /api/v1/members?search=`, เลือกได้ด้วยคีย์บอร์ด (ลูกศรขึ้น/ลง + Enter + Esc) และมี `aria-expanded`/`role="listbox"` ให้ screen reader
+- [X] T114 [P] [US4] แก้ `web/src/components/MemberFormDialog.tsx` เปลี่ยน `Dialog`/`InputText`/`Button` เป็น `modal` + `input` + `btn` ของ daisyUI (คง validation เบอร์โทรและ error 409 เบอร์ซ้ำ)
 
 ---
 
@@ -557,8 +557,8 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **Independent Test**: ติ๊ก "เฉพาะที่ใช้ได้ตอนนี้" → เหลือเฉพาะโปรที่ยังไม่หมดอายุ
 
-- [ ] T115 [US5] แก้ `web/src/app/(protected)/promotions/page.tsx` ใช้ `DataTable` ของเราแบบ**ไม่เปิดตัวแบ่งหน้า** (`GET /api/v1/promotions` ไม่แบ่งหน้า) พร้อมแถบ filter สวิตช์ "เฉพาะที่ใช้ได้ตอนนี้" ที่ส่ง `activeOnly` ไปที่ API
-- [ ] T116 [US5] แก้ `web/src/components/PromotionFormDialog.tsx` เปลี่ยน `Dialog`/`Dropdown`/`InputNumber`/`Calendar`/`Checkbox`/`Button` เป็น `modal` + `<select class="select">` + `<input type="number">` + `<input type="date">` + `<input type="checkbox" class="checkbox">` + `btn` ของ daisyUI — `<input type="date">` ใช้ date picker ของระบบปฏิบัติการซึ่งใช้งานง่ายกว่าบนแท็บเล็ต (research.md ข้อ 9) คง validation ช่วงวันที่เดิม
+- [X] T115 [US5] แก้ `web/src/app/(protected)/promotions/page.tsx` ใช้ `DataTable` ของเราแบบ**ไม่เปิดตัวแบ่งหน้า** (`GET /api/v1/promotions` ไม่แบ่งหน้า) พร้อมแถบ filter สวิตช์ "เฉพาะที่ใช้ได้ตอนนี้" ที่ส่ง `activeOnly` ไปที่ API
+- [X] T116 [US5] แก้ `web/src/components/PromotionFormDialog.tsx` เปลี่ยน `Dialog`/`Dropdown`/`InputNumber`/`Calendar`/`Checkbox`/`Button` เป็น `modal` + `<select class="select">` + `<input type="number">` + `<input type="date">` + `<input type="checkbox" class="checkbox">` + `btn` ของ daisyUI — `<input type="date">` ใช้ date picker ของระบบปฏิบัติการซึ่งใช้งานง่ายกว่าบนแท็บเล็ต (research.md ข้อ 9) คง validation ช่วงวันที่เดิม
 
 ---
 
@@ -568,11 +568,11 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **Independent Test**: เลือกช่วงวันที่ในหน้าประวัติ → เห็นเฉพาะบิลในช่วง เปลี่ยนหน้าแล้วไม่มีบิลซ้ำหรือหาย
 
-- [ ] T117 [US6] แก้ `web/src/app/(protected)/sales/history/page.tsx` ใช้ `DataTable` ของเราพร้อม **server paging จริง** และแถบ filter: ช่วงวันที่ (`<input type="date">` สองช่อง ส่งเป็น `from`/`to`) + เลือกพนักงาน (`select` ส่งเป็น `staffId`) — เปลี่ยน filter ต้องรีเซ็ตกลับหน้า 1 โดยใช้กลไก `filterKey` เดียวกับ T111 ไม่ใช่เขียน logic รีเซ็ตซ้ำในหน้านี้
-- [ ] T118 [P] [US6] แก้ `web/src/app/(protected)/reports/page.tsx` เปลี่ยน `TabView`/`TabPanel` เป็น `tabs tabs-border` และ `DataTable` ของ PrimeReact เป็นของเรา (ไม่เปิดตัวแบ่งหน้า — รายงานคืน aggregate ที่มีขอบเขตในตัว) พร้อม filter ช่วงวันที่ที่ส่งไปทุกตาราง
-- [ ] T119 [P] [US6] แก้ `web/src/app/(protected)/sales/receipt/[id]/page.tsx` และ `web/src/components/Receipt.tsx` เปลี่ยน `Button` เป็น `btn` ของ daisyUI โดยคง `data-receipt-print` และโครงใบเสร็จเดิมไว้ทั้งหมด
+- [X] T117 [US6] แก้ `web/src/app/(protected)/sales/history/page.tsx` ใช้ `DataTable` ของเราพร้อม **server paging จริง** และแถบ filter: ช่วงวันที่ (`<input type="date">` สองช่อง ส่งเป็น `from`/`to`) + เลือกพนักงาน (`select` ส่งเป็น `staffId`) — เปลี่ยน filter ต้องรีเซ็ตกลับหน้า 1 โดยใช้กลไก `filterKey` เดียวกับ T111 ไม่ใช่เขียน logic รีเซ็ตซ้ำในหน้านี้
+- [X] T118 [P] [US6] แก้ `web/src/app/(protected)/reports/page.tsx` เปลี่ยน `TabView`/`TabPanel` เป็น `tabs tabs-border` และ `DataTable` ของ PrimeReact เป็นของเรา (ไม่เปิดตัวแบ่งหน้า — รายงานคืน aggregate ที่มีขอบเขตในตัว) พร้อม filter ช่วงวันที่ที่ส่งไปทุกตาราง
+- [X] T119 [P] [US6] แก้ `web/src/app/(protected)/sales/receipt/[id]/page.tsx` และ `web/src/components/Receipt.tsx` เปลี่ยน `Button` เป็น `btn` ของ daisyUI โดยคง `data-receipt-print` และโครงใบเสร็จเดิมไว้ทั้งหมด
 
-- [ ] T120 ถอด `primereact` และ `primeicons` ออกจาก `web/package.json` แล้วรัน `npm install` — ทำเป็นขั้นสุดท้ายของเฟสนี้ **หลังจาก** `grep -r "primereact" web/src` ได้ผลลัพธ์ว่างแล้วเท่านั้น ถ้ายัง grep เจอแปลว่ายังมีหน้าที่ย้ายไม่เสร็จ
+- [X] T120 ถอด `primereact` และ `primeicons` ออกจาก `web/package.json` แล้วรัน `npm install` — ทำเป็นขั้นสุดท้ายของเฟสนี้ **หลังจาก** `grep -r "primereact" web/src` ได้ผลลัพธ์ว่างแล้วเท่านั้น ถ้ายัง grep เจอแปลว่ายังมีหน้าที่ย้ายไม่เสร็จ
 
 **Checkpoint**: `grep -r "primereact" web/src web/package.json` ต้องได้ผลลัพธ์ว่างทั้งคู่ และทุกหน้ายังเปิดได้
 
@@ -582,12 +582,12 @@ Task: "สร้าง Cart component ใน web/src/components/Cart.tsx"
 
 **Purpose**: ปิดงานด้วยตัวเลขที่วัดได้ ไม่ใช่ความรู้สึกว่า "ดูดีแล้ว"
 
-- [ ] T121 **แก้ scenario เดิมให้ยังตรวจของจริง** — ไล่ `quickstart.md` หัวข้อ 4–6 ทุกจุดที่เรียก `GET /api/v1/products` หรือ `GET /api/v1/sales` โดยไม่ส่ง `pageSize` (บรรทัด US3 ข้อ 2/ข้อ 4, US6 ข้อ 1/ข้อ 4 และ NFR-3) ให้ส่ง `pageSize` ชัดเจนหรือไล่อ่านทีละหน้าจนครบ **ทำก่อน T124** ไม่งั้น NFR-3 ที่เคยตรวจ 54 บิลจะเหลือตรวจ 20 บิลแล้วขึ้น PASS หลอก (quickstart.md ข้อ 7.6)
-- [ ] T122 เขียนสคริปต์วัด responsive ที่รันซ้ำได้ใน `scratchpad/` — วน `/login` `/sales` `/sales/history` `/stock` `/promotions` `/reports` × ความกว้าง 360/768/1024/1440 แล้ว assert ทั้ง 4 เกณฑ์ของ quickstart.md ข้อ 7.5: `scrollWidth - clientWidth <= 1`, แผงแคชเชียร์ ≤32% ของจอในช่วง 768–1100px และชั้นวาง ≥68% ที่ 900px, ทุก datagrid ที่ ≤768px เลื่อนแนวนอนในกล่องตัวเอง, ปุ่มและช่องกรอกสูง ≥44px ที่ 360px
-- [ ] T123 รันสคริปต์ T122 แล้วแก้จนผ่านครบทุกช่อง — จุดที่คาดว่าต้องแก้คือ `web/src/components/Cart.tsx` (ความกว้างแผง), `web/src/components/DataTable.tsx` (กล่องเลื่อนแนวนอน) และ `web/src/app/globals.css` (ความสูงขั้นต่ำของปุ่ม/ช่องกรอก) — ค่าตั้งต้นก่อนแก้คือแผงแคชเชียร์ 384px = 42.7% ของจอที่ 900px ซึ่ง**ตก**เกณฑ์
-- [ ] T124 รัน quickstart.md ทั้งไฟล์ (หัวข้อ 4, 5, 6 และ 7) แล้วบันทึกผลลง `specs/001-single-store-pos/quickstart-results.md` — **ผลต้องไม่แย่ลงกว่า 31 PASS / 0 FAIL / 2 N/A** และทุกตัวเลขต้องมาจากรอบที่รายงานเท่านั้น
-- [ ] T125 [P] อัปเดต `web/README.md` — บันทึกว่าใช้ daisyUI 5 บน Tailwind 4, ไม่มี `tailwind.config.ts` แล้ว (ธีมอยู่ใน `globals.css`) และคงคำเตือนเรื่อง `npm run build` ทับ `.next/` ของ dev server ที่รันอยู่
-- [ ] T126 [P] อัปเดต `specs/001-single-store-pos/research.md` ข้อ 8 ถ้าการอัปเกรดจริงต่างจากที่วางแผนไว้ (เช่น Next.js 14.2.35 ต้องอัปเกรดตาม) — บันทึกสิ่งที่เกิดขึ้นจริง ไม่ใช่สิ่งที่ตั้งใจไว้
+- [X] T121 **แก้ scenario เดิมให้ยังตรวจของจริง** — ไล่ `quickstart.md` หัวข้อ 4–6 ทุกจุดที่เรียก `GET /api/v1/products` หรือ `GET /api/v1/sales` โดยไม่ส่ง `pageSize` (บรรทัด US3 ข้อ 2/ข้อ 4, US6 ข้อ 1/ข้อ 4 และ NFR-3) ให้ส่ง `pageSize` ชัดเจนหรือไล่อ่านทีละหน้าจนครบ **ทำก่อน T124** ไม่งั้น NFR-3 ที่เคยตรวจ 54 บิลจะเหลือตรวจ 20 บิลแล้วขึ้น PASS หลอก (quickstart.md ข้อ 7.6)
+- [X] T122 เขียนสคริปต์วัด responsive ที่รันซ้ำได้ใน `scratchpad/` — วน `/login` `/sales` `/sales/history` `/stock` `/promotions` `/reports` × ความกว้าง 360/768/1024/1440 แล้ว assert ทั้ง 4 เกณฑ์ของ quickstart.md ข้อ 7.5: `scrollWidth - clientWidth <= 1`, แผงแคชเชียร์ ≤32% ของจอในช่วง 768–1100px และชั้นวาง ≥68% ที่ 900px, ทุก datagrid ที่ ≤768px เลื่อนแนวนอนในกล่องตัวเอง, ปุ่มและช่องกรอกสูง ≥44px ที่ 360px
+- [X] T123 รันสคริปต์ T122 แล้วแก้จนผ่านครบทุกช่อง — จุดที่คาดว่าต้องแก้คือ `web/src/components/Cart.tsx` (ความกว้างแผง), `web/src/components/DataTable.tsx` (กล่องเลื่อนแนวนอน) และ `web/src/app/globals.css` (ความสูงขั้นต่ำของปุ่ม/ช่องกรอก) — ค่าตั้งต้นก่อนแก้คือแผงแคชเชียร์ 384px = 42.7% ของจอที่ 900px ซึ่ง**ตก**เกณฑ์
+- [X] T124 รัน quickstart.md ทั้งไฟล์ (หัวข้อ 4, 5, 6 และ 7) แล้วบันทึกผลลง `specs/001-single-store-pos/quickstart-results.md` — **ผลต้องไม่แย่ลงกว่า 31 PASS / 0 FAIL / 2 N/A** และทุกตัวเลขต้องมาจากรอบที่รายงานเท่านั้น
+- [X] T125 [P] อัปเดต `web/README.md` — บันทึกว่าใช้ daisyUI 5 บน Tailwind 4, ไม่มี `tailwind.config.ts` แล้ว (ธีมอยู่ใน `globals.css`) และคงคำเตือนเรื่อง `npm run build` ทับ `.next/` ของ dev server ที่รันอยู่
+- [X] T126 [P] อัปเดต `specs/001-single-store-pos/research.md` ข้อ 8 ถ้าการอัปเกรดจริงต่างจากที่วางแผนไว้ (เช่น Next.js 14.2.35 ต้องอัปเกรดตาม) — บันทึกสิ่งที่เกิดขึ้นจริง ไม่ใช่สิ่งที่ตั้งใจไว้
 
 ---
 

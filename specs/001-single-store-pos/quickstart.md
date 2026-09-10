@@ -52,11 +52,17 @@ npm run dev
 
 ## 4. Validation Scenarios (อ้างอิงตาม User Story ใน spec.md)
 
+> **เรื่อง `pageSize` ในหัวข้อนี้** — `GET /api/v1/products` และ `GET /api/v1/sales` แบ่งหน้าแล้ว
+> (contracts/*.md) ถ้าไม่ส่ง `pageSize` จะได้แค่ 20 แถวแรก scenario ใดที่หมายถึง "ทุกแถว" จึงต้องส่ง
+> `pageSize=100` (เพดานสูงสุด) หรือไล่อ่านทีละหน้าจนครบเสมอ ไม่งั้นการตรวจจะอ่อนลงเงียบ ๆ แล้วยังขึ้น PASS
+> และอ่านผลจาก `items` ในซองแทนที่จะอ่าน array ตรง ๆ
+
+
 ### US1 — พนักงานทำการขายสินค้า (P1)
 
 1. ล็อกอินด้วยบัญชี Cashier ผ่าน `POST /api/v1/auth/login` (ดู `contracts/auth.md`) → ได้ JWT token
-2. `GET /api/v1/products?search=มะม่วง` → ต้องเจอสินค้า "มะม่วง" (สอดคล้อง Acceptance Scenario #1)
-3. `GET /api/v1/products?barcode=<บาร์โค้ดมะม่วง>` → ต้องเจอสินค้าเดียวกัน (Acceptance Scenario #2)
+2. `GET /api/v1/products?search=มะม่วง&pageSize=100` → ต้องเจอสินค้า "มะม่วง" ใน `items` (สอดคล้อง Acceptance Scenario #1)
+3. `GET /api/v1/products?barcode=<บาร์โค้ดมะม่วง>&pageSize=100` → ต้องเจอสินค้าเดียวกัน (Acceptance Scenario #2)
 4. `POST /api/v1/sales` พร้อม `lineItems: [{ productId: <มะม่วง>, quantity: 2 }]` (ดู `contracts/sales.md`) → ได้ 201
    พร้อม `totalAmount` ถูกต้อง และ `GET /api/v1/products/<มะม่วง>` ต้องแสดง `stockQuantity` ลดลง 2 (Acceptance Scenario #4)
 5. `POST /api/v1/sales` ด้วย `lineItems: []` → ต้องได้ 400 (Edge Case: ห้ามชำระเงินตะกร้าว่าง)
@@ -75,9 +81,9 @@ npm run dev
 ### US3 — ผู้จัดการดูแลสต็อกสินค้า (P3)
 
 1. ล็อกอินด้วยบัญชี Manager → `POST /api/v1/products` เพิ่มสินค้าใหม่ (ดู `contracts/products.md`) → 201
-2. `GET /api/v1/products` (ไม่ล็อกอินเป็น Cashier ก็ต้องเห็นสินค้านี้ในหน้าขาย) → เจอสินค้าที่เพิ่งเพิ่ม (Acceptance Scenario #1)
+2. `GET /api/v1/products?pageSize=100` (ไม่ล็อกอินเป็น Cashier ก็ต้องเห็นสินค้านี้ในหน้าขาย) → เจอสินค้าที่เพิ่งเพิ่มใน `items` — **ต้องส่ง `pageSize`** ไม่งั้นสินค้าใหม่ที่เรียงไปอยู่หน้าหลังจะหาไม่เจอทั้งที่มีอยู่จริง (Acceptance Scenario #1)
 3. `PUT /api/v1/products/{id}` แก้ราคา → `GET /api/v1/products/{id}` ต้องแสดงราคาที่อัปเดตแล้ว (Acceptance Scenario #2)
-4. ตั้ง `stockQuantity` ให้ <= `lowStockThreshold` (เช่นขายจนเหลือน้อย) → `GET /api/v1/products?lowStockOnly=true` ต้องเจอ
+4. ตั้ง `stockQuantity` ให้ <= `lowStockThreshold` (เช่นขายจนเหลือน้อย) → `GET /api/v1/products?lowStockOnly=true&pageSize=100` ต้องเจอใน `items` และ `totalCount` ต้องเป็นจำนวนสินค้าใกล้หมด **หลังกรอง** ไม่ใช่จำนวนสินค้าทั้งร้าน
    สินค้านี้ (Acceptance Scenario #3 / SC-003)
 5. ลองสั่งซื้อ (`POST /api/v1/products` โดย login เป็น Cashier) → ต้องได้ 403 (FR-029)
 
@@ -100,11 +106,11 @@ npm run dev
 
 ### US6 — ดูประวัติการขายและรายงานสรุป (P6)
 
-1. `GET /api/v1/sales?from=<วันนี้>&to=<วันนี้>` → เห็นบิลที่ทำไปใน US1–US5 (Acceptance Scenario #1)
+1. `GET /api/v1/sales?from=<วันนี้>&to=<วันนี้>&pageSize=100` → เห็นบิลที่ทำไปใน US1–US5 ครบใน `items` — **ต้องส่ง `pageSize`** ฐานข้อมูล dev มีบิลสะสมเกิน 20 ใบแล้ว บิลที่เพิ่งทำจะหลุดออกนอกหน้าแรกทันที (Acceptance Scenario #1)
 2. `GET /api/v1/reports/sales?period=daily&date=<วันนี้>` (ดู `contracts/reports.md`) → `totalSalesAmount` ต้องตรงกับ
    ผลรวมบิลจริงในวันนั้น (Acceptance Scenario #2 / SC-004)
 3. `GET /api/v1/reports/sales-by-staff?from=...&to=...` → ยอดของพนักงานแต่ละคนตรงกับบิลที่คนนั้นขาย (Acceptance Scenario #3)
-4. `GET /api/v1/reports/stock` → จำนวนคงเหลือตรงกับที่เห็นใน `GET /api/v1/products` (Acceptance Scenario #4)
+4. `GET /api/v1/reports/stock` → จำนวนคงเหลือตรงกับที่เห็นใน `GET /api/v1/products?pageSize=100` (Acceptance Scenario #4) — รายงานสต็อกไม่แบ่งหน้า จึงต้องเทียบกับ `items` ที่ดึงมาครบเท่านั้น
 5. `GET /api/v1/reports/best-selling-products?from=<วันนี้>&to=<วันนี้>&limit=10` (ดู `contracts/reports.md`) →
    อันดับสินค้าต้องตรงกับที่รวม `quantity` เองจากบิลจริงในช่วงนั้น และเรียงจากมากไปน้อย (FR-026) — ข้อนี้คู่กับข้อ 3
    ทำให้ SC-006 ครบทั้งสองครึ่ง (สินค้าขายดีที่สุด + พนักงานยอดขายสูงสุด) โดยผู้จัดการไม่ต้องดึงข้อมูลดิบไปคำนวณเอง
@@ -135,6 +141,8 @@ SC ส่วนใหญ่ถูกพิสูจน์โดย scenario ท�
   → ต้องมีคำขอเดียวที่ได้ 201 อีกคำขอต้องได้ 409 `insufficient_stock` (ไม่ใช่ทั้งคู่สำเร็จหรือสต็อกติดลบ)
 - **Append-only**: ต้องไม่มี endpoint ใดใน `contracts/sales.md` ที่แก้ไข/ลบบิลที่สร้างแล้ว
 - **ไม่มี VAT**: `totalAmount` ทุกบิลต้องเท่ากับ `subtotalAmount - discountAmount` พอดี ไม่มีการบวกภาษีเพิ่ม
+  — ตรวจ**ทุกบิลของวันนี้จริง ๆ** ต้องไล่อ่านทีละหน้าจนครบ (`page=1,2,3…` จน `page > totalPages`) หรือส่ง
+  `pageSize=100` แล้วเช็กว่า `totalCount` ไม่เกินนั้น ถ้าอ่านแค่หน้าแรกจะกลายเป็นตรวจ 20 บิลแล้วขึ้น PASS
 
 ## 7. ตรวจ daisyUI + Server Paging + Responsive (รอบที่ 2)
 

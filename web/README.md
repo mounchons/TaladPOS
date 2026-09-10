@@ -1,6 +1,6 @@
 # TaladPOS Web
 
-Frontend ของระบบ POS ร้านค้าเดี่ยว — Next.js 14 (App Router) + Tailwind CSS + PrimeReact
+Frontend ของระบบ POS ร้านค้าเดี่ยว — Next.js 14 (App Router) + Tailwind CSS 4 + daisyUI 5
 
 `web/` คุยกับ backend ผ่าน **REST API เท่านั้น** ไม่มีการเชื่อมต่อฐานข้อมูลโดยตรง
 (constitution Principle I — ดูหัวข้อ [ขอบเขตของ frontend](#ขอบเขตของ-frontend))
@@ -53,17 +53,32 @@ npm run dev
 src/
 ├── app/                Next.js App Router — /login, /sales, /stock, /members, /promotions, /reports
 ├── components/         UI component ที่ใช้ร่วมกัน (Cart, AppShell, ฟอร์ม dialog ต่าง ๆ)
-├── lib/api/            REST client — จุดเดียวที่ประกอบ URL/header ไปหา api/
-└── styles/             Tailwind design token + PrimeReact passthrough preset
+└── lib/api/            REST client — จุดเดียวที่ประกอบ URL/header ไปหา api/
 ```
 
 ### Styling
 
-Tailwind CSS เป็นแหล่ง styling เดียว PrimeReact ใช้แบบ unstyled ผ่าน passthrough preset ใน
-`src/styles/primereact-passthrough.ts` ไม่ได้โหลดธีม CSS ของ PrimeReact เข้ามา
+**ไม่มี `tailwind.config.ts`** — Tailwind 4 อ่าน config จาก CSS ทั้งหมด ทุกอย่างอยู่ใน
+`src/app/globals.css` ที่เดียว แบ่งเป็นสองบล็อกที่ต้องมีคู่กันเสมอ:
 
-> `tailwind.config.ts` ต้อง scan `src/styles/` ด้วย ไม่งั้นคลาสที่ใช้เฉพาะใน passthrough preset
-> จะถูก purge ทิ้งแบบเงียบ ๆ
+| บล็อก | สร้างอะไร | ถ้าขาด |
+|---|---|---|
+| `@theme` | utility ของโปรเจกต์ (`bg-steel-50`, `text-ink-300`, `font-display`, `rounded-control`) | class เหล่านั้นหายเงียบ ๆ ไม่มี error |
+| `@plugin "daisyui/theme"` | สีของ component daisyUI (`btn`, `input`, `table`, `modal`) | component ออกมาเป็นสี default ของ daisyUI ไม่ใช่สีร้าน |
+
+> **กับดักที่เคยเจอจริง**: `@theme` วาง token ไว้ที่ `:root` ส่วน `next/font` ประกาศตัวแปรฟอนต์ไว้ที่
+> element ที่ใส่ `className` ให้ custom property ที่มี `var()` ข้างในถูก resolve ณ element ที่ประกาศมัน
+> ถ้า `--font-kanit` ไม่ได้อยู่บน `<html>` ตัว `--font-display` จะกลายเป็น invalid ที่ `:root`
+> แล้วทุก `font-display` ตกกลับไปใช้ฟอนต์ body **โดยไม่มี error ใด ๆ** — ตัวแปรฟอนต์จึงต้องอยู่บน
+> `<html>` ใน `layout.tsx` ไม่ใช่ `<body>`
+
+component ที่เขียนเองแทน library: `DataTable.tsx` (ตาราง + server paging + ช่องใส่ filter),
+`Modal.tsx` (`<dialog>` ที่ไม่ปิดเมื่อคลิกนอกกล่อง), `MemberSearch.tsx` (autocomplete พร้อมคีย์บอร์ด)
+
+### สิ่งที่ต้องระวังตอน build
+
+`npm run build` เขียนทับ `.next/` ของ dev server ที่รันอยู่ ทำให้ทุก chunk กลายเป็น 404 ทันที
+**ต้องหยุด dev server ก่อน build เสมอ** แล้วค่อยเริ่มใหม่
 
 ## ขอบเขตของ frontend
 

@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { dialogPT, inputTextPT, buttonPT, secondaryButtonPT } from "@/styles/primereact-passthrough";
+import { Modal, modalButton } from "@/components/Modal";
 import { registerMember, type Member } from "@/lib/api/members";
 import { ApiError } from "@/lib/api/client";
 
@@ -49,44 +46,60 @@ export function MemberFormDialog({ visible, onHide, onRegistered }: MemberFormDi
   }
 
   return (
-    <Dialog visible={visible} onHide={onHide} header="สมัครสมาชิกใหม่" pt={dialogPT} modal>
-      <form onSubmit={handleSubmit}>
+    <Modal
+      visible={visible}
+      onHide={onHide}
+      title="สมัครสมาชิกใหม่"
+      footer={
+        <>
+          <button type="button" onClick={onHide} className={modalButton.secondary}>
+            ยกเลิก
+          </button>
+          <button
+            type="submit"
+            form="member-form"
+            disabled={isSubmitting}
+            className={modalButton.primary}
+          >
+            {isSubmitting ? "กำลังบันทึก..." : "สมัครสมาชิก"}
+          </button>
+        </>
+      }
+    >
+      <form id="member-form" onSubmit={handleSubmit}>
         <label className="mb-1.5 block text-sm text-ink-700" htmlFor="member-name">
           ชื่อ
         </label>
-        <InputText
+        <input
           id="member-name"
+          type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          pt={inputTextPT}
-          className="mb-3"
+          className="input mb-3 w-full rounded-control border-steel-200 bg-white"
           required
         />
 
         <label className="mb-1.5 block text-sm text-ink-700" htmlFor="member-phone">
           เบอร์โทรศัพท์
         </label>
-        <InputText
+        {/* type="tel" so a phone keypad comes up on a tablet at the counter,
+            where members are usually registered. */}
+        <input
           id="member-phone"
+          type="tel"
+          inputMode="tel"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
-          pt={inputTextPT}
-          className="mb-3"
+          className="input money mb-3 w-full rounded-control border-steel-200 bg-white"
           required
         />
 
-        {error && <p className="mb-3 rounded-control border border-chili/30 bg-chili/5 px-3 py-2.5 text-sm text-chili">{error}</p>}
-
-        <div className="mt-4 flex justify-end gap-2">
-          <Button type="button" label="ยกเลิก" onClick={onHide} pt={secondaryButtonPT} />
-          <Button
-            type="submit"
-            label={isSubmitting ? "กำลังบันทึก..." : "สมัครสมาชิก"}
-            disabled={isSubmitting}
-            pt={buttonPT}
-          />
-        </div>
+        {error && (
+          <p className="rounded-control border border-chili/30 bg-chili/5 px-3 py-2.5 text-sm text-chili">
+            {error}
+          </p>
+        )}
       </form>
-    </Dialog>
+    </Modal>
   );
 }
