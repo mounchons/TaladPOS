@@ -13,13 +13,14 @@
 ## 1. ตั้งค่าและรัน `api/`
 
 ```bash
+docker compose up -d postgres   # เริ่ม PostgreSQL 16 ตาม docker-compose.yml ที่ root ของ repo
 cd api
 dotnet restore
 dotnet ef database update --project src/TaladPOS.Infrastructure --startup-project src/TaladPOS.Api
 dotnet run --project src/TaladPOS.Api
 ```
 
-API ควรพร้อมใช้งานที่ `https://localhost:5001` (หรือ port ที่ตั้งค่าไว้)
+API ควรพร้อมใช้งานที่ `http://localhost:5054` (ตาม `Properties/launchSettings.json` โปรไฟล์ `http`; ใช้ `dotnet run --launch-profile https` แทนถ้าต้องการ HTTPS ที่ `https://localhost:7096`)
 
 **รัน unit test ของ business logic ก่อนเริ่มพัฒนาเพิ่ม (constitution Principle III — NON-NEGOTIABLE)**:
 

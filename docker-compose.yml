@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: taladpos
+      POSTGRES_USER: taladpos
+      POSTGRES_PASSWORD: taladpos_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - taladpos_pgdata:/var/lib/postgresql/data
+
+volumes:
+  taladpos_pgdata:

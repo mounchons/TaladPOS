@@ -34,13 +34,13 @@ description: "Task list template for feature implementation"
 
 **Purpose**: เตรียมโครงสร้างโปรเจกต์ `api/` และ `web/` ตาม constitution Repository Structure
 
-- [ ] T001 สร้าง solution + 4 projects (`TaladPOS.Domain`, `TaladPOS.Application`, `TaladPOS.Infrastructure`, `TaladPOS.Api`) ใน `api/src/` ตาม Project Structure ใน plan.md
-- [ ] T002 สร้าง 3 test projects (`TaladPOS.Domain.Tests`, `TaladPOS.Application.Tests`, `TaladPOS.Api.IntegrationTests`) พร้อม xUnit + FluentAssertions ใน `api/tests/`
-- [ ] T003 [P] สร้างโปรเจกต์ Next.js 14 (App Router) + TypeScript + Tailwind CSS 3 ใน `web/`
-- [ ] T004 [P] ติดตั้ง PrimeReact และตั้งค่าโหมด unstyled + Tailwind passthrough preset ตาม research.md #7 ใน `web/src/styles/`
-- [ ] T005 [P] ตั้งค่า lint/format: `.editorconfig`/`dotnet format` สำหรับ `api/`, ESLint+Prettier สำหรับ `web/`
-- [ ] T006 ตั้งค่าการเชื่อมต่อ PostgreSQL 16 (connection string ใน `appsettings.Development.json`) และ `docker-compose.yml` สำหรับรัน PostgreSQL ในเครื่อง ใน `api/`
-- [ ] T007 [P] สร้างไฟล์ `.env.local.example` กำหนด `NEXT_PUBLIC_API_BASE_URL` ใน `web/`
+- [X] T001 สร้าง solution + 4 projects (`TaladPOS.Domain`, `TaladPOS.Application`, `TaladPOS.Infrastructure`, `TaladPOS.Api`) ใน `api/src/` ตาม Project Structure ใน plan.md
+- [X] T002 สร้าง 3 test projects (`TaladPOS.Domain.Tests`, `TaladPOS.Application.Tests`, `TaladPOS.Api.IntegrationTests`) พร้อม xUnit + FluentAssertions ใน `api/tests/`
+- [X] T003 [P] สร้างโปรเจกต์ Next.js 14 (App Router) + TypeScript + Tailwind CSS 3 ใน `web/`
+- [X] T004 [P] ติดตั้ง PrimeReact และตั้งค่าโหมด unstyled + Tailwind passthrough preset ตาม research.md #7 ใน `web/src/styles/`
+- [X] T005 [P] ตั้งค่า lint/format: `.editorconfig`/`dotnet format` สำหรับ `api/`, ESLint+Prettier สำหรับ `web/`
+- [X] T006 ตั้งค่าการเชื่อมต่อ PostgreSQL 16 (connection string ใน `appsettings.Development.json`) และ `docker-compose.yml` สำหรับรัน PostgreSQL ในเครื่อง ใน `api/`
+- [X] T007 [P] สร้างไฟล์ `.env.local.example` กำหนด `NEXT_PUBLIC_API_BASE_URL` ใน `web/`
 
 ---
 
@@ -51,18 +51,18 @@ description: "Task list template for feature implementation"
 
 **⚠️ CRITICAL**: ห้ามเริ่มงาน User Story ใดจนกว่า phase นี้จะเสร็จ
 
-- [ ] T008 สร้าง `TaladPOSDbContext` (EF Core) และโครง migration เริ่มต้นใน `api/src/TaladPOS.Infrastructure/`
-- [ ] T009 [P] Implement `Staff` domain entity (Name, Username unique, PasswordHash, Role enum `Manager`/`Cashier`) ตาม data-model.md ใน `api/src/TaladPOS.Domain/Staff/Staff.cs`
-- [ ] T010 [P] Implement `Product` domain entity (Name required, ImageUrl required, Price > 0, Barcode optional-unique, StockQuantity int >= 0, LowStockThreshold int >= 0, computed `IsLowStock`/`IsOutOfStock`) ตาม data-model.md ใน `api/src/TaladPOS.Domain/Products/Product.cs`
-- [ ] T011 Implement credential verification ด้วย `PasswordHasher<Staff>` (research.md #1) ใน `api/src/TaladPOS.Application/Auth/StaffAuthenticator.cs`
-- [ ] T012 Implement JWT issuing service (claims: `staffId`, `role`, อายุจำกัดตาม `expiresAt`) ตาม contracts/auth.md ใน `api/src/TaladPOS.Application/Auth/JwtTokenService.cs` (depends on T009)
-- [ ] T013 Implement `POST /api/auth/login` ตาม contracts/auth.md (คืน 401 `invalid_credentials` เมื่อ username/password ผิด) ใน `api/src/TaladPOS.Api/Controllers/AuthController.cs` (depends on T011, T012)
-- [ ] T014 ตั้งค่า JWT bearer authentication middleware + authorization policy แยก `Manager`/`Cashier` (FR-029) ใน `api/src/TaladPOS.Api/Program.cs` (depends on T012)
-- [ ] T015 [P] Implement EF Core entity configuration + migration สำหรับ `Staff` และ `Product` (unique index บน `Username` และ `Barcode`) ใน `api/src/TaladPOS.Infrastructure/Configurations/` (depends on T008, T009, T010)
-- [ ] T016 [P] สร้าง global error-handling middleware (validation → 400, not found → 404, conflict → 409) ใน `api/src/TaladPOS.Api/Middleware/ErrorHandlingMiddleware.cs`
-- [ ] T017 สร้าง seed script (1 บัญชี Manager, 1 บัญชี Cashier, สินค้าตัวอย่าง 2 รายการ ตาม quickstart.md ข้อ 3) ใน `api/src/TaladPOS.Infrastructure/Seed/DevelopmentSeeder.cs` (depends on T015)
-- [ ] T018 [P] สร้าง REST API client base (fetch wrapper แนบ `Authorization: Bearer` header อัตโนมัติ, อ่าน base URL จาก `NEXT_PUBLIC_API_BASE_URL`) ใน `web/src/lib/api/client.ts`
-- [ ] T019 [P] ตั้งค่า `PrimeReactProvider` + root layout (โหลด Tailwind globals) ใน `web/src/app/layout.tsx`
+- [X] T008 สร้าง `TaladPOSDbContext` (EF Core) และโครง migration เริ่มต้นใน `api/src/TaladPOS.Infrastructure/`
+- [X] T009 [P] Implement `Staff` domain entity (Name, Username unique, PasswordHash, Role enum `Manager`/`Cashier`) ตาม data-model.md ใน `api/src/TaladPOS.Domain/Staff/Staff.cs`
+- [X] T010 [P] Implement `Product` domain entity (Name required, ImageUrl required, Price > 0, Barcode optional-unique, StockQuantity int >= 0, LowStockThreshold int >= 0, computed `IsLowStock`/`IsOutOfStock`) ตาม data-model.md ใน `api/src/TaladPOS.Domain/Products/Product.cs`
+- [X] T011 Implement credential verification ด้วย `PasswordHasher<Staff>` (research.md #1) ใน `api/src/TaladPOS.Application/Auth/StaffAuthenticator.cs` (ใช้ marker type แทน `Staff` โดยตรงเพื่อ hash รหัสผ่านก่อนมี instance จริงตอน seed — ดูคอมเมนต์ในไฟล์)
+- [X] T012 Implement JWT issuing service (claims: `staffId`, `role`, อายุจำกัดตาม `expiresAt`) ตาม contracts/auth.md ใน `api/src/TaladPOS.Infrastructure/Auth/JwtTokenService.cs` (interface `IJwtTokenService` อยู่ใน Application ตาม research.md #1; implementation ย้ายไป Infrastructure เพราะพึ่ง `System.IdentityModel.Tokens.Jwt`)
+- [X] T013 Implement `POST /api/auth/login` ตาม contracts/auth.md (คืน 401 `invalid_credentials` เมื่อ username/password ผิด) ใน `api/src/TaladPOS.Api/Controllers/AuthController.cs` (depends on T011, T012)
+- [X] T014 ตั้งค่า JWT bearer authentication middleware + authorization policy แยก `Manager`/`Cashier` (FR-029) ใน `api/src/TaladPOS.Api/Program.cs` (depends on T012)
+- [X] T015 [P] Implement EF Core entity configuration + migration สำหรับ `Staff` และ `Product` (unique index บน `Username` และ `Barcode`) ใน `api/src/TaladPOS.Infrastructure/Configurations/` (depends on T008, T009, T010) — สร้าง migration `InitialCreate` และรันจริงกับ PostgreSQL 16 (docker-compose) สำเร็จ
+- [X] T016 [P] สร้าง global error-handling middleware (validation → 400, not found → 404, conflict → 409) ใน `api/src/TaladPOS.Api/Middleware/ErrorHandlingMiddleware.cs`
+- [X] T017 สร้าง seed script (1 บัญชี Manager, 1 บัญชี Cashier, สินค้าตัวอย่าง 2 รายการ ตาม quickstart.md ข้อ 3) ใน `api/src/TaladPOS.Infrastructure/Seed/DevelopmentSeeder.cs` (depends on T015) — ทดสอบรันจริง เห็นข้อมูล seed ใน PostgreSQL แล้ว
+- [X] T018 [P] สร้าง REST API client base (fetch wrapper แนบ `Authorization: Bearer` header อัตโนมัติ, อ่าน base URL จาก `NEXT_PUBLIC_API_BASE_URL`) ใน `web/src/lib/api/client.ts`
+- [X] T019 [P] ตั้งค่า `PrimeReactProvider` + root layout (โหลด Tailwind globals) ใน `web/src/app/layout.tsx`
 
 **Checkpoint**: Auth ใช้งานได้จริง, entity หลักพร้อม, DB migration พร้อม — เริ่มงาน User Story ได้
 
@@ -77,20 +77,20 @@ description: "Task list template for feature implementation"
 
 ### Tests for User Story 1 (business logic — NON-NEGOTIABLE ตาม constitution Principle III)
 
-- [ ] T020 [P] [US1] Unit test: การตัดสต็อกต้องถูกปฏิเสธเมื่อจำนวนที่ขอเกินกว่า `StockQuantity` ที่มีอยู่ ใน `api/tests/TaladPOS.Domain.Tests/Products/ProductStockTests.cs`
-- [ ] T021 [P] [US1] Unit test: `Sale` ต้องมีอย่างน้อย 1 `SaleLineItem` เสมอ (ปฏิเสธตะกร้าว่าง ตาม Edge Case ในสเปก) ใน `api/tests/TaladPOS.Domain.Tests/Sales/SaleTests.cs`
-- [ ] T022 [P] [US1] Unit test: `SaleLineItem` เก็บ `ProductNameSnapshot`/`UnitPriceSnapshot` แยกจากค่าปัจจุบันของ `Product` (คงอยู่แม้สินค้าถูกลบ/แก้ไขภายหลัง) ใน `api/tests/TaladPOS.Domain.Tests/Sales/SaleLineItemTests.cs`
+- [X] T020 [P] [US1] Unit test: การตัดสต็อกต้องถูกปฏิเสธเมื่อจำนวนที่ขอเกินกว่า `StockQuantity` ที่มีอยู่ ใน `api/tests/TaladPOS.Domain.Tests/Products/ProductStockTests.cs`
+- [X] T021 [P] [US1] Unit test: `Sale` ต้องมีอย่างน้อย 1 `SaleLineItem` เสมอ (ปฏิเสธตะกร้าว่าง ตาม Edge Case ในสเปก) ใน `api/tests/TaladPOS.Domain.Tests/Sales/SaleTests.cs`
+- [X] T022 [P] [US1] Unit test: `SaleLineItem` เก็บ `ProductNameSnapshot`/`UnitPriceSnapshot` แยกจากค่าปัจจุบันของ `Product` (คงอยู่แม้สินค้าถูกลบ/แก้ไขภายหลัง) ใน `api/tests/TaladPOS.Domain.Tests/Sales/SaleLineItemTests.cs`
 
 ### Implementation for User Story 1
 
-- [ ] T023 [P] [US1] Implement `Sale` และ `SaleLineItem` domain entities (append-only ตาม data-model.md) ใน `api/src/TaladPOS.Domain/Sales/` (depends on T020-T022)
-- [ ] T024 [US1] Implement `CompleteSaleUseCase`: ตรวจตะกร้าไม่ว่าง, ตัดสต็อกแบบ atomic conditional update (`UPDATE ... WHERE stock_quantity >= @qty`, research.md #2), ตั้ง `DiscountAmount = 0` ชั่วคราว (ยังไม่มีโปรโมชั่น/สมาชิกใน US1), บันทึก `Sale` ทั้งหมดใน transaction เดียว ใน `api/src/TaladPOS.Application/Sales/CompleteSaleUseCase.cs` (depends on T023)
-- [ ] T025 [US1] Implement repository + EF Core configuration สำหรับ `Sale`/`SaleLineItem` และ migration ใน `api/src/TaladPOS.Infrastructure/Repositories/SaleRepository.cs` (depends on T010, T023)
-- [ ] T026 [US1] Implement `GET /api/products` (query `search`, `barcode`, `lowStockOnly`) ตาม contracts/products.md ใน `api/src/TaladPOS.Api/Controllers/ProductsController.cs` (depends on T010, T014)
-- [ ] T027 [US1] Implement `POST /api/sales` และ `GET /api/sales/{id}` ตาม contracts/sales.md (400 ตะกร้าว่าง, 409 `insufficient_stock`) ใน `api/src/TaladPOS.Api/Controllers/SalesController.cs` (depends on T024)
-- [ ] T028 [P] [US1] สร้าง ProductCard grid + search bar (ชื่อ/บาร์โค้ด) ด้วย PrimeReact ใน `web/src/components/ProductCard.tsx` และ `web/src/app/sales/page.tsx`
-- [ ] T029 [P] [US1] สร้าง Cart component (เพิ่ม/ลด/ลบรายการ, ยอดรวมย่อยแบบเรียลไทม์) ด้วย PrimeReact Button/InputNumber ใน `web/src/components/Cart.tsx`
-- [ ] T030 [US1] เชื่อมปุ่มชำระเงินกับ `POST /api/sales` ผ่าน `web/src/lib/api/sales.ts` พร้อมแสดง error เมื่อสต็อกไม่พอ (depends on T027, T029)
+- [X] T023 [P] [US1] Implement `Sale` และ `SaleLineItem` domain entities (append-only ตาม data-model.md) ใน `api/src/TaladPOS.Domain/Sales/` (depends on T020-T022)
+- [X] T024 [US1] Implement `CompleteSaleUseCase`: ตรวจตะกร้าไม่ว่าง, ตัดสต็อกแบบ atomic conditional update (`UPDATE ... WHERE stock_quantity >= @qty`, research.md #2), ตั้ง `DiscountAmount = 0` ชั่วคราว (ยังไม่มีโปรโมชั่น/สมาชิกใน US1), บันทึก `Sale` ทั้งหมดใน transaction เดียว ใน `api/src/TaladPOS.Application/Sales/CompleteSaleUseCase.cs` (depends on T023) — ใช้ `IUnitOfWork.BeginTransactionAsync` ครอบทั้งการตัดสต็อกและบันทึก Sale เพราะ `ExecuteUpdateAsync` ไม่รวม transaction กับ `SaveChangesAsync` โดยอัตโนมัติ (พบและแก้ไขจากคำแนะนำก่อน implement); มี unit test เพิ่มเติมยืนยัน commit/ไม่สร้างบิลเมื่อสต็อกไม่พอ ใน `api/tests/TaladPOS.Application.Tests/Sales/CompleteSaleUseCaseTests.cs`
+- [X] T025 [US1] Implement repository + EF Core configuration สำหรับ `Sale`/`SaleLineItem` และ migration ใน `api/src/TaladPOS.Infrastructure/Repositories/SaleRepository.cs` (depends on T010, T023) — สร้าง migration `AddSales` และรันจริงกับ PostgreSQL สำเร็จ
+- [X] T026 [US1] Implement `GET /api/products` (query `search`, `barcode`, `lowStockOnly`) ตาม contracts/products.md ใน `api/src/TaladPOS.Api/Controllers/ProductsController.cs` (depends on T010, T014)
+- [X] T027 [US1] Implement `POST /api/sales` และ `GET /api/sales/{id}` ตาม contracts/sales.md (400 ตะกร้าว่าง, 409 `insufficient_stock`) ใน `api/src/TaladPOS.Api/Controllers/SalesController.cs` (depends on T024)
+- [X] T028 [P] [US1] สร้าง ProductCard grid + search bar (ชื่อ/บาร์โค้ด) ด้วย PrimeReact ใน `web/src/components/ProductCard.tsx` และ `web/src/app/sales/page.tsx`
+- [X] T029 [P] [US1] สร้าง Cart component (เพิ่ม/ลด/ลบรายการ, ยอดรวมย่อยแบบเรียลไทม์) ด้วย PrimeReact Button/InputNumber ใน `web/src/components/Cart.tsx`
+- [X] T030 [US1] เชื่อมปุ่มชำระเงินกับ `POST /api/sales` ผ่าน `web/src/lib/api/sales.ts` พร้อมแสดง error เมื่อสต็อกไม่พอ (depends on T027, T029) — ทดสอบผ่าน browser จริงครบวงจร (ค้นหา → เพิ่มตะกร้า → ปรับจำนวน → ชำระเงิน → ตะกร้าล้าง/สต็อกลด); ระหว่างทางพบและแก้บั๊ก CORS จริง (ต้องเพิ่ม `app.UseCors` ใน `Program.cs` ให้ `web/` เรียก `api/` ข้าม origin ได้) และปัญหา `.env.local` ของ `web/` ไม่มีอยู่จริง (มีแต่ `.env.local.example`)
 
 **Checkpoint**: US1 ใช้งานได้ครบวงจรด้วยตัวเอง — ขายของได้จริง ตัดสต็อกถูกต้อง บันทึกบิล
 
