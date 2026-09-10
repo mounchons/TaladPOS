@@ -6,6 +6,7 @@ import { inputTextPT } from "@/styles/primereact-passthrough";
 import { ProductCard } from "@/components/ProductCard";
 import { Cart, type CartLine } from "@/components/Cart";
 import { MemberFormDialog } from "@/components/MemberFormDialog";
+import { ReceiptDialog } from "@/components/ReceiptDialog";
 import { searchProducts, type Product } from "@/lib/api/products";
 import { createSale, type Sale } from "@/lib/api/sales";
 import type { Member } from "@/lib/api/members";
@@ -20,6 +21,7 @@ export default function SalesPage() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [memberDialogVisible, setMemberDialogVisible] = useState(false);
   const [lastCompletedSale, setLastCompletedSale] = useState<Sale | null>(null);
+  const [receiptVisible, setReceiptVisible] = useState(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -72,6 +74,7 @@ export default function SalesPage() {
         })),
       });
       setLastCompletedSale(sale);
+      setReceiptVisible(true);
       setCartLines([]);
       setSelectedMember(null);
       searchProducts({ search: query || undefined })
@@ -115,7 +118,11 @@ export default function SalesPage() {
             {query ? `ไม่พบสินค้าที่ตรงกับ "${query}"` : "ยังไม่มีสินค้าในร้าน"}
           </p>
         ) : (
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2.5">
+            {/* Auto-fitting tracks rather than fixed column counts: the shelf
+                fills whatever width is left beside the register at any screen
+                size, and a card never stretches past the size where its photo
+                stops earning the space. */}
             {products.map((product) => (
               <ProductCard key={product.id} product={product} onSelect={addToCart} />
             ))}
@@ -133,6 +140,13 @@ export default function SalesPage() {
         onSelectMember={setSelectedMember}
         onOpenRegisterMember={() => setMemberDialogVisible(true)}
         lastCompletedSale={lastCompletedSale}
+        onShowReceipt={() => setReceiptVisible(true)}
+      />
+
+      <ReceiptDialog
+        sale={lastCompletedSale}
+        visible={receiptVisible}
+        onHide={() => setReceiptVisible(false)}
       />
 
       <MemberFormDialog

@@ -44,6 +44,9 @@ npm run dev
 | `npm run lint` | ESLint |
 | `npx tsc --noEmit` | ตรวจ type ทั้งโปรเจกต์ |
 
+> หยุด `npm run dev` ก่อนรัน `npm run build` — build เขียนทับโฟลเดอร์ `.next/` ที่ dev server กำลังใช้อยู่
+> ทำให้ dev server ที่ยังรันค้างเสิร์ฟ chunk เป็น 404 ทั้งหมด (แก้ด้วยการรีสตาร์ท dev server)
+
 ## โครงสร้าง
 
 ```text

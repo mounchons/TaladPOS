@@ -24,6 +24,7 @@ export function Cart({
   onSelectMember,
   onOpenRegisterMember,
   lastCompletedSale,
+  onShowReceipt,
 }: {
   lines: CartLine[];
   onChangeQuantity: (productId: string, quantity: number) => void;
@@ -34,6 +35,7 @@ export function Cart({
   onSelectMember: (member: Member | null) => void;
   onOpenRegisterMember: () => void;
   lastCompletedSale?: Sale | null;
+  onShowReceipt: () => void;
 }) {
   const subtotal = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
@@ -44,11 +46,12 @@ export function Cart({
   // the pay button showing. md and up is untouched: the rail stays a rail.
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  // A finished sale renders its summary up in the goods area, so open the
-  // sheet to show it rather than leaving the cashier with a cleared total.
+  // A finished sale collapses the sheet: the receipt has taken over the
+  // screen in its own dialog, and behind it the register should already be
+  // reset and out of the way for the next customer.
   const completedSaleId = lastCompletedSale?.id ?? null;
   useEffect(() => {
-    if (completedSaleId) setIsSheetOpen(true);
+    if (completedSaleId) setIsSheetOpen(false);
   }, [completedSaleId]);
 
   const collapsedOnPhone = isSheetOpen ? "" : "hidden";
@@ -131,35 +134,7 @@ export function Cart({
         <div
           className={`${collapsedOnPhone} flex-1 overflow-y-auto px-5 py-4 md:block md:flex-1 md:overflow-y-auto`}
         >
-          {lastCompletedSale && lines.length === 0 && (
-            <div className="receipt-settle rounded-control border border-ink-700 bg-ink-700/50 p-4">
-              <p className="mb-3 text-xs text-ink-300">ขายสำเร็จ</p>
-              <ul className="mb-3 space-y-1.5">
-                {lastCompletedSale.lineItems.map((li) => (
-                  <li key={li.productId} className="flex justify-between gap-3 text-sm">
-                    <span className="text-ink-300">
-                      {li.productNameSnapshot}
-                      <span className="money"> ×{li.quantity}</span>
-                      {li.discountAmount > 0 && (
-                        <span className="ml-1 text-xs text-mango">
-                          ลด <span className="money">{li.discountAmount.toFixed(2)}</span>
-                        </span>
-                      )}
-                    </span>
-                    <span className="money text-ink-300">{li.lineTotal.toFixed(2)}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex justify-between border-t border-ink-700 pt-2 text-sm">
-                <span className="text-ink-300">รับไป</span>
-                <span className="money font-medium text-white">
-                  {lastCompletedSale.totalAmount.toFixed(2)} บาท
-                </span>
-              </div>
-            </div>
-          )}
-
-          {lines.length === 0 && !lastCompletedSale && (
+          {lines.length === 0 && (
             <p className="pt-8 text-center text-sm text-ink-300">แตะสินค้าเพื่อเริ่มขาย</p>
           )}
 
@@ -212,6 +187,10 @@ export function Cart({
               {subtotal.toFixed(2)}
             </span>
           </div>
+          {/* Disabled used to be ink-700 on an ink panel - a 1.2:1 difference
+              that read as "there is no pay button" until something was in the
+              cart. It now keeps a lit outline so the button is always visibly
+              there, just clearly not ready yet. */}
           <Button
             label={isCheckingOut ? "กำลังชำระเงิน" : "ชำระเงิน"}
             onClick={onCheckout}
@@ -219,12 +198,22 @@ export function Cart({
             pt={{
               root: {
                 className:
-                  "flex w-full items-center justify-center rounded-control bg-white px-4 py-4 font-display " +
-                  "text-base font-semibold text-ink transition-colors hover:bg-mango " +
-                  "disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-300",
+                  "flex w-full items-center justify-center rounded-control border border-white bg-white px-4 py-4 " +
+                  "font-display text-base font-semibold text-ink transition-colors hover:border-mango hover:bg-mango " +
+                  "disabled:cursor-not-allowed disabled:border-ink-500 disabled:bg-transparent disabled:text-ink-300",
               },
             }}
           />
+
+          {lastCompletedSale && (
+            <button
+              type="button"
+              onClick={onShowReceipt}
+              className="mt-3 w-full rounded py-1 text-center text-xs text-ink-300 transition-colors hover:text-white"
+            >
+              ใบเสร็จบิลล่าสุด
+            </button>
+          )}
         </div>
       </aside>
     </>

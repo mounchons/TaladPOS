@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { Button } from "primereact/button";
+import { secondaryButtonPT } from "@/styles/primereact-passthrough";
 import { Receipt } from "@/components/Receipt";
 import { getReceipt, type Sale } from "@/lib/api/sales";
 
@@ -34,7 +36,19 @@ export default function ReceiptPage() {
 
   return (
     <main className="px-5 py-6">
-      <Receipt sale={sale} />
+      <div className="mx-auto max-w-[22rem]">
+        <div className="mb-4 flex justify-end">
+          <Button
+            label="พิมพ์ใบเสร็จ"
+            icon="pi pi-print"
+            onClick={() => window.print()}
+            pt={secondaryButtonPT}
+          />
+        </div>
+        <div className="border border-steel-200 print:border-0">
+          <Receipt sale={sale} />
+        </div>
+      </div>
     </main>
   );
 }

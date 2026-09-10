@@ -69,6 +69,34 @@
   body {
     background: #fff;
   }
+
+  /* Print the till slip on its own, wherever it is on screen - the receipt
+     page or the dialog that opens after a sale. Hiding by visibility rather
+     than display keeps the receipt's own layout intact (display:none on an
+     ancestor would take the slip down with it); the slip is then lifted out
+     of the flow to the top of the sheet so the blank space the hidden app
+     still occupies doesn't push it onto a second page. */
+  body * {
+    visibility: hidden;
+  }
+
+  [data-receipt-print],
+  [data-receipt-print] * {
+    visibility: visible;
+  }
+
+  [data-receipt-print] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    /* Capped at till-slip width and centred. Without the cap the slip
+       inherits the full sheet width and each row's label and amount get
+       flung to opposite margins - readable on screen at 22rem, absurd
+       across an A4. On narrow roll paper the cap simply never binds. */
+    margin-inline: auto;
+    max-width: 22rem;
+  }
 }
 
 /* Tablet/desktop app bar height. Shared so the sales register rail can be

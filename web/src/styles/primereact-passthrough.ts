@@ -199,3 +199,16 @@ export const dialogPT = {
   },
   mask: { className: "bg-ink/50" },
 };
+
+// The receipt dialog frames a till slip, which brings its own padding and
+// wants to sit edge to edge inside the dialog - so this drops the content
+// padding and narrows the shell to slip width instead of form width.
+export const receiptDialogPT = {
+  ...dialogPT,
+  root: {
+    className:
+      "flex max-h-[90dvh] w-[calc(100vw-2rem)] max-w-[24rem] flex-col overflow-hidden " +
+      "rounded-control border border-steel-200 bg-white",
+  },
+  content: { className: "min-h-0 flex-1 overflow-y-auto" },
+};
