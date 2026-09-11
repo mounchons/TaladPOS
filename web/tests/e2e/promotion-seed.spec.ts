@@ -1,7 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
-
-const MANAGER_USERNAME = "manager";
-const MANAGER_PASSWORD = "Manager123!";
+import { test, expect } from "@playwright/test";
+import { loginAsManager } from "./helpers/auth";
 
 interface PromotionSeed {
   scope: "Item" | "Bill";
@@ -24,16 +22,8 @@ const SEEDS: PromotionSeed[] = [
   { scope: "Item", discount: 5, membersOnly: false, start: "2025-01-01", end: "2025-12-31" },
 ];
 
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByRole("textbox", { name: "ชื่อผู้ใช้" }).fill(MANAGER_USERNAME);
-  await page.getByRole("textbox", { name: "รหัสผ่าน" }).fill(MANAGER_PASSWORD);
-  await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page).toHaveURL(/\/sales$/);
-}
-
-test("seeds multiple promotions (>5) for manual/exploratory testing", async ({ page }) => {
-  await login(page);
+test("PROMO-10: seeds multiple promotions (>5) for manual/exploratory testing", async ({ page }) => {
+  await loginAsManager(page);
   await page.goto("/promotions");
 
   // อ่านรายชื่อสินค้าที่มีอยู่ครั้งเดียว แล้วปิด dialog ทิ้ง
