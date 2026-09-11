@@ -32,7 +32,7 @@ description: "Task list template for feature implementation"
 
 **Purpose**: เตรียม dependency ใหม่ที่ต้องใช้
 
-- [ ] T001 เพิ่ม dependency `exceljs` ใน `web/package.json` (`cd web && npm install exceljs`) ตาม research.md ข้อ 1
+- [X] T001 เพิ่ม dependency `exceljs` ใน `web/package.json` (`cd web && npm install exceljs`) ตาม research.md ข้อ 1
 
 ---
 
@@ -43,22 +43,22 @@ description: "Task list template for feature implementation"
 
 **⚠️ CRITICAL**: ห้ามเริ่มงาน User Story ใดจนกว่า phase นี้จะเสร็จ
 
-- [ ] T002 [P] สร้าง shared types `ExportColumn<T>` (data-model.md ข้อ 1) และ `XlsxExportRequest` (data-model.md
+- [X] T002 [P] สร้าง shared types `ExportColumn<T>` (data-model.md ข้อ 1) และ `XlsxExportRequest` (data-model.md
   ข้อ 5: `{ filenamePrefix, sheetName, columns: {header}[], rows: (string|number)[][] }`) ใน
   `web/src/lib/export/types.ts`
-- [ ] T003 Implement Next.js Route Handler `POST /api/export/xlsx` ตาม contracts/export-routes.md ใน
+- [X] T003 Implement Next.js Route Handler `POST /api/export/xlsx` ตาม contracts/export-routes.md ใน
   `web/src/app/api/export/xlsx/route.ts` (depends on T001, T002): validate `rows[i].length === columns.length`
   ทุกแถว (ไม่ตรงคืน `400 { "error": "invalid_export_request" }`), `rows` ว่าง (`[]`) ต้องสร้างไฟล์ที่มีแค่หัว
   คอลัมน์สำเร็จ (FR-011 — ไม่ error), สร้าง workbook ด้วย `exceljs`: sheet ชื่อตาม `sheetName`, แถวแรกเป็นหัว
   คอลัมน์ตัวหนา (bold), ปรับความกว้างคอลัมน์ตามความยาวเนื้อหาโดยประมาณ, ตอบกลับด้วย
   `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` และ
   `Content-Disposition: attachment; filename="<filenamePrefix>-<YYYY-MM-DD-HHmm>.xlsx"` (FR-009, FR-010)
-- [ ] T004 Implement client helper `triggerXlsxExport(request: XlsxExportRequest): Promise<void>` ใน
+- [X] T004 Implement client helper `triggerXlsxExport(request: XlsxExportRequest): Promise<void>` ใน
   `web/src/lib/export/xlsxClient.ts` ตาม research.md ข้อ 4 (depends on T002, T003): `fetch("POST", ...)` ไป
   `/api/export/xlsx` พร้อม JSON body, รับ response กลับมาเป็น `Blob`, สร้าง Object URL ชั่วคราวเพื่อ trigger
   การดาวน์โหลดผ่าน `<a download>` ที่สร้างขึ้นด้วย JavaScript แล้ว revoke Object URL ทันทีหลังคลิก, throw
   error ที่มีข้อความอ่านง่ายถ้า response ไม่ใช่ `200`
-- [ ] T005 [P] สร้าง shared component `ExportButton` ใน `web/src/components/ExportButton.tsx`: รับ prop
+- [X] T005 [P] สร้าง shared component `ExportButton` ใน `web/src/components/ExportButton.tsx`: รับ prop
   `onExport: () => Promise<void>`, จัดการ loading state ของตัวเอง (แสดงข้อความ "กำลังเตรียมไฟล์..." และ
   `disabled` ปุ่มระหว่างรอ กันกดซ้ำซ้อนตาม FR-008), จับ error จาก `onExport` แล้วแสดงข้อความ error ใต้ปุ่ม
   (ใช้พื้นที่ข้อความเดียวกันนี้แสดงข้อความ "เกินเพดาน" ของ US2 ได้ด้วย เพราะ `onExport` ของ US2 จะ throw
@@ -79,7 +79,7 @@ description: "Task list template for feature implementation"
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] เพิ่มปุ่ม `<ExportButton>` บนแท็บ "สต็อกคงเหลือ" ใน
+- [X] T006 [US1] เพิ่มปุ่ม `<ExportButton>` บนแท็บ "สต็อกคงเหลือ" ใน
   `web/src/app/(protected)/reports/page.tsx` (depends on T004, T005): `onExport` แปลง state `stock`
   (`StockReportRow[]`) เป็น `columns`/`rows` ตาม data-model.md ข้อ 2 (ชื่อสินค้า, จำนวนคงเหลือ,
   สถานะ = `row.isLowStock ? "ใกล้หมด" : "ปกติ"`) แล้วเรียก `triggerXlsxExport({ filenamePrefix:
@@ -104,13 +104,13 @@ description: "Task list template for feature implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T008 [P] [US2] Implement `fetchAllSalesForExport(filters): Promise<FetchAllSalesResult>` ใน
+- [X] T008 [P] [US2] Implement `fetchAllSalesForExport(filters): Promise<FetchAllSalesResult>` ใน
   `web/src/lib/api/sales.ts` ตาม data-model.md ข้อ 4 และ research.md ข้อ 3: เรียกหน้าแรกด้วย
   `searchSalesPaged({ ...filters, page: 1, pageSize: 100 })`, ถ้า `totalCount > 10_000`
   (ค่าคงที่ `SALES_EXPORT_ROW_CAP`) คืน `{ status: "cap_exceeded", totalCount }` **ทันที** โดยไม่ยิงหน้า
   ถัดไปต่อ, ถ้าไม่เกินให้วนเรียกหน้าถัดไปจนครบ `totalPages` แล้วคืน `{ status: "ok", sales: [...ทุกแถว] }`
   (ใช้รูปแบบเดียวกับ `fetchAllPages()` ที่มีอยู่แล้วใน `web/src/lib/api/products.ts`)
-- [ ] T009 [US2] เพิ่มปุ่ม `<ExportButton>` บนหน้า `web/src/app/(protected)/sales/history/page.tsx` (depends
+- [X] T009 [US2] เพิ่มปุ่ม `<ExportButton>` บนหน้า `web/src/app/(protected)/sales/history/page.tsx` (depends
   on T004, T005, T008): `onExport` เรียก `fetchAllSalesForExport()` ด้วยตัวกรองปัจจุบันบนจอ (`from`, `to`,
   `staffId` เมื่อติ๊ก "เฉพาะบิลของฉัน", `memberId`) — ถ้าผลเป็น `cap_exceeded` ให้ throw error ข้อความ
   "ตัวกรองนี้ตรงกับ {totalCount} บิล เกิน 10,000 บิล กรุณาแคบช่วงวันที่หรือตัวกรองลงก่อน" (FR-006, ไม่เรียก
@@ -129,7 +129,7 @@ description: "Task list template for feature implementation"
 
 **Purpose**: ตรวจสอบสิ่งที่ครอบคลุมทั้งสอง User Story พร้อมกัน
 
-- [ ] T011 [P] รัน `npm run lint` และ `npm run build` ใน `web/` ให้ผ่านไม่มี error/type error จากไฟล์ใหม่และ
+- [X] T011 [P] รัน `npm run lint` และ `npm run build` ใน `web/` ให้ผ่านไม่มี error/type error จากไฟล์ใหม่และ
   ที่แก้ไขทั้งหมด (T002–T009)
 - [ ] T012 ตรวจสอบด้วยมือตาม quickstart.md หัวข้อ 3 (กันกดปุ่ม export ซ้ำซ้อนระหว่างเตรียมไฟล์ — ทดสอบทั้ง
   สองหน้าจอ, FR-008) — ทำหลัง T007 และ T010 เสร็จแล้วทั้งคู่

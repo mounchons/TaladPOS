@@ -102,14 +102,15 @@ web/
 │   │   └── api/
 │   │       └── export/
 │   │           └── xlsx/
-│   │               └── route.ts              # ใหม่ — Next.js Route Handler: รับ {filename, sheetName,
-│   │                                          #        columns, rows} คืน .xlsx binary (ดู contracts/)
+│   │               └── route.ts              # ใหม่ — Next.js Route Handler: รับ {filenamePrefix,
+│   │                                          #        sheetName, columns, rows} คืน .xlsx binary (ดู contracts/)
 │   ├── lib/
 │   │   ├── api/
 │   │   │   └── sales.ts                      # แก้ไข — เพิ่มฟังก์ชันดึงประวัติการขายทุกหน้าตามตัวกรอง
 │   │   │                                      #        พร้อมเช็คเพดาน 10,000 (รูปแบบเดียวกับ fetchAllPages
 │   │   │                                      #        ที่มีอยู่แล้วใน products.ts)
 │   │   └── export/
+│   │       ├── types.ts                      # ใหม่ — ExportColumn<T>, XlsxExportRequest (data-model.md §1, §5)
 │   │       └── xlsxClient.ts                 # ใหม่ — helper ฝั่ง client: เรียก Route Handler, รับ blob,
 │   │                                          #        สั่งดาวน์โหลด
 │   └── components/

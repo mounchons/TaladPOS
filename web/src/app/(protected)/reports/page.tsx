@@ -14,6 +14,9 @@ import {
 } from "@/lib/api/reports";
 import { ManagerOnly } from "@/components/ManagerOnly";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { ExportButton } from "@/components/ExportButton";
+import { triggerXlsxExport } from "@/lib/export/xlsxClient";
+import { toExportRows, type ExportColumn } from "@/lib/export/types";
 
 function toDateOnly(date: Date): string {
   const y = date.getFullYear();
@@ -125,6 +128,24 @@ export default function ReportsPage() {
     },
   ];
 
+  // data-model.md §2 - same 3 columns as `stockColumns` above, but returning
+  // raw string/number cell values instead of ReactNode for the Excel sheet.
+  const stockExportColumns: ExportColumn<StockReportRow>[] = [
+    { header: "ชื่อสินค้า", value: (r) => r.productName },
+    { header: "จำนวนคงเหลือ", value: (r) => r.stockQuantity },
+    { header: "สถานะ", value: (r) => (r.isLowStock ? "ใกล้หมด" : "ปกติ") },
+  ];
+
+  // tasks.md T006 (US1, FR-001/FR-002) - exports exactly the rows already on
+  // screen; the stock report has no pagination cap (FR-002/Assumptions).
+  async function exportStockReport() {
+    await triggerXlsxExport({
+      filenamePrefix: "taladpos-stock-report",
+      sheetName: "สต็อกคงเหลือ",
+      ...toExportRows(stock, stockExportColumns),
+    });
+  }
+
   const dateField = "input money w-full rounded-control border-steel-200 bg-white";
 
   // Shared by the three range-driven tabs; the stock tab is a snapshot and has
@@ -214,13 +235,18 @@ export default function ReportsPage() {
         )}
 
         {activeTab === 3 && (
-          <DataTable
-            columns={stockColumns}
-            rows={stock}
-            rowKey={(r) => r.productId}
-            isLoading={isLoading}
-            emptyText="ยังไม่มีสินค้าในร้าน"
-          />
+          <>
+            <div className="mb-3 flex justify-end">
+              <ExportButton onExport={exportStockReport} />
+            </div>
+            <DataTable
+              columns={stockColumns}
+              rows={stock}
+              rowKey={(r) => r.productId}
+              isLoading={isLoading}
+              emptyText="ยังไม่มีสินค้าในร้าน"
+            />
+          </>
         )}
       </div>
     </main>

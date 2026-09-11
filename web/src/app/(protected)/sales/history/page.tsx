@@ -3,10 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable, type DataTableColumn } from "@/components/DataTable";
-import { searchSalesPaged, type Sale } from "@/lib/api/sales";
+import { fetchAllSalesForExport, searchSalesPaged, SALES_EXPORT_ROW_CAP, type Sale } from "@/lib/api/sales";
 import { MemberSearch } from "@/components/MemberSearch";
 import type { Member } from "@/lib/api/members";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { ExportButton } from "@/components/ExportButton";
+import { triggerXlsxExport } from "@/lib/export/xlsxClient";
+import { toExportRows, type ExportColumn } from "@/lib/export/types";
 
 const PAGE_SIZE = 20;
 
@@ -99,11 +102,51 @@ export default function SalesHistoryPage() {
     },
   ];
 
+  // data-model.md §3 - same 6 columns as `columns` above, minus the receipt
+  // button (no meaning in a spreadsheet), as raw cell values instead of nodes.
+  const salesExportColumns: ExportColumn<Sale>[] = [
+    { header: "วันที่", value: (s) => new Date(s.createdAt).toLocaleString("th-TH") },
+    { header: "พนักงาน", value: (s) => s.staff?.name ?? "-" },
+    { header: "สมาชิก", value: (s) => s.member?.name ?? "-" },
+    { header: "จำนวนรายการ", value: (s) => s.lineItems.length },
+    { header: "ส่วนลด", value: (s) => s.discountAmount },
+    { header: "ยอดรวม", value: (s) => s.totalAmount },
+  ];
+
+  // tasks.md T009 (US2, FR-003-FR-006) - pulls every bill matching the
+  // filters on screen (not just the current page), same filters as `refresh`
+  // above. Throwing here (instead of calling triggerXlsxExport) is how the
+  // cap-exceeded message reaches <ExportButton>'s error slot.
+  async function exportSalesHistory() {
+    const result = await fetchAllSalesForExport({
+      from: from || undefined,
+      to: to || undefined,
+      staffId: onlyMine ? staff?.id : undefined,
+      memberId: member?.id,
+    });
+
+    if (result.status === "cap_exceeded") {
+      throw new Error(
+        `ตัวกรองนี้ตรงกับ ${result.totalCount.toLocaleString("th-TH")} บิล เกิน ` +
+          `${SALES_EXPORT_ROW_CAP.toLocaleString("th-TH")} บิล กรุณาแคบช่วงวันที่หรือตัวกรองลงก่อน`,
+      );
+    }
+
+    await triggerXlsxExport({
+      filenamePrefix: "taladpos-sales-history",
+      sheetName: "ประวัติการขาย",
+      ...toExportRows(result.sales, salesExportColumns),
+    });
+  }
+
   const fieldClass = "input w-full rounded-control border-steel-200 bg-white";
 
   return (
     <main className="px-5 py-5">
-      <h1 className="mb-5 text-xl font-semibold">ประวัติการขาย</h1>
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold">ประวัติการขาย</h1>
+        <ExportButton onExport={exportSalesHistory} />
+      </div>
 
       <DataTable
         columns={columns}

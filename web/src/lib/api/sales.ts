@@ -1,4 +1,4 @@
-import { apiFetch, type PagedResult } from "./client";
+import { apiFetch, MAX_PAGE_SIZE, type PagedResult } from "./client";
 
 export interface SaleLineItemDto {
   productId: string;
@@ -84,4 +84,39 @@ export function searchSalesPaged(params: {
 // contracts/sales.md - GET /api/v1/sales/{id}/receipt (FR-030)
 export function getReceipt(saleId: string): Promise<Sale> {
   return apiFetch<Sale>(`/api/v1/sales/${saleId}/receipt`);
+}
+
+/** FR-006 - the most bills a single export can cover; above this the user must narrow the filter. */
+export const SALES_EXPORT_ROW_CAP = 10_000;
+
+export type FetchAllSalesResult =
+  | { status: "ok"; sales: Sale[] }
+  | { status: "cap_exceeded"; totalCount: number };
+
+/**
+ * data-model.md §4 / research.md #3 - every bill matching the filter, not
+ * just the current on-screen page (FR-004). Checks `totalCount` from the
+ * first page before paging further: a filter that matches more than
+ * SALES_EXPORT_ROW_CAP bills stops immediately instead of pulling all of it
+ * only to discard it (FR-006 - no silent partial export either way).
+ */
+export async function fetchAllSalesForExport(filters: {
+  from?: string;
+  to?: string;
+  staffId?: string;
+  memberId?: string;
+}): Promise<FetchAllSalesResult> {
+  const first = await searchSalesPaged({ ...filters, page: 1, pageSize: MAX_PAGE_SIZE });
+
+  if (first.totalCount > SALES_EXPORT_ROW_CAP) {
+    return { status: "cap_exceeded", totalCount: first.totalCount };
+  }
+
+  const sales = [...first.items];
+  for (let page = 2; page <= first.totalPages; page++) {
+    const result = await searchSalesPaged({ ...filters, page, pageSize: MAX_PAGE_SIZE });
+    sales.push(...result.items);
+  }
+
+  return { status: "ok", sales };
 }
