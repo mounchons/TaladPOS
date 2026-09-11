@@ -9,6 +9,14 @@ import { useRef, useState } from "react";
  * flight, so a second click can't start a second export) and the same place
  * to surface a message - including US2's "เกินเพดาน" message, which reaches
  * here by `onExport` throwing instead of calling `triggerXlsxExport`.
+ *
+ * The re-entry guard is a ref, not the `isExporting` state: two clicks fired
+ * back-to-back (verified in manual QA) both run before React's first state
+ * update commits, so both would read the same stale `isExporting === false`
+ * and both call `onExport`. A ref updates synchronously within the same
+ * click handler, so the second call sees it immediately - `isExporting`
+ * state still drives the `disabled` attribute/label, it just isn't what
+ * makes the guard correct.
  */
 export function ExportButton({
   onExport,
@@ -19,9 +27,11 @@ export function ExportButton({
 }) {
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isExportingRef = useRef(false);
 
   async function handleClick() {
-    if (isExporting) return;
+    if (isExportingRef.current) return;
+    isExportingRef.current = true;
     setError(null);
     setIsExporting(true);
     try {
@@ -29,6 +39,7 @@ export function ExportButton({
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด ไม่สามารถ export ได้ ลองใหม่อีกครั้ง");
     } finally {
+      isExportingRef.current = false;
       setIsExporting(false);
     }
   }
