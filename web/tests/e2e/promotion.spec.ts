@@ -29,12 +29,15 @@ test.describe("Promotions - Manager", () => {
     const endDate = dialog.getByRole("textbox").nth(1);
     await endDate.fill("2026-12-31");
 
+    // นับแถวที่ตรงเงื่อนไขก่อนบันทึก เผื่อมีโปรโมชั่นซ้ำสภาพนี้อยู่แล้วจากรันครั้งก่อน
+    const matchingRows = page.getByRole("row").filter({ hasText: productName! }).filter({ hasText: "90%" });
+    const countBefore = await matchingRows.count();
+
     await dialog.getByRole("button", { name: "บันทึก" }).click();
     await expect(dialog).toBeHidden();
 
-    const row = page.getByRole("row").filter({ hasText: productName! }).filter({ hasText: "90%" });
-    await expect(row).toBeVisible();
-    await expect(row.getByText("ใช้อยู่")).toBeVisible();
+    await expect(matchingRows).toHaveCount(countBefore + 1);
+    await expect(matchingRows.last().getByText("ใช้อยู่")).toBeVisible();
   });
 
   test("rejects a discount percentage above 100", async ({ page }) => {
