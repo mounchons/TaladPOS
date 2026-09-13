@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 1,
+  "basePath": "docs/image/product",
+  "imageFormat": "png",
+  "background": "transparent",
+  "fruits": [
+    {
+      "id": 1,
+      "slug": "apple",
+      "nameTh": "แอปเปิล",
+      "nameEn": "Apple",
+      "images": {
+        "large": { "path": "docs/image/product/apple-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/apple-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 2,
+      "slug": "banana",
+      "nameTh": "กล้วยหอม",
+      "nameEn": "Banana",
+      "images": {
+        "large": { "path": "docs/image/product/banana-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/banana-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 3,
+      "slug": "orange",
+      "nameTh": "ส้ม",
+      "nameEn": "Orange",
+      "images": {
+        "large": { "path": "docs/image/product/orange-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/orange-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 4,
+      "slug": "mango",
+      "nameTh": "มะม่วง",
+      "nameEn": "Mango",
+      "images": {
+        "large": { "path": "docs/image/product/mango-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/mango-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 5,
+      "slug": "watermelon",
+      "nameTh": "แตงโม",
+      "nameEn": "Watermelon",
+      "images": {
+        "large": { "path": "docs/image/product/watermelon-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/watermelon-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 6,
+      "slug": "pineapple",
+      "nameTh": "สับปะรด",
+      "nameEn": "Pineapple",
+      "images": {
+        "large": { "path": "docs/image/product/pineapple-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/pineapple-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 7,
+      "slug": "grapes",
+      "nameTh": "องุ่น",
+      "nameEn": "Grapes",
+      "images": {
+        "large": { "path": "docs/image/product/grapes-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/grapes-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 8,
+      "slug": "strawberry",
+      "nameTh": "สตรอว์เบอร์รี",
+      "nameEn": "Strawberry",
+      "images": {
+        "large": { "path": "docs/image/product/strawberry-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/strawberry-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 9,
+      "slug": "papaya",
+      "nameTh": "มะละกอ",
+      "nameEn": "Papaya",
+      "images": {
+        "large": { "path": "docs/image/product/papaya-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/papaya-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 10,
+      "slug": "guava",
+      "nameTh": "ฝรั่ง",
+      "nameEn": "Guava",
+      "images": {
+        "large": { "path": "docs/image/product/guava-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/guava-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 11,
+      "slug": "dragon-fruit",
+      "nameTh": "แก้วมังกร",
+      "nameEn": "Dragon Fruit",
+      "images": {
+        "large": { "path": "docs/image/product/dragon-fruit-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/dragon-fruit-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 12,
+      "slug": "durian",
+      "nameTh": "ทุเรียน",
+      "nameEn": "Durian",
+      "images": {
+        "large": { "path": "docs/image/product/durian-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/durian-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 13,
+      "slug": "mangosteen",
+      "nameTh": "มังคุด",
+      "nameEn": "Mangosteen",
+      "images": {
+        "large": { "path": "docs/image/product/mangosteen-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/mangosteen-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 14,
+      "slug": "rambutan",
+      "nameTh": "เงาะ",
+      "nameEn": "Rambutan",
+      "images": {
+        "large": { "path": "docs/image/product/rambutan-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/rambutan-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 15,
+      "slug": "longan",
+      "nameTh": "ลำไย",
+      "nameEn": "Longan",
+      "images": {
+        "large": { "path": "docs/image/product/longan-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/longan-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 16,
+      "slug": "lychee",
+      "nameTh": "ลิ้นจี่",
+      "nameEn": "Lychee",
+      "images": {
+        "large": { "path": "docs/image/product/lychee-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/lychee-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 17,
+      "slug": "coconut",
+      "nameTh": "มะพร้าว",
+      "nameEn": "Coconut",
+      "images": {
+        "large": { "path": "docs/image/product/coconut-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/coconut-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 18,
+      "slug": "pomelo",
+      "nameTh": "ส้มโอ",
+      "nameEn": "Pomelo",
+      "images": {
+        "large": { "path": "docs/image/product/pomelo-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/pomelo-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 19,
+      "slug": "pear",
+      "nameTh": "ลูกแพร์",
+      "nameEn": "Pear",
+      "images": {
+        "large": { "path": "docs/image/product/pear-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/pear-512.png", "width": 512, "height": 512 }
+      }
+    },
+    {
+      "id": 20,
+      "slug": "kiwi",
+      "nameTh": "กีวี",
+      "nameEn": "Kiwi",
+      "images": {
+        "large": { "path": "docs/image/product/kiwi-1024.png", "width": 1024, "height": 1024 },
+        "small": { "path": "docs/image/product/kiwi-512.png", "width": 512, "height": 512 }
+      }
+    }
+  ]
+}
