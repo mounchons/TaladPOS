@@ -19,6 +19,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Product images copied from docs/image/product by api/tools/TaladPOS.TestData
+web/public/images/products/
+
 # Environment files
 .env
 .env.local
