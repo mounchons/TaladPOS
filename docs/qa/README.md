@@ -65,6 +65,9 @@ Passed!  - Failed: 0, Passed:  9, Skipped: 0, Total:  9 - TaladPOS.Api.Integrati
 
 ถ้าชั้นที่สาม (IntegrationTests) แดง แปลว่า PostgreSQL ยังไม่พร้อม — กลับไปรัน `docker compose up -d postgres`
 
+ต้องการข้อมูลตั้งต้นสำหรับทดสอบผ่านหน้าเว็บ (สินค้า 20 รายการ โปรโมชั่น สมาชิก บิลย้อนหลัง) ให้รัน
+`./scripts/reset-test-data.ps1` — รายละเอียดดู [คู่มือ Reset ข้อมูลทดสอบ](../reset-test-data.md)
+
 ---
 
 ## ปิรามิดเทสต์ของโปรเจกต์นี้
