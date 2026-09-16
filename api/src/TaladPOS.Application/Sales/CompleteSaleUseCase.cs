@@ -1,7 +1,6 @@
 using TaladPOS.Application.Common;
 using TaladPOS.Application.Members;
 using TaladPOS.Application.Products;
-using TaladPOS.Application.Promotions;
 using TaladPOS.Domain.Products;
 using TaladPOS.Domain.Promotions;
 using TaladPOS.Domain.Sales;
@@ -15,35 +14,38 @@ public record CompleteSaleRequest(
 
 /// <summary>
 /// Checkout (contracts/sales.md - POST /api/v1/sales). Runs stock decrements,
-/// the Sale insert, the member accumulation update (US4, FR-014), and
-/// discount resolution (US5, FR-019-FR-022) as one database transaction so
-/// none of them can land without the others (FR-016).
+/// the Sale insert and the member accumulation update (US4, FR-014) as one
+/// database transaction so none of them can land without the others (FR-016).
+///
+/// Pricing moved out to <see cref="CartPricingService"/> for 003: the preview
+/// endpoint has to produce the same numbers, and the only way to guarantee that
+/// is for both to run the same code (003/FR-012).
+///
+/// That also forced the order to change. Stock used to be decremented line by
+/// line while walking the request; it now happens after pricing, because how
+/// many units are free - and therefore how many come off the shelf for nothing -
+/// is a pricing outcome, not something the request states (003/research.md #8).
 /// </summary>
 public class CompleteSaleUseCase
 {
     private readonly IProductRepository _productRepository;
     private readonly ISaleRepository _saleRepository;
     private readonly IMemberRepository _memberRepository;
-    private readonly IPromotionRepository _promotionRepository;
+    private readonly CartPricingService _pricing;
     private readonly IUnitOfWork _unitOfWork;
 
     public CompleteSaleUseCase(
         IProductRepository productRepository,
         ISaleRepository saleRepository,
         IMemberRepository memberRepository,
-        IPromotionRepository promotionRepository,
+        CartPricingService pricing,
         IUnitOfWork unitOfWork)
     {
         _productRepository = productRepository;
         _saleRepository = saleRepository;
         _memberRepository = memberRepository;
-        _promotionRepository = promotionRepository;
+        _pricing = pricing;
         _unitOfWork = unitOfWork;
-    }
-
-    private sealed record PendingLine(Guid ProductId, string Name, decimal UnitPrice, int Quantity, decimal ItemDiscount)
-    {
-        public decimal Subtotal => UnitPrice * Quantity;
     }
 
     public async Task<Sale> ExecuteAsync(CompleteSaleRequest request, CancellationToken ct = default)
@@ -51,6 +53,15 @@ public class CompleteSaleUseCase
         if (request.LineItems is null || request.LineItems.Count == 0)
         {
             throw new ArgumentException("A sale must contain at least one line item.", nameof(request));
+        }
+
+        foreach (var line in request.LineItems)
+        {
+            if (line.Quantity <= 0)
+            {
+                throw new ArgumentException(
+                    $"Quantity for product {line.ProductId} must be greater than 0.", nameof(request));
+            }
         }
 
         await using var transaction = await _unitOfWork.BeginTransactionAsync(ct);
@@ -62,86 +73,47 @@ public class CompleteSaleUseCase
         }
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var activePromotions = await _promotionRepository.GetActiveOnAsync(today, ct);
-        var hasMember = request.MemberId is not null;
+        var cartLines = request.LineItems
+            .Select(line => new CartLine(line.ProductId, line.Quantity))
+            .ToList();
 
-        var pendingLines = new List<PendingLine>();
-        foreach (var line in request.LineItems)
+        var priced = await _pricing.PriceAsync(cartLines, request.MemberId is not null, today, ct);
+
+        // 003/FR-017: gifts leave the shelf like anything else, so every line -
+        // gift or paid - is decremented. Grouped back per product because a
+        // product may now span a paid line and a gift line.
+        foreach (var group in priced.Cart.Lines.GroupBy(line => line.ProductId))
         {
-            if (line.Quantity <= 0)
-            {
-                throw new ArgumentException(
-                    $"Quantity for product {line.ProductId} must be greater than 0.", nameof(request));
-            }
-
-            var product = await _productRepository.GetByIdAsync(line.ProductId, ct)
-                ?? throw new KeyNotFoundException($"Product {line.ProductId} was not found.");
-
-            var decreased = await _productRepository.TryDecreaseStockAsync(line.ProductId, line.Quantity, ct);
+            var quantity = group.Sum(line => line.Quantity);
+            var decreased = await _productRepository.TryDecreaseStockAsync(group.Key, quantity, ct);
             if (!decreased)
             {
-                throw new InsufficientStockException(line.ProductId, line.Quantity, product.StockQuantity);
+                var product = priced.Products[group.Key];
+                throw new InsufficientStockException(group.Key, quantity, product.StockQuantity);
             }
-
-            var lineSubtotal = product.Price * line.Quantity;
-            var itemDiscount = DiscountResolver.ResolveItemDiscount(
-                activePromotions, product.Id, hasMember, lineSubtotal, today);
-
-            pendingLines.Add(new PendingLine(product.Id, product.Name, product.Price, line.Quantity, itemDiscount));
         }
 
-        var billSubtotal = pendingLines.Sum(l => l.Subtotal);
-        var billDiscount = DiscountResolver.ResolveBillDiscount(activePromotions, hasMember, billSubtotal, today);
+        var saleLineItems = priced.Cart.Lines
+            .Select(line => new SaleLineItem(
+                line.ProductId, line.ProductName, line.UnitPrice, line.Quantity, line.DiscountAmount, line.IsGift))
+            .ToList();
 
-        var saleLineItems = DistributeBillDiscount(pendingLines, billDiscount);
+        var appliedPromotions = priced.Cart.AppliedPromotions
+            .Select(promotion => new SaleAppliedPromotion(
+                promotion.PromotionId, promotion.Description, promotion.SetCount, promotion.DiscountAmount))
+            .ToList();
 
-        var sale = new Sale(request.StaffId, request.MemberId, saleLineItems);
+        var sale = new Sale(request.StaffId, request.MemberId, saleLineItems, appliedPromotions);
         await _saleRepository.AddAsync(sale, ct);
 
         if (request.MemberId is Guid memberId)
         {
+            // 003/FR-022: the accumulated total follows what the customer actually
+            // paid, so a gift line (net zero) adds nothing to it by construction.
             await _memberRepository.IncreaseAccumulatedPurchaseTotalAsync(memberId, sale.TotalAmount, ct);
         }
 
         await transaction.CommitAsync(ct);
         return sale;
-    }
-
-    /// <summary>
-    /// A Bill-scope discount (FR-022) has no dedicated column on Sale -
-    /// Sale.DiscountAmount is the sum of its line items' DiscountAmount
-    /// (data-model.md), by design (keeps the aggregate's invariants derived
-    /// rather than duplicated). It's prorated across lines by each line's
-    /// share of the subtotal, with the rounding remainder folded into the
-    /// last line, so SubtotalAmount - DiscountAmount == TotalAmount exactly.
-    /// </summary>
-    private static List<SaleLineItem> DistributeBillDiscount(IReadOnlyList<PendingLine> lines, decimal billDiscount)
-    {
-        var result = new List<SaleLineItem>(lines.Count);
-
-        if (billDiscount == 0m)
-        {
-            foreach (var line in lines)
-            {
-                result.Add(new SaleLineItem(line.ProductId, line.Name, line.UnitPrice, line.Quantity, line.ItemDiscount));
-            }
-
-            return result;
-        }
-
-        var billSubtotal = lines.Sum(l => l.Subtotal);
-        var distributed = 0m;
-        for (var i = 0; i < lines.Count; i++)
-        {
-            var line = lines[i];
-            var share = i == lines.Count - 1
-                ? billDiscount - distributed
-                : Math.Round(billDiscount * (line.Subtotal / billSubtotal), 2);
-            distributed += share;
-
-            result.Add(new SaleLineItem(line.ProductId, line.Name, line.UnitPrice, line.Quantity, line.ItemDiscount + share));
-        }
-
-        return result;
     }
 }

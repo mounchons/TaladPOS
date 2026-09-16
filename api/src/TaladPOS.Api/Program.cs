@@ -35,7 +35,9 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+builder.Services.AddScoped<CartPricingService>();
 builder.Services.AddScoped<CompleteSaleUseCase>();
+builder.Services.AddScoped<PreviewSaleUseCase>();
 
 // --- Stock management (US3: FR-015, FR-017, FR-018) ---
 builder.Services.AddScoped<CreateProductUseCase>();
@@ -51,6 +53,13 @@ builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
 builder.Services.AddScoped<CreatePromotionUseCase>();
 builder.Services.AddScoped<UpdatePromotionUseCase>();
 builder.Services.AddScoped<DeletePromotionUseCase>();
+
+// --- Conditional promotions (003: FR-001-FR-027) ---
+builder.Services.AddScoped<IConditionalPromotionRepository, ConditionalPromotionRepository>();
+builder.Services.AddScoped<ListConditionalPromotionsQuery>();
+builder.Services.AddScoped<CreateConditionalPromotionUseCase>();
+builder.Services.AddScoped<UpdateConditionalPromotionUseCase>();
+builder.Services.AddScoped<DeleteConditionalPromotionUseCase>();
 
 // --- Sales history & reports (US6: FR-024-FR-028) ---
 builder.Services.AddScoped<GetSalesHistoryQuery>();

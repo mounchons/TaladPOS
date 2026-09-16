@@ -84,6 +84,15 @@ public class ProductUseCaseTests
         public Task<Product?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
             Task.FromResult(_products.GetValueOrDefault(id));
 
+        public Task<IReadOnlyList<Product>> GetByIdsAsync(
+            IEnumerable<Guid> ids, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<Product>>(
+                ids.Distinct()
+                    .Select(id => _products.GetValueOrDefault(id))
+                    .Where(product => product is not null)
+                    .Select(product => product!)
+                    .ToList());
+
         public Task<IReadOnlyList<Product>> SearchAsync(
             string? search, string? barcode, bool lowStockOnly, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<Product>>(_products.Values.ToList());

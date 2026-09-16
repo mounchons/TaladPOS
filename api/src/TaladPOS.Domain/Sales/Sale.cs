@@ -10,6 +10,7 @@ namespace TaladPOS.Domain.Sales;
 public class Sale
 {
     private readonly List<SaleLineItem> _lineItems = new();
+    private readonly List<SaleAppliedPromotion> _appliedPromotions = new();
 
     public Guid Id { get; private set; }
 
@@ -20,6 +21,12 @@ public class Sale
     public DateTime CreatedAtUtc { get; private set; }
 
     public IReadOnlyCollection<SaleLineItem> LineItems => _lineItems.AsReadOnly();
+
+    /// <summary>
+    /// Which conditional promotions fired on this bill (003/FR-024). Provenance
+    /// only - the totals below still come from the line items alone, unchanged.
+    /// </summary>
+    public IReadOnlyCollection<SaleAppliedPromotion> AppliedPromotions => _appliedPromotions.AsReadOnly();
 
     public decimal SubtotalAmount => _lineItems.Sum(item => item.UnitPriceSnapshot * item.Quantity);
 
@@ -32,7 +39,11 @@ public class Sale
     {
     }
 
-    public Sale(Guid staffId, Guid? memberId, IEnumerable<SaleLineItem> lineItems)
+    public Sale(
+        Guid staffId,
+        Guid? memberId,
+        IEnumerable<SaleLineItem> lineItems,
+        IEnumerable<SaleAppliedPromotion>? appliedPromotions = null)
     {
         var items = lineItems?.ToList() ?? new List<SaleLineItem>();
         if (items.Count == 0)
@@ -49,6 +60,12 @@ public class Sale
         {
             item.SaleId = Id;
             _lineItems.Add(item);
+        }
+
+        foreach (var promotion in appliedPromotions ?? Enumerable.Empty<SaleAppliedPromotion>())
+        {
+            promotion.SaleId = Id;
+            _appliedPromotions.Add(promotion);
         }
     }
 }

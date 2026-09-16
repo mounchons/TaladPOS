@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProductCard } from "@/components/ProductCard";
 import { Cart, type CartLine } from "@/components/Cart";
 import { MemberFormDialog } from "@/components/MemberFormDialog";
 import { ReceiptDialog } from "@/components/ReceiptDialog";
 import { searchProductsByNameOrBarcode, type Product } from "@/lib/api/products";
-import { createSale, type Sale } from "@/lib/api/sales";
+import { createSale, previewSale, type PricedCart, type Sale } from "@/lib/api/sales";
 import type { Member } from "@/lib/api/members";
 import { ApiError } from "@/lib/api/client";
 
@@ -20,6 +20,51 @@ export default function SalesPage() {
   const [memberDialogVisible, setMemberDialogVisible] = useState(false);
   const [lastCompletedSale, setLastCompletedSale] = useState<Sale | null>(null);
   const [receiptVisible, setReceiptVisible] = useState(false);
+
+  // 002: every figure the register shows - discounts, gifts, the total - is
+  // priced by the server, because the same code then runs at checkout. The web
+  // app owning a second copy of the discount rules is exactly what constitution
+  // Principle I rules out, and it would drift (003/FR-012, 003/FR-013).
+  const [pricedCart, setPricedCart] = useState<PricedCart | null>(null);
+  const [isPricing, setIsPricing] = useState(false);
+  const previewRequestId = useRef(0);
+
+  useEffect(() => {
+    if (cartLines.length === 0) {
+      previewRequestId.current += 1;
+      setPricedCart(null);
+      setIsPricing(false);
+      return;
+    }
+
+    const requestId = ++previewRequestId.current;
+    setIsPricing(true);
+
+    // Debounced: a cashier scanning a queue of items would otherwise fire a
+    // request per beep. The previous result stays on screen meanwhile, so the
+    // total never blanks out mid-sale.
+    const timeout = setTimeout(() => {
+      previewSale({
+        memberId: selectedMember?.id ?? null,
+        lineItems: cartLines.map((line) => ({
+          productId: line.product.id,
+          quantity: line.quantity,
+        })),
+      })
+        .then((cart) => {
+          // A slower earlier request must not overwrite a newer answer.
+          if (requestId === previewRequestId.current) setPricedCart(cart);
+        })
+        .catch(() => {
+          if (requestId === previewRequestId.current) setPricedCart(null);
+        })
+        .finally(() => {
+          if (requestId === previewRequestId.current) setIsPricing(false);
+        });
+    }, 250);
+
+    return () => clearTimeout(timeout);
+  }, [cartLines, selectedMember]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -72,6 +117,7 @@ export default function SalesPage() {
       setLastCompletedSale(sale);
       setReceiptVisible(true);
       setCartLines([]);
+      setPricedCart(null);
       setSelectedMember(null);
       searchProductsByNameOrBarcode(query)
         .then(setProducts)
@@ -139,6 +185,8 @@ export default function SalesPage() {
         onOpenRegisterMember={() => setMemberDialogVisible(true)}
         lastCompletedSale={lastCompletedSale}
         onShowReceipt={() => setReceiptVisible(true)}
+        pricedCart={pricedCart}
+        isPricing={isPricing}
       />
 
       <ReceiptDialog

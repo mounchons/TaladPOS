@@ -62,7 +62,8 @@ try
         // No CASCADE on purpose: a future table referencing these should make
         // this fail loudly rather than be wiped silently. Staff is not listed.
         await db.Database.ExecuteSqlRawAsync(
-            "TRUNCATE TABLE sale_line_items, sales, promotions, members, products;");
+            "TRUNCATE TABLE sale_applied_promotions, sale_line_items, sales, "
+            + "conditional_promotion_lines, conditional_promotions, promotions, members, products;");
 
         summary = await new TestDataBuilder(db).BuildAsync(catalog, imageUrls, utcNow);
         await transaction.CommitAsync();
@@ -117,6 +118,17 @@ static void PrintSummary(TestDataSummary summary, string database, DateOnly toda
         var audience = promotion.AppliesToMembersOnly ? "members only" : "everyone";
         Console.WriteLine(
             $"    - {promotion.Scope,-4} {promotion.DiscountPercentage,3:0}%  {target} / {audience}  "
+            + $"{promotion.StartDate:yyyy-MM-dd} .. {promotion.EndDate:yyyy-MM-dd}  [{state}]");
+    }
+
+    Console.WriteLine($"  Bundles     : {summary.ConditionalPromotions.Count}");
+
+    foreach (var promotion in summary.ConditionalPromotions)
+    {
+        var state = promotion.IsActive(today) ? "active" : promotion.EndDate < today ? "expired" : "upcoming";
+        var audience = promotion.AppliesToMembersOnly ? "members only" : "everyone";
+        Console.WriteLine(
+            $"    - {promotion.Describe(productNames)} / {audience}  "
             + $"{promotion.StartDate:yyyy-MM-dd} .. {promotion.EndDate:yyyy-MM-dd}  [{state}]");
     }
 

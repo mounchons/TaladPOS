@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Product } from "@/lib/api/products";
 import type { Member } from "@/lib/api/members";
-import type { Sale } from "@/lib/api/sales";
+import type { PricedCart, Sale } from "@/lib/api/sales";
 import { MemberSearch } from "@/components/MemberSearch";
 
 export interface CartLine {
@@ -22,6 +22,8 @@ export function Cart({
   onOpenRegisterMember,
   lastCompletedSale,
   onShowReceipt,
+  pricedCart,
+  isPricing,
 }: {
   lines: CartLine[];
   onChangeQuantity: (productId: string, quantity: number) => void;
@@ -33,9 +35,30 @@ export function Cart({
   onOpenRegisterMember: () => void;
   lastCompletedSale?: Sale | null;
   onShowReceipt: () => void;
+  /**
+   * 002: the server's pricing of this exact cart. Null while the first preview
+   * is still in flight or if it failed - the cart then falls back to plain
+   * arithmetic so the cashier still sees a number, but no discount is ever
+   * invented here (constitution Principle I).
+   */
+  pricedCart?: PricedCart | null;
+  isPricing?: boolean;
 }) {
-  const subtotal = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
+  const undiscounted = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
+  const total = pricedCart?.totalAmount ?? undiscounted;
+  const discount = pricedCart?.discountAmount ?? 0;
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
+
+  // How many units of each product the bill is giving away, so the line can say
+  // so without the cart re-deriving which ones they are (003/FR-016).
+  const giftedByProduct = new Map<string, number>();
+  for (const line of pricedCart?.lines ?? []) {
+    if (line.isGift) {
+      giftedByProduct.set(line.productId, (giftedByProduct.get(line.productId) ?? 0) + line.quantity);
+    }
+  }
+
+  const unclaimedGifts = pricedCart?.unclaimedGifts ?? [];
 
   // On a phone the register cannot sit beside the goods, and stacking it below
   // them would put the total a full scroll away from the products - so it
@@ -156,6 +179,15 @@ export function Cart({
                     <p className="money text-xs text-ink-300">
                       {line.product.price.toFixed(2)} / ชิ้น
                     </p>
+                    {/* 003/FR-016: the cashier has to be able to tell the
+                        customer which units are free before taking payment. */}
+                    {(giftedByProduct.get(line.product.id) ?? 0) > 0 && (
+                      <p className="mt-0.5 text-xs text-mango">
+                        ของแถม{" "}
+                        <span className="money">{giftedByProduct.get(line.product.id)}</span> ชิ้น ·
+                        ไม่คิดเงิน
+                      </p>
+                    )}
                   </div>
                   {/* daisyUI has no number stepper, so it is a join of three
                       controls. The clamp to stockQuantity is kept on every path
@@ -218,10 +250,32 @@ export function Cart({
         {/* The total is the loudest thing in the app on purpose: the cashier
           reads it out, the customer checks it. */}
         <div className="border-t border-ink-700 px-5 pb-5 pt-4">
+          {/* 003/FR-015: the bill has earned a gift nobody has picked up. Said
+              out loud rather than silently dropped, and it never blocks paying. */}
+          {unclaimedGifts.map((gift) => (
+            <p
+              key={`${gift.promotionId}-${gift.giftProductId}`}
+              className="mb-3 rounded-control border border-mango/40 bg-mango/10 px-3 py-2 text-xs text-mango"
+            >
+              ยังไม่ได้ใช้สิทธิ์ · {gift.description} — หยิบ {gift.giftProductName} อีก{" "}
+              <span className="money">{gift.missingQuantity}</span> ชิ้น
+            </p>
+          ))}
+
+          {discount > 0 && (
+            <div className="mb-2 flex items-baseline justify-between gap-3 text-sm">
+              <span className="text-ink-300">ส่วนลด</span>
+              <span className="money text-white">−{discount.toFixed(2)}</span>
+            </div>
+          )}
+
           <div className="mb-4 flex items-baseline justify-between gap-3">
-            <span className="text-sm text-ink-300">ยอดรวม</span>
+            <span className="text-sm text-ink-300">
+              ยอดรวม
+              {isPricing && <span className="ml-2 text-xs text-ink-500">กำลังคิดราคา…</span>}
+            </span>
             <span className="money text-5xl font-semibold leading-none text-mango">
-              {subtotal.toFixed(2)}
+              {total.toFixed(2)}
             </span>
           </div>
           {/* Disabled used to be ink-700 on an ink panel - a 1.2:1 difference

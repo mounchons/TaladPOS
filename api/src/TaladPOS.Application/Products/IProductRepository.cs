@@ -7,6 +7,16 @@ public interface IProductRepository
 {
     Task<Product?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
+    /// <summary>
+    /// Load several products at once. Pricing a cart needs the name and price
+    /// of every product in the cart *and* of every product the active
+    /// conditional promotions point at (003/research.md #7); asking one id at a
+    /// time would turn one checkout into a dozen round trips. Ids with no
+    /// matching product are simply absent from the result, which is how the
+    /// caller detects a deleted product.
+    /// </summary>
+    Task<IReadOnlyList<Product>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default);
+
     Task<IReadOnlyList<Product>> SearchAsync(
         string? search, string? barcode, bool lowStockOnly, CancellationToken ct = default);
 

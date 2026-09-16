@@ -7,6 +7,16 @@ export interface SaleLineItemDto {
   quantity: number;
   discountAmount: number;
   lineTotal: number;
+  /** 003/FR-016 - a promotional gift. Bills saved before 002 come back false. */
+  isGift: boolean;
+}
+
+/** 003/FR-024 - which conditional promotion produced part of this bill's discount. */
+export interface AppliedPromotion {
+  promotionId: string;
+  description: string;
+  setCount: number;
+  discountAmount: number;
 }
 
 export interface StaffSummary {
@@ -28,6 +38,7 @@ export interface Sale {
   subtotalAmount: number;
   discountAmount: number;
   totalAmount: number;
+  appliedPromotions: AppliedPromotion[];
 }
 
 export interface CreateSaleLineItem {
@@ -40,6 +51,54 @@ export function createSale(request: {
   lineItems: CreateSaleLineItem[];
 }): Promise<Sale> {
   return apiFetch<Sale>("/api/v1/sales", {
+    method: "POST",
+    body: JSON.stringify({ memberId: request.memberId ?? null, lineItems: request.lineItems }),
+  });
+}
+
+/** 003/contracts/sales-preview.md - one line of a priced cart. */
+export interface PricedLine {
+  productId: string;
+  productName: string;
+  unitPrice: number;
+  quantity: number;
+  discountAmount: number;
+  lineTotal: number;
+  isGift: boolean;
+}
+
+/** 003/FR-015 - an earned gift that is not in the cart yet. */
+export interface UnclaimedGift {
+  promotionId: string;
+  description: string;
+  giftProductId: string;
+  giftProductName: string;
+  missingQuantity: number;
+}
+
+export interface PricedCart {
+  lines: PricedLine[];
+  appliedPromotions: AppliedPromotion[];
+  unclaimedGifts: UnclaimedGift[];
+  subtotalAmount: number;
+  discountAmount: number;
+  totalAmount: number;
+}
+
+/**
+ * 003/contracts/sales-preview.md - POST /api/v1/sales/preview.
+ *
+ * Every number the register shows comes from here. The web app deliberately
+ * does no discount arithmetic of its own: the server runs the same pricing code
+ * for the preview and for the real checkout, which is the only way the total on
+ * screen is guaranteed to be the total charged (003/FR-012, constitution
+ * Principle I).
+ */
+export function previewSale(request: {
+  memberId?: string | null;
+  lineItems: CreateSaleLineItem[];
+}): Promise<PricedCart> {
+  return apiFetch<PricedCart>("/api/v1/sales/preview", {
     method: "POST",
     body: JSON.stringify({ memberId: request.memberId ?? null, lineItems: request.lineItems }),
   });

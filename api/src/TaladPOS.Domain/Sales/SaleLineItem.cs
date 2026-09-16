@@ -21,6 +21,13 @@ public class SaleLineItem
 
     public decimal DiscountAmount { get; private set; }
 
+    /// <summary>
+    /// 003/FR-016: this line is a promotional gift. A bundle discount of 100%
+    /// also nets to zero, so the receipt cannot tell the two apart from the
+    /// amounts alone - it has to be recorded (003/research.md #4).
+    /// </summary>
+    public bool IsGift { get; private set; }
+
     public decimal LineTotal => (UnitPriceSnapshot * Quantity) - DiscountAmount;
 
     // EF Core materialization constructor.
@@ -34,7 +41,8 @@ public class SaleLineItem
         string productNameSnapshot,
         decimal unitPriceSnapshot,
         int quantity,
-        decimal discountAmount = 0m)
+        decimal discountAmount = 0m,
+        bool isGift = false)
     {
         if (string.IsNullOrWhiteSpace(productNameSnapshot))
         {
@@ -64,5 +72,6 @@ public class SaleLineItem
         UnitPriceSnapshot = unitPriceSnapshot;
         Quantity = quantity;
         DiscountAmount = discountAmount;
+        IsGift = isGift;
     }
 }

@@ -19,6 +19,7 @@ internal sealed record PlannedSale(
 internal sealed record TestDataSummary(
     IReadOnlyList<Product> Products,
     IReadOnlyList<Promotion> Promotions,
+    IReadOnlyList<ConditionalPromotion> ConditionalPromotions,
     IReadOnlyList<Member> Members,
     IReadOnlyList<Sale> Sales,
     IReadOnlyList<Staff> Staff,
@@ -111,6 +112,58 @@ internal sealed class TestDataBuilder
 
         _db.Promotions.AddRange(promotions);
 
+        var conditionalPromotions = new List<ConditionalPromotion>();
+        foreach (var spec in TestDataSpec.ConditionalPromotions)
+        {
+            var lines = new List<ConditionLine>();
+            var missing = false;
+            foreach (var (slug, minimumQuantity) in spec.Condition)
+            {
+                if (!products.TryGetValue(slug, out var conditionProduct))
+                {
+                    warnings.Add(
+                        $"Skipped conditional promotion '{spec.Name}': '{slug}' is not in products.json.");
+                    missing = true;
+                    break;
+                }
+
+                lines.Add(new ConditionLine(conditionProduct.Id, minimumQuantity));
+            }
+
+            if (missing)
+            {
+                continue;
+            }
+
+            Reward reward;
+            if (spec.RewardKind == RewardKind.Gift)
+            {
+                if (!products.TryGetValue(spec.GiftProductSlug!, out var giftProduct))
+                {
+                    warnings.Add(
+                        $"Skipped conditional promotion '{spec.Name}': gift '{spec.GiftProductSlug}' "
+                        + "is not in products.json.");
+                    continue;
+                }
+
+                reward = Reward.Gift(giftProduct.Id, spec.GiftQuantity!.Value);
+            }
+            else
+            {
+                reward = Reward.Percentage(spec.DiscountPercentage!.Value);
+            }
+
+            conditionalPromotions.Add(new ConditionalPromotion(
+                spec.Name,
+                lines,
+                reward,
+                spec.AppliesToMembersOnly,
+                today.AddDays(spec.StartOffsetDays),
+                today.AddDays(spec.EndOffsetDays)));
+        }
+
+        _db.ConditionalPromotions.AddRange(conditionalPromotions);
+
         var members = TestDataSpec.Members.Select(m => new Member(m.Name, m.PhoneNumber)).ToList();
         _db.Members.AddRange(members);
 
@@ -132,7 +185,8 @@ internal sealed class TestDataBuilder
 
         await _db.SaveChangesAsync(ct);
 
-        return new TestDataSummary(products.Values.ToList(), promotions, members, sales, staff, warnings);
+        return new TestDataSummary(
+            products.Values.ToList(), promotions, conditionalPromotions, members, sales, staff, warnings);
     }
 
     private List<PlannedSale> PlanSales(IReadOnlyList<CatalogProduct> catalog, DateTime utcNow)

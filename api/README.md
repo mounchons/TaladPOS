@@ -69,7 +69,7 @@ variable (ใช้ `__` แทนจุดคั่นระดับ เช่
 
 ## Reset ข้อมูลทดสอบ (สำหรับ QA)
 
-ล้าง products, promotions, members และ sales แล้วสร้างชุดข้อมูลทดสอบใหม่ (สินค้า 20 รายการพร้อมรูป,
+ล้าง products, promotions, conditional promotions, members และ sales แล้วสร้างชุดข้อมูลทดสอบใหม่ (สินค้า 20 รายการพร้อมรูป,
 โปรโมชั่น 8, สมาชิก 5, บิลย้อนหลังประมาณ 96 บิล) — `staff` ไม่ถูกล้าง:
 
 ```powershell

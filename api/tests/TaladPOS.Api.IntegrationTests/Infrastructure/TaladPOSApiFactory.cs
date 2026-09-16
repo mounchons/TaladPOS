@@ -66,7 +66,12 @@ public sealed class TaladPOSApiFactory : WebApplicationFactory<Program>, IAsyncL
         using var scope = Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<TaladPOSDbContext>();
         await db.Database.ExecuteSqlRawAsync(
-            "TRUNCATE TABLE sale_line_items, sales, products CASCADE;");
+            // 002: the conditional promotion tables go too. They reference products
+            // by id with no foreign key (003/research.md #7), so a promotion left
+            // behind would point at a product this very reset just replaced, and
+            // the next test would inherit a promotion flagged unusable.
+            "TRUNCATE TABLE sale_applied_promotions, sale_line_items, sales, "
+            + "conditional_promotion_lines, conditional_promotions, products CASCADE;");
         await SeedAsync(db, scope.ServiceProvider.GetRequiredService<StaffAuthenticator>());
     }
 

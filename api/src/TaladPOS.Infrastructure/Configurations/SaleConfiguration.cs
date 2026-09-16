@@ -32,5 +32,27 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
         builder.Navigation(s => s.LineItems)
             .HasField("_lineItems")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        // 003/FR-024: which conditional promotions fired, as a snapshot. No
+        // foreign key back to the promotion - it may be edited or deleted and
+        // the bill still has to explain itself.
+        builder.OwnsMany(s => s.AppliedPromotions, promotion =>
+        {
+            promotion.ToTable("sale_applied_promotions");
+
+            promotion.WithOwner().HasForeignKey(p => p.SaleId);
+
+            promotion.HasKey(p => p.Id);
+
+            promotion.Property(p => p.SaleId).IsRequired();
+            promotion.Property(p => p.PromotionId).IsRequired();
+            promotion.Property(p => p.DescriptionSnapshot).IsRequired().HasMaxLength(400);
+            promotion.Property(p => p.SetCount).IsRequired();
+            promotion.Property(p => p.DiscountAmount).IsRequired().HasColumnType("numeric(12,2)");
+        });
+
+        builder.Navigation(s => s.AppliedPromotions)
+            .HasField("_appliedPromotions")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

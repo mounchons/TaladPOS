@@ -19,6 +19,10 @@ public class SaleLineItemConfiguration : IEntityTypeConfiguration<SaleLineItem>
         builder.Property(li => li.Quantity).IsRequired();
         builder.Property(li => li.DiscountAmount).IsRequired().HasColumnType("numeric(12,2)");
 
+        // 003/FR-016. Additive with a default so every row written before this
+        // feature reads back as "not a gift" without a data migration.
+        builder.Property(li => li.IsGift).IsRequired().HasDefaultValue(false);
+
         builder.Ignore(li => li.LineTotal);
     }
 }

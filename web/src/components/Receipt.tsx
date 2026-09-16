@@ -42,11 +42,24 @@ export function Receipt({ sale }: { sale: Sale }) {
       </dl>
 
       <ul className="my-5 space-y-2 border-y border-dashed border-steel-200 py-5">
-        {sale.lineItems.map((li) => (
-          <li key={li.productId} className="flex justify-between gap-4">
+        {/* 003/FR-016: a product can appear twice - once paid for, once as a
+            gift - so the key carries the gift flag. The gift line shows the
+            product's real price with a discount that cancels it, never 0.00 as
+            a unit price, so the receipt shows what was given away as well as
+            what it was worth. */}
+        {sale.lineItems.map((li, index) => (
+          <li key={`${li.productId}-${li.isGift ? "gift" : "paid"}-${index}`} className="flex justify-between gap-4">
             <span className="text-ink-700">
               {li.productNameSnapshot}
               <span className="money text-ink-300"> ×{li.quantity}</span>
+              {li.isGift && (
+                <span className="ml-2 rounded bg-mango/15 px-1.5 py-0.5 text-xs text-mango-600">
+                  ของแถม
+                </span>
+              )}
+              <span className="block text-xs text-ink-300">
+                <span className="money">{li.unitPriceSnapshot.toFixed(2)}</span> / ชิ้น
+              </span>
               {li.discountAmount > 0 && (
                 <span className="block text-xs text-mango-600">
                   ส่วนลด <span className="money">{li.discountAmount.toFixed(2)}</span>
@@ -68,6 +81,25 @@ export function Receipt({ sale }: { sale: Sale }) {
           <span className="money">{sale.discountAmount.toFixed(2)}</span>
         </div>
       </div>
+
+      {/* 003/FR-024: where the discount came from, worded as it was on the day
+          of sale - the promotion itself may since have been edited or deleted. */}
+      {sale.appliedPromotions?.length > 0 && (
+        <div className="mt-3 space-y-1 border-t border-dashed border-steel-200 pt-3 text-xs text-ink-500">
+          <p className="text-ink-700">โปรโมชั่นที่ใช้</p>
+          {sale.appliedPromotions.map((promotion) => (
+            <div key={promotion.promotionId} className="flex justify-between gap-4">
+              <span>
+                {promotion.description}
+                {promotion.setCount > 1 && (
+                  <span className="money text-ink-300"> ×{promotion.setCount}</span>
+                )}
+              </span>
+              <span className="money shrink-0">−{promotion.discountAmount.toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="mt-3 flex items-baseline justify-between gap-4 border-t border-steel-200 pt-3">
         <span className="text-sm text-ink-700">ยอดสุทธิ</span>

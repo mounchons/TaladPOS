@@ -12,6 +12,21 @@ internal sealed record ProductSpec(
     decimal Price, bool HasBarcode, int FinalStock, int Popularity, int? LowStockThreshold = null);
 
 /// <summary>Start/end are day offsets from today (UTC, the same "today" CompleteSaleUseCase uses).</summary>
+/// <summary>
+/// 003/tasks.md T048, T053, T057 - one of each shape the feature supports, so
+/// QA does not have to hand-build them before every run.
+/// </summary>
+internal sealed record ConditionalPromotionSpec(
+    string Name,
+    IReadOnlyList<(string ProductSlug, int MinimumQuantity)> Condition,
+    RewardKind RewardKind,
+    string? GiftProductSlug,
+    int? GiftQuantity,
+    decimal? DiscountPercentage,
+    bool AppliesToMembersOnly,
+    int StartOffsetDays,
+    int EndOffsetDays);
+
 internal sealed record PromotionSpec(
     PromotionScope Scope, decimal DiscountPercentage, string? ProductSlug, bool AppliesToMembersOnly,
     int StartOffsetDays, int EndOffsetDays);
@@ -68,6 +83,30 @@ internal static class TestDataSpec
         ["pear"] = new(30m, HasBarcode: true, FinalStock: 20, Popularity: 2),
         ["kiwi"] = new(20m, HasBarcode: true, FinalStock: 1, Popularity: 3),
     };
+
+    public static readonly IReadOnlyList<ConditionalPromotionSpec> ConditionalPromotions =
+        new ConditionalPromotionSpec[]
+        {
+            // "ซื้อ a+b แถม c" - the User Story 1 shape.
+            new("ซื้อคู่แถมส้มโอ",
+                new[] { ("mango", 1), ("watermelon", 1) },
+                RewardKind.Gift, "pomelo", 1, null,
+                AppliesToMembersOnly: false, StartOffsetDays: -10, EndOffsetDays: 30),
+
+            // "ซื้อ a y ชิ้น แถม x ชิ้น" - User Story 2, gift is the same product.
+            new("มะม่วงซื้อ 2 แถม 1",
+                new[] { ("mango", 2) },
+                RewardKind.Gift, "mango", 1, null,
+                AppliesToMembersOnly: false, StartOffsetDays: -10, EndOffsetDays: 30),
+
+            // "ซื้อ a+b ลด x%" - User Story 3. Deliberately fights the first one
+            // over mango, so a reset dataset always contains the overlap case
+            // that FR-019's allocation order exists to settle.
+            new("ซื้อคู่ลด 15%",
+                new[] { ("mango", 1), ("durian", 1) },
+                RewardKind.Percentage, null, null, 15m,
+                AppliesToMembersOnly: false, StartOffsetDays: -10, EndOffsetDays: 30),
+        };
 
     public static readonly IReadOnlyList<PromotionSpec> Promotions = new PromotionSpec[]
     {

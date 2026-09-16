@@ -18,6 +18,20 @@ public class ProductRepository : IProductRepository
     public Task<Product?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id, ct);
 
+    public async Task<IReadOnlyList<Product>> GetByIdsAsync(
+        IEnumerable<Guid> ids, CancellationToken ct = default)
+    {
+        var wanted = ids.Distinct().ToList();
+        if (wanted.Count == 0)
+        {
+            return Array.Empty<Product>();
+        }
+
+        return await _dbContext.Products
+            .Where(p => wanted.Contains(p.Id))
+            .ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<Product>> SearchAsync(
         string? search, string? barcode, bool lowStockOnly, CancellationToken ct = default)
     {

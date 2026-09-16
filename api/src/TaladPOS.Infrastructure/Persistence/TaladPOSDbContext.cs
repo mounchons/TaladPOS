@@ -26,6 +26,8 @@ public class TaladPOSDbContext : DbContext
 
     public DbSet<Promotion> Promotions => Set<Promotion>();
 
+    public DbSet<ConditionalPromotion> ConditionalPromotions => Set<ConditionalPromotion>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TaladPOSDbContext).Assembly);

@@ -33,7 +33,7 @@ public class CompleteSaleUseCaseTests
         var members = new FakeMemberRepository();
         var promotions = new FakePromotionRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var useCase = new CompleteSaleUseCase(products, sales, members, promotions, unitOfWork);
+        var useCase = new CompleteSaleUseCase(products, sales, members, Pricing(products, promotions), unitOfWork);
 
         var request = new CompleteSaleRequest(
             StaffId: Guid.NewGuid(),
@@ -59,7 +59,7 @@ public class CompleteSaleUseCaseTests
         var members = new FakeMemberRepository(member);
         var promotions = new FakePromotionRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var useCase = new CompleteSaleUseCase(products, sales, members, promotions, unitOfWork);
+        var useCase = new CompleteSaleUseCase(products, sales, members, Pricing(products, promotions), unitOfWork);
 
         var request = new CompleteSaleRequest(
             StaffId: Guid.NewGuid(),
@@ -83,7 +83,7 @@ public class CompleteSaleUseCaseTests
         var itemPromo = new Promotion(PromotionScope.Item, 10m, mango.Id, false, today, today);
         var promotions = new FakePromotionRepository(itemPromo);
         var unitOfWork = new FakeUnitOfWork();
-        var useCase = new CompleteSaleUseCase(products, sales, members, promotions, unitOfWork);
+        var useCase = new CompleteSaleUseCase(products, sales, members, Pricing(products, promotions), unitOfWork);
 
         var request = new CompleteSaleRequest(
             StaffId: Guid.NewGuid(),
@@ -112,7 +112,7 @@ public class CompleteSaleUseCaseTests
         var billPromo = new Promotion(PromotionScope.Bill, 10m, null, false, today, today);
         var promotions = new FakePromotionRepository(billPromo);
         var unitOfWork = new FakeUnitOfWork();
-        var useCase = new CompleteSaleUseCase(products, sales, members, promotions, unitOfWork);
+        var useCase = new CompleteSaleUseCase(products, sales, members, Pricing(products, promotions), unitOfWork);
 
         var request = new CompleteSaleRequest(
             StaffId: Guid.NewGuid(),
@@ -136,17 +136,22 @@ public class CompleteSaleUseCaseTests
         var membersOnlyPromo = new Promotion(PromotionScope.Item, 20m, mango.Id, true, today, today);
         var promotions = new FakePromotionRepository(membersOnlyPromo);
 
+        var withoutMemberProducts = new FakeProductRepository(mango);
         var withoutMemberUseCase = new CompleteSaleUseCase(
-            new FakeProductRepository(mango), new FakeSaleRepository(), new FakeMemberRepository(),
-            promotions, new FakeUnitOfWork());
+            withoutMemberProducts, new FakeSaleRepository(), new FakeMemberRepository(),
+            Pricing(withoutMemberProducts, promotions), new FakeUnitOfWork());
         var saleWithoutMember = await withoutMemberUseCase.ExecuteAsync(new CompleteSaleRequest(
             Guid.NewGuid(), null, [new CompleteSaleLineItemRequest(mango.Id, 1)]));
         saleWithoutMember.DiscountAmount.Should().Be(0m);
 
         var mangoForMemberSale = NewProduct("มะม่วง", 45m, stock: 10);
+        var withMemberProducts = new FakeProductRepository(mangoForMemberSale);
         var withMemberUseCase = new CompleteSaleUseCase(
-            new FakeProductRepository(mangoForMemberSale), new FakeSaleRepository(), new FakeMemberRepository(member),
-            new FakePromotionRepository(new Promotion(PromotionScope.Item, 20m, mangoForMemberSale.Id, true, today, today)),
+            withMemberProducts, new FakeSaleRepository(), new FakeMemberRepository(member),
+            Pricing(
+                withMemberProducts,
+                new FakePromotionRepository(
+                    new Promotion(PromotionScope.Item, 20m, mangoForMemberSale.Id, true, today, today))),
             new FakeUnitOfWork());
         var saleWithMember = await withMemberUseCase.ExecuteAsync(new CompleteSaleRequest(
             Guid.NewGuid(), member.Id, [new CompleteSaleLineItemRequest(mangoForMemberSale.Id, 1)]));
@@ -162,7 +167,7 @@ public class CompleteSaleUseCaseTests
         var members = new FakeMemberRepository();
         var promotions = new FakePromotionRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var useCase = new CompleteSaleUseCase(products, sales, members, promotions, unitOfWork);
+        var useCase = new CompleteSaleUseCase(products, sales, members, Pricing(products, promotions), unitOfWork);
 
         var request = new CompleteSaleRequest(
             StaffId: Guid.NewGuid(),
@@ -185,7 +190,7 @@ public class CompleteSaleUseCaseTests
         var members = new FakeMemberRepository();
         var promotions = new FakePromotionRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var useCase = new CompleteSaleUseCase(products, sales, members, promotions, unitOfWork);
+        var useCase = new CompleteSaleUseCase(products, sales, members, Pricing(products, promotions), unitOfWork);
 
         var request = new CompleteSaleRequest(
             StaffId: Guid.NewGuid(),
@@ -206,7 +211,7 @@ public class CompleteSaleUseCaseTests
         var members = new FakeMemberRepository();
         var promotions = new FakePromotionRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var useCase = new CompleteSaleUseCase(products, sales, members, promotions, unitOfWork);
+        var useCase = new CompleteSaleUseCase(products, sales, members, Pricing(products, promotions), unitOfWork);
 
         var request = new CompleteSaleRequest(Guid.NewGuid(), null, LineItems: []);
 
@@ -214,6 +219,52 @@ public class CompleteSaleUseCaseTests
 
         await act.Should().ThrowAsync<ArgumentException>();
         unitOfWork.LastTransaction.Should().BeNull("checking out an empty cart must be rejected before any transaction work");
+    }
+
+    /// <summary>
+    /// 002: CompleteSaleUseCase now prices through CartPricingService rather
+    /// than reaching for the promotion repository itself. These tests keep
+    /// their original fakes and wrap them, so they still guard the pre-002
+    /// behaviour they were written for (003/FR-026).
+    /// </summary>
+    private static CartPricingService Pricing(
+        IProductRepository products, IPromotionRepository promotions) =>
+        new(products, promotions, new FakeConditionalPromotionRepository());
+
+    private sealed class FakeConditionalPromotionRepository : IConditionalPromotionRepository
+    {
+        private readonly List<ConditionalPromotion> _promotions;
+
+        public FakeConditionalPromotionRepository(params ConditionalPromotion[] promotions) =>
+            _promotions = promotions.ToList();
+
+        public Task<ConditionalPromotion?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+            Task.FromResult(_promotions.FirstOrDefault(p => p.Id == id));
+
+        public Task<IReadOnlyList<ConditionalPromotion>> ListAsync(
+            bool activeOnly, DateOnly today, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<ConditionalPromotion>>(
+                _promotions.Where(p => !activeOnly || p.IsActive(today)).ToList());
+
+        public Task<IReadOnlyList<ConditionalPromotion>> GetActiveOnAsync(
+            DateOnly date, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<ConditionalPromotion>>(
+                _promotions.Where(p => p.IsActive(date)).ToList());
+
+        public Task AddAsync(ConditionalPromotion promotion, CancellationToken ct = default)
+        {
+            _promotions.Add(promotion);
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateAsync(ConditionalPromotion promotion, CancellationToken ct = default) =>
+            Task.CompletedTask;
+
+        public Task DeleteAsync(ConditionalPromotion promotion, CancellationToken ct = default)
+        {
+            _promotions.Remove(promotion);
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeProductRepository : IProductRepository
@@ -225,6 +276,15 @@ public class CompleteSaleUseCaseTests
 
         public Task<Product?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
             Task.FromResult(_products.GetValueOrDefault(id));
+
+        public Task<IReadOnlyList<Product>> GetByIdsAsync(
+            IEnumerable<Guid> ids, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<Product>>(
+                ids.Distinct()
+                    .Select(id => _products.GetValueOrDefault(id))
+                    .Where(product => product is not null)
+                    .Select(product => product!)
+                    .ToList());
 
         public Task<IReadOnlyList<Product>> SearchAsync(
             string? search, string? barcode, bool lowStockOnly, CancellationToken ct = default) =>
