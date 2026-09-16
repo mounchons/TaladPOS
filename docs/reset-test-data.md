@@ -171,7 +171,8 @@ Reset complete - database 'taladpos'
 ### 5.2 รูปสินค้า
 
 - tool copy รูปทั้งสองขนาดจาก `docs/image/product/` ไปไว้ที่ `web/public/images/products/`
-  (โฟลเดอร์นี้ถูก git ignore เพราะสร้างใหม่ได้ทุกครั้ง) และข้ามไฟล์ที่ copy ไว้แล้วและยังไม่เปลี่ยน
+  และข้ามไฟล์ที่ copy ไว้แล้วและยังไม่เปลี่ยน โฟลเดอร์นี้ commit ไว้ใน git ด้วย เพื่อให้ข้อมูลตัวอย่างใน
+  `db/init/01-taladpos.sql` แสดงรูปได้ทันทีหลัง clone (ดู [student-setup.md](student-setup.md))
 - `ImageUrl` ของสินค้าเก็บ **รูปเล็ก**: `http://localhost:3000/images/products/<slug>-512.png`
 - **รูปใหญ่** วางคู่กันในโฟลเดอร์เดียว หาได้โดยเปลี่ยน `-512` เป็น `-1024` (schema มีฟิลด์รูปช่องเดียว จึงไม่ได้เก็บแยก)
 - ใช้ URL เต็มแทน path สั้น เพราะช่อง "URL รูปภาพ" ในฟอร์มแก้ไขสินค้าเป็น `type="url"`
