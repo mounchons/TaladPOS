@@ -1,0 +1,5 @@
+# The database dump runs inside the Linux postgres container and shell
+# scripts run under bash; keep both LF even on Windows clones (core.autocrlf).
+*.sql text eol=lf
+*.sh  text eol=lf
+*.png binary

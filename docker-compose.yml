@@ -9,6 +9,9 @@ services:
       - "5432:5432"
     volumes:
       - taladpos_pgdata:/var/lib/postgresql/data
+      # Teaching dataset (pg_dump). Postgres runs it only when the volume is
+      # empty, i.e. the first `docker compose up` or after `docker compose down -v`.
+      - ./db/init:/docker-entrypoint-initdb.d:ro
 
 volumes:
   taladpos_pgdata:
