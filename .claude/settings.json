@@ -1,17 +1,1 @@
-{
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/auto-commit-after-implement.sh\"",
-            "shell": "bash",
-            "timeout": 30,
-            "statusMessage": "Checking for /speckit-implement changes to auto-commit..."
-          }
-        ]
-      }
-    ]
-  }
-}
+{}
