@@ -12,6 +12,41 @@ services:
       # Teaching dataset (pg_dump). Postgres runs it only when the volume is
       # empty, i.e. the first `docker compose up` or after `docker compose down -v`.
       - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # TCP, not the unix socket: while the dump above is being restored the
+      # entrypoint runs a temporary server on the socket only, so a socket
+      # check would report ready and let the API connect mid-restore.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U taladpos -d taladpos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build: ./api
+    # Development is what appsettings.Development.json (JWT key, CORS origin)
+    # and Program.cs (Swagger, MigrateAsync, seed) are keyed on. Only the DB
+    # host differs from `dotnet run`: inside compose it is the service name.
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__TaladPOSDb: "Host=postgres;Port=5432;Database=taladpos;Username=taladpos;Password=taladpos_dev_password"
+    ports:
+      - "5054:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+      args:
+        # Inlined into the browser bundle at build time - the student's browser
+        # calls the API, so this is the host-published port, not http://api:8080.
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:5054
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
 
 volumes:
   taladpos_pgdata:

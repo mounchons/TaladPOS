@@ -1,0 +1,10 @@
+# Local build output carries Windows paths (obj/project.assets.json) that
+# break restore/publish inside the Linux build stage.
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+
+# The image only publishes src/TaladPOS.Api and the projects it references.
+tests/
+tools/

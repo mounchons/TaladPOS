@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+build
+coverage
+test-results
+playwright-report
+blob-report
+playwright/.cache
+*.tsbuildinfo
+next-env.d.ts
+
+# NEXT_PUBLIC_API_BASE_URL comes from the build arg in docker-compose.yml,
+# never from a developer's local env file.
+.env*.local
