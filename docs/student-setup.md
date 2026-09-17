@@ -16,55 +16,43 @@ clone โปรเจกต์ไปแล้วรันบนเครื่�
 | โปรแกรม | ใช้ทำอะไร |
 |---|---|
 | Git | clone โปรเจกต์ |
-| Docker Desktop | รันฐานข้อมูล PostgreSQL 16 |
-| .NET 8 SDK | รัน API (`api/`) |
-| Node.js 20 LTS + npm | รันหน้าเว็บ (`web/`) |
+| Docker Desktop | build และรันทั้งระบบ: ฐานข้อมูล PostgreSQL 16, API (.NET 8) และหน้าเว็บ (Next.js) |
 
-ตรวจว่ามีครบด้วย `git --version`, `docker --version`, `dotnet --list-sdks` (ต้องมีบรรทัดที่ขึ้นต้นด้วย `8.`) และ `node -v`
+ตรวจว่ามีครบด้วย `git --version`, `docker --version` และ `docker compose version`
+ไม่ต้องติดตั้ง .NET หรือ Node.js เพราะ API และเว็บ build และรันใน Docker
 
 ---
 
 ## 2. ติดตั้งและเปิดระบบ
 
-เปิด terminal 3 หน้าต่าง: หน้าต่างแรกสำหรับฐานข้อมูล หน้าต่างที่สองสำหรับ API หน้าต่างที่สามสำหรับเว็บ
-
-### 2.1 Clone และเปิดฐานข้อมูล
+เปิด Docker Desktop ให้ขึ้นว่า Engine running ก่อน แล้วใช้ terminal หน้าต่างเดียว:
 
 ```bash
 git clone <URL ของ repo>
 cd TaladPOS
-docker compose up -d
+docker compose up -d --build
 ```
+
+คำสั่งนี้ build image ของ API (`api/Dockerfile`) และเว็บ (`web/Dockerfile`) แล้วเปิดทั้ง 3 ส่วน:
+
+| ส่วน | URL |
+|---|---|
+| หน้าเว็บ | http://localhost:3000 |
+| API | http://localhost:5054 (รายการ endpoint: http://localhost:5054/swagger) |
+| PostgreSQL | `localhost:5432` |
+
+ครั้งแรกต้องดาวน์โหลด image และ package รวมกว่า 1 GB อาจใช้เวลา 5–20 นาที ครั้งต่อไปจะเร็วเพราะใช้ cache
+ถ้าอินเทอร์เน็ตหลุดกลางคันให้รันคำสั่งเดิมซ้ำ Docker จะทำต่อจากส่วนที่เสร็จแล้ว
 
 ครั้งแรกที่รัน PostgreSQL จะโหลดข้อมูลตัวอย่างจาก `db/init/01-taladpos.sql` ให้เอง
-ตรวจว่าโหลดเสร็จแล้วด้วย:
+API จะรอจนฐานข้อมูลพร้อมก่อนแล้วจึงเปิด ไม่ต้องรัน migration เอง เพราะในข้อมูลตัวอย่างมีตารางและประวัติ migration ครบแล้ว
+ตรวจว่าทุกส่วนเปิดแล้วด้วย:
 
 ```bash
-docker compose logs postgres
+docker compose ps
 ```
 
-ต้องเห็นบรรทัด `running /docker-entrypoint-initdb.d/01-taladpos.sql` และ `PostgreSQL init process complete`
-
-### 2.2 เปิด API
-
-```bash
-cd api
-dotnet run --project src/TaladPOS.Api
-```
-
-API ขึ้นที่ **http://localhost:5054** และดูรายการ endpoint ได้ที่ http://localhost:5054/swagger
-ไม่ต้องรัน `dotnet ef database update` เพราะในข้อมูลตัวอย่างมีตารางและประวัติ migration ครบแล้ว
-
-### 2.3 เปิดหน้าเว็บ
-
-```bash
-cd web
-cp .env.local.example .env.local
-npm install
-npm run dev
-```
-
-บน Windows (PowerShell) ใช้ `Copy-Item .env.local.example .env.local` แทน `cp`
+ต้องเห็น `postgres` สถานะ `Up (healthy)` และ `api`, `web` สถานะ `Up`
 
 เปิด **http://localhost:3000** แล้วล็อกอิน
 
@@ -72,6 +60,24 @@ npm run dev
 |---|---|---|
 | `manager` | `Manager123!` | ผู้จัดการ: ทุกเมนู คือ ขายสินค้า, ประวัติการขาย, จัดการสต็อก, โปรโมชั่น, รายงาน |
 | `cashier` | `Cashier123!` | แคชเชียร์: ขายสินค้า และประวัติการขาย |
+
+### คำสั่งที่ใช้บ่อย (รันที่ root ของ repo)
+
+| ต้องการ | คำสั่ง |
+|---|---|
+| เปิดระบบครั้งถัดไป (เปิด Docker Desktop ก่อน) | `docker compose up -d` |
+| หยุดระบบ (ข้อมูลยังอยู่) | `docker compose stop` |
+| แก้โค้ดหรือ `git pull` แล้วอยากเห็นผล | `docker compose up -d --build` |
+| ดู log ของแต่ละส่วน | `docker compose logs -f api` (หรือ `web`, `postgres`) |
+
+ระบบใน Docker ไม่ได้ reload อัตโนมัติเมื่อแก้โค้ด ต้อง build ใหม่ทุกครั้ง
+ถ้าจะแก้โค้ดบ่อยและอยากเห็นผลทันที ให้ติดตั้ง .NET 8 SDK และ Node.js 22 เพิ่ม แล้วเปิดแบบ dev แทน:
+
+```bash
+docker compose stop api web
+dotnet run --project api/src/TaladPOS.Api      # หน้าต่างที่ 1
+npm --prefix web ci && npm --prefix web run dev  # หน้าต่างที่ 2 (สร้าง web/.env.local จาก .env.local.example ก่อน)
+```
 
 ---
 
@@ -105,8 +111,7 @@ docker compose up -d
 
 `-v` ลบ volume ที่เก็บข้อมูล PostgreSQL จะโหลด `db/init/01-taladpos.sql` ใหม่เฉพาะตอนที่ volume ว่างเท่านั้น
 ถ้าสั่งแค่ `docker compose down` (ไม่มี `-v`) ข้อมูลเดิมจะยังอยู่
-
-หยุด API ก่อน reset แล้วค่อยเปิดใหม่หลังฐานข้อมูลโหลดเสร็จ
+`docker compose up -d` จะเปิด API และเว็บกลับมาให้เองหลังฐานข้อมูลโหลดเสร็จ
 
 ---
 
@@ -114,12 +119,11 @@ docker compose up -d
 
 | อาการ | สาเหตุ | วิธีแก้ |
 |---|---|---|
-| API ขึ้น error `password authentication failed for user "taladpos"` | มี PostgreSQL ตัวอื่นใช้พอร์ต 5432 อยู่ API จึงไปต่อผิดตัว | ดูด้วย `docker ps` แล้วหยุดตัวที่ใช้พอร์ต 5432 หรือหยุด PostgreSQL ที่ติดตั้งไว้ในเครื่อง |
-| `docker compose up` ขึ้น `port is already allocated` | สาเหตุเดียวกับข้อบน | เหมือนข้อบน |
+| `docker compose up` ขึ้น `port is already allocated` | มีโปรแกรมอื่นใช้พอร์ต 5432, 5054 หรือ 3000 อยู่ เช่น PostgreSQL ตัวอื่น หรือ `dotnet run` / `npm run dev` ที่เปิดค้างไว้ | ดูด้วย `docker ps` ว่า container ไหนใช้พอร์ตนั้นแล้วหยุด หรือปิดโปรแกรมที่เปิดค้างไว้ แล้วรัน `docker compose up -d` ใหม่ ห้ามเปลี่ยนพอร์ต เพราะ URL รูปสินค้าและการเชื่อมต่อเว็บกับ API ผูกกับพอร์ตเหล่านี้ |
+| `docker compose up -d --build` ล้มระหว่าง build ด้วย `ETIMEDOUT` หรือ `TLS handshake timeout` | อินเทอร์เน็ตหลุด | รันคำสั่งเดิมซ้ำ |
 | ล็อกอินไม่ได้ และ `docker compose logs postgres` ไม่มีบรรทัด `01-taladpos.sql` | volume มีข้อมูลเก่าค้างอยู่ PostgreSQL จึงข้ามการโหลด | ทำตามหัวข้อ 4 |
-| `dotnet run` ขึ้นว่าไม่พบ framework `Microsoft.AspNetCore.App` เวอร์ชัน `8.0.x` | ไม่มี .NET 8 SDK | ติดตั้ง .NET 8 SDK (มี .NET รุ่นอื่นอย่างเดียวใช้ไม่ได้) |
-| หน้าเว็บขึ้น แต่รูปสินค้าไม่แสดง | เว็บไม่ได้รันที่พอร์ต 3000 (URL รูปในข้อมูลตัวอย่างเป็น `http://localhost:3000/images/products/...`) | ปิดโปรแกรมที่ใช้พอร์ต 3000 แล้วรัน `npm run dev` ใหม่ |
-| หน้าเว็บเรียก API ไม่ได้ / ล็อกอินค้าง | ไม่ได้สร้าง `web/.env.local` หรือ API ยังไม่ได้เปิด | ทำหัวข้อ 2.2 และ 2.3 ให้ครบ |
+| หน้าเว็บเรียก API ไม่ได้ / ล็อกอินค้าง | API ยังไม่เปิดหรือล้ม | ดู `docker compose ps` ว่า `api` สถานะ `Up` ไหม ถ้าไม่ ดูสาเหตุด้วย `docker compose logs api` |
+| แก้โค้ดแล้วหน้าเว็บหรือ API ไม่เปลี่ยน | image เดิมยังไม่ได้ build ใหม่ | `docker compose up -d --build` |
 
 ---
 
